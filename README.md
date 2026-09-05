@@ -7,15 +7,21 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 
 - **Node.js + Express** (un único proceso sirve las vistas y las acciones).
 - **Vistas**: server-side rendering con **EJS** + **Tailwind CSS** vía CDN (sin build step).
-- **Base de datos**: **SQLite** con `better-sqlite3` — un único archivo en `data/flaks.sqlite`.
-- **Sesiones**: `express-session` con un store propio sobre `better-sqlite3` (tabla `sessions`).
+- **Base de datos**: **SQLite** con `node-sqlite3-wasm` (SQLite compilado a WebAssembly) — un único
+  archivo en `data/flaks.sqlite`. API síncrona, **sin compilación nativa ni `node-gyp`**.
+- **Sesiones**: `express-session` con un store propio sobre la misma base (tabla `sessions`).
 - **Contraseñas**: hash con `bcryptjs` (equivalente en JS puro a `bcrypt`, sin compilación nativa).
 - **Archivos**: `multer`, guardados en `storage/uploads/<categoria>/`.
 
-> Nota: el prompt sugería `connect-sqlite3` para las sesiones. Se reemplazó por un store propio de
-> ~80 líneas sobre `better-sqlite3` para **no** sumar una segunda dependencia nativa (`connect-sqlite3`
-> arrastra `sqlite3` + `node-gyp`), lo que simplifica el despliegue en hosting compartido y elimina
-> varias vulnerabilidades transitivas.
+> **Por qué `node-sqlite3-wasm` y no `better-sqlite3`**: el hosting compartido de Hostinger corre
+> sobre glibc 2.28 y bloquea `node-gyp` (symlinks). `better-sqlite3` falla ahí con
+> `GLIBC_2.29 not found` / `EACCES symlink python3`. `node-sqlite3-wasm` es 100% WebAssembly + JS:
+> `npm install` no compila nada y funciona en cualquier hosting. `db/index.js` expone un adaptador
+> con la misma interfaz (`prepare().get/all/run`, `exec`, `transaction`), así que el resto del código
+> no cambia.
+>
+> Igual se descartó `connect-sqlite3` para las sesiones (arrastra otra dependencia nativa): el store
+> vive en `lib/session-store.js`.
 
 ## Pantallas
 
@@ -101,12 +107,23 @@ lib/
   format.js          moneda ARS, fechas DD/MM/AAAA, selector de período
   billing.js         armado de facturación / gastos / caja de un mes
   audit.js           registro en audit_log + historial
-  session-store.js   store de sesiones sobre better-sqlite3
+  session-store.js   store de sesiones sobre la base SQLite
 middleware/auth.js   login obligatorio
 routes/              tareas, clientes, facturacion, gastos, caja, documentos, auth
 views/               EJS (layout + una carpeta por pantalla)
 data/  storage/      datos persistentes (no versionar)
 ```
+
+## Problemas comunes en el deploy
+
+- **`GLIBC_2.29 not found` / `EACCES: permission denied, symlink '/usr/bin/python3'`**: es
+  `better-sqlite3` intentando compilar. Este proyecto ya **no** lo usa (usa `node-sqlite3-wasm`).
+  Si ves este error, asegurate de estar desplegando el commit actual y borrá el build anterior
+  (en hPanel, "Clear build cache" o eliminá y recreá la app apuntando al repo).
+- **La base "se reinicia" en cada deploy**: no debe pasar si `data/` no está en el repo. Verificá
+  que `data/` esté en `.gitignore` y que no la hayas subido.
+- **Errores de escritura tras un corte**: si quedó una carpeta `data/flaks.sqlite.lock`, la app la
+  limpia sola al arrancar. Si persiste, borrala manualmente y reiniciá.
 
 ## Notas de seguridad
 
