@@ -118,6 +118,19 @@ router.post('/:id', (req, res) => {
   res.redirect('/clientes/' + cliente.id);
 });
 
+// Cambio rápido de estado desde la lista de clientes.
+router.post('/:id/estado', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  if (!cliente) return res.redirect('/clientes');
+  const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : cliente.estado;
+  if (estado !== cliente.estado) {
+    db.prepare('UPDATE clientes SET estado = ? WHERE id = ?').run(estado, cliente.id);
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Cambió el estado de "${cliente.nombre}" a ${estado}`);
+    req.session.flash = { tipo: 'ok', msg: `"${cliente.nombre}" ahora es ${estado}.` };
+  }
+  res.redirect(req.get('referer') || '/clientes');
+});
+
 router.post('/:id/notas', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.redirect('/clientes');
