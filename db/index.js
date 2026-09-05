@@ -27,6 +27,17 @@ raw.exec('PRAGMA foreign_keys = ON');
 // Esquema (idempotente).
 raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
 
+// Migraciones sobre bases ya creadas (ALTER que schema.sql no aplica).
+(function migrar() {
+  const colsGastos = raw.all('PRAGMA table_info(gastos)').map((c) => c.name);
+  if (!colsGastos.includes('pagado_por')) {
+    raw.exec('ALTER TABLE gastos ADD COLUMN pagado_por TEXT');
+  }
+  if (!colsGastos.includes('saldado')) {
+    raw.exec('ALTER TABLE gastos ADD COLUMN saldado INTEGER NOT NULL DEFAULT 1');
+  }
+})();
+
 // --- Adaptador con la interfaz de better-sqlite3 que usa el resto del código ---
 
 function esObjetoDeParametros(v) {

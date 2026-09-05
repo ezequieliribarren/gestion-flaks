@@ -64,8 +64,22 @@ CREATE TABLE IF NOT EXISTS gastos (
   fecha       TEXT NOT NULL,
   categoria   TEXT,
   activo      INTEGER NOT NULL DEFAULT 1,
+  pagado_por  TEXT,                              -- 'German' | 'Ezequiel' | NULL
+  saldado     INTEGER NOT NULL DEFAULT 1,        -- 1 = ya está saldado / pasa a Caja; 0 = va a cuenta corriente
   creado_por  TEXT,
   creado_en   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Registro de cada vez que se salda la cuenta corriente de gastos (quién le pagó a quién).
+CREATE TABLE IF NOT EXISTS saldos_gastos (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  periodo        TEXT,                           -- 'YYYY-MM'
+  fecha          TEXT NOT NULL DEFAULT (datetime('now')),
+  de_quien       TEXT NOT NULL,                  -- quién paga la diferencia
+  a_quien        TEXT NOT NULL,                  -- quién la recibe
+  monto          REAL NOT NULL DEFAULT 0,
+  detalle        TEXT,
+  registrado_por TEXT
 );
 
 CREATE TABLE IF NOT EXISTS documentos (

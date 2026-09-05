@@ -31,9 +31,14 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 4. **Cliente (detalle)** — cobro mensual total, checklist de tareas del mes, trabajos recurrentes,
    trabajos únicos (ambos con reparto German/Ezequiel), anotaciones libres.
 5. **Facturación** — planilla por mes/año: recurrentes activos + únicos del mes, totales y subtotal por persona.
-6. **Gasto (carga)** — formulario: descripción, monto, tipo (recurrente/único), fecha, categoría.
-7. **Gastos** — planilla por mes con total.
-8. **Caja** — facturado − gastos = neto; reparto por persona; toggle para incluir clientes potenciales (proyección).
+6. **Gasto (carga)** — formulario: descripción, monto, tipo (recurrente/único), fecha, categoría,
+   **quién lo pagó** (German/Ezequiel) y **¿Saldado? Sí/No** (obligatorio).
+7. **Gastos** — planilla por mes + **cuenta corriente**: los gastos "no saldados" (los pagó uno solo
+   y todavía no se compensó) suman a la cuenta corriente; la pantalla muestra cuánto puso cada uno,
+   quién tiene saldo a favor y un botón **"Registrar pago y saldar"** que compensa la diferencia,
+   deja registro del pago y recién ahí esos gastos pasan a Caja.
+8. **Caja** — facturado − gastos **saldados** = neto; reparto por persona; avisa si hay gastos sin
+   saldar (no incluidos hasta compensarlos); toggle para incluir clientes potenciales (proyección).
 9. **Documentos** — subida de PDF / Word / TXT por categoría, opcionalmente asociados a un cliente; listar / descargar / eliminar.
 
 Toda la interfaz está en español, moneda en **ARS** y fechas en formato **DD/MM/AAAA**.

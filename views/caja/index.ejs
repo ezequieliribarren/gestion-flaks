@@ -17,6 +17,12 @@
   <div class="bg-white rounded-lg shadow-sm p-5">
     <div class="text-xs text-slate-500 uppercase tracking-wide">Gastos</div>
     <div class="text-2xl font-bold text-red-700 mt-1">− <%= fmt.formatARS(caja.gastos.total) %></div>
+    <% if (caja.gastosPendientes > 0) { %>
+      <div class="text-xs text-amber-600 mt-1">
+        + <%= fmt.formatARS(caja.gastosPendientes) %> sin saldar (no incluidos —
+        <a href="/gastos?mes=<%= mes %>&anio=<%= anio %>" class="underline">saldar en Gastos</a>)
+      </div>
+    <% } %>
   </div>
   <div class="bg-white rounded-lg shadow-sm p-5">
     <div class="text-xs text-slate-500 uppercase tracking-wide">Ganancia neta</div>
