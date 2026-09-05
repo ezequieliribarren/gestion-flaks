@@ -10,8 +10,23 @@ const SQLiteStore = require('./lib/session-store')(session);
 const expressLayouts = require('express-ejs-layouts');
 
 const db = require('./db');
+const { seedUsers } = require('./db/seed-users');
 const { requireAuth } = require('./middleware/auth');
 const fmt = require('./lib/format');
+
+// Al arrancar, crea/actualiza a German y Ezequiel desde las variables de entorno.
+// Así el deploy es sólo "cargar variables + Restart", sin correr scripts a mano.
+try {
+  console.log('--- Sincronizando usuarios desde variables de entorno ---');
+  const ok = seedUsers();
+  if (!ok) {
+    console.warn('!!! Ningún usuario configurado. Cargá GERMAN_USERNAME/GERMAN_PASSWORD y');
+    console.warn('!!! EZEQUIEL_USERNAME/EZEQUIEL_PASSWORD en las variables de entorno y reiniciá.');
+  }
+  console.log('---------------------------------------------------------');
+} catch (e) {
+  console.error('Error sincronizando usuarios:', e);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;

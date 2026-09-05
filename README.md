@@ -82,11 +82,23 @@ sólo se cargan si todavía no hay ningún cliente.
    (`SESSION_SECRET`, credenciales del seed, `NODE_ENV=production`, `GASTOS_REPARTO_GERMAN`, etc.).
    No hace falta subir el archivo `.env`.
 4. Ejecutar **Run NPM Install**.
-5. Abrir la consola / terminal de la app y correr una sola vez:
-   ```bash
-   npm run seed
-   ```
-6. **Restart** la aplicación.
+5. **Restart** la aplicación.
+
+Al arrancar, la app **crea/actualiza sola** a German y Ezequiel con las variables de entorno
+(no hace falta correr nada a mano). En los logs de la app vas a ver algo como:
+
+```
+--- Sincronizando usuarios desde variables de entorno ---
++ Usuario creado: "german" (largo de contraseña: 12)
++ Usuario creado: "ezequiel" (largo de contraseña: 12)
+Usuarios en la base: 2
+```
+
+Si el "largo de contraseña" no coincide con lo que esperás, revisá el valor en el panel
+(espacios de más, comillas). Para **cambiar una contraseña**: editás la variable y **Restart**.
+
+`npm run seed` (en la terminal de la app) sigue existiendo y además carga los datos de ejemplo
+si `SEED_DEMO_DATA=true`.
 
 ### Persistencia
 

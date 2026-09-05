@@ -2,29 +2,8 @@
 
 require('dotenv').config();
 
-const bcrypt = require('bcryptjs');
 const db = require('./index');
-
-function upsertUser(nombre, usuario, password) {
-  if (!usuario || !password) {
-    console.warn(`! Falta usuario/contraseña para ${nombre} en .env — se omite.`);
-    return;
-  }
-  const existente = db.prepare('SELECT id FROM users WHERE usuario = ?').get(usuario);
-  const hash = bcrypt.hashSync(password, 10);
-  if (existente) {
-    db.prepare('UPDATE users SET nombre = ?, password_hash = ? WHERE id = ?').run(nombre, hash, existente.id);
-    console.log(`= Usuario actualizado: ${usuario}`);
-  } else {
-    db.prepare('INSERT INTO users (nombre, usuario, password_hash) VALUES (?, ?, ?)').run(nombre, usuario, hash);
-    console.log(`+ Usuario creado: ${usuario}`);
-  }
-}
-
-function seedUsers() {
-  upsertUser('German', process.env.GERMAN_USERNAME, process.env.GERMAN_PASSWORD);
-  upsertUser('Ezequiel', process.env.EZEQUIEL_USERNAME, process.env.EZEQUIEL_PASSWORD);
-}
+const { seedUsers } = require('./seed-users');
 
 function seedDemo() {
   if (String(process.env.SEED_DEMO_DATA).toLowerCase() !== 'true') {
