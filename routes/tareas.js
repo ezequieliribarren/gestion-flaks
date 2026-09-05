@@ -37,7 +37,7 @@ router.get('/', (req, res) => {
   if (fEstado) { where.push('t.estado = ?'); params.push(fEstado); }
 
   const sql = `
-    SELECT t.*, c.nombre AS cliente_nombre, c.color AS cliente_color
+    SELECT t.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
     FROM tareas t
     LEFT JOIN clientes c ON c.id = t.cliente_id
     ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
@@ -53,7 +53,7 @@ router.get('/', (req, res) => {
     vencida: t.fecha_cierre && t.estado !== 'completada' && t.fecha_cierre.slice(0, 10) < hoy,
   }));
 
-  const clientes = db.prepare('SELECT id, nombre, color FROM clientes ORDER BY nombre').all();
+  const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
 
   res.render('tareas/index', {
     titulo: 'Tareas',
@@ -67,18 +67,18 @@ router.get('/', (req, res) => {
 });
 
 router.get('/nueva', (req, res) => {
-  const clientes = db.prepare('SELECT id, nombre, color FROM clientes ORDER BY nombre').all();
+  const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
   res.render('tareas/form', { titulo: 'Nueva tarea', tarea: {}, clientes, PRIORIDADES, ESTADOS });
 });
 
 router.get('/:id', (req, res) => {
   const tarea = db.prepare(`
-    SELECT t.*, c.nombre AS cliente_nombre, c.color AS cliente_color
+    SELECT t.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
     FROM tareas t LEFT JOIN clientes c ON c.id = t.cliente_id
     WHERE t.id = ?
   `).get(req.params.id);
   if (!tarea) return res.status(404).render('error', { titulo: 'No encontrada', mensaje: 'La tarea no existe.' });
-  const clientes = db.prepare('SELECT id, nombre, color FROM clientes ORDER BY nombre').all();
+  const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
   res.render('tareas/detalle', {
     titulo: tarea.nombre,
     tarea,

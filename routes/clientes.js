@@ -1,12 +1,54 @@
 'use strict';
 
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
+const multer = require('multer');
 const db = require('../db');
 const audit = require('../lib/audit');
+const { STORAGE_DIR, UPLOADS_DIR } = require('../lib/paths');
 
 const router = express.Router();
 
 const ESTADOS = ['activo', 'potencial', 'inactivo'];
+
+// --- Subida de logos de clientes ---
+const LOGOS_DIR = path.join(UPLOADS_DIR, 'logos');
+const EXT_LOGO = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'];
+
+const logoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      fs.mkdirSync(LOGOS_DIR, { recursive: true });
+      cb(null, LOGOS_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `logo-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (EXT_LOGO.includes(path.extname(file.originalname).toLowerCase())) return cb(null, true);
+    cb(new Error('El logo tiene que ser una imagen (PNG, JPG, WEBP, GIF o SVG).'));
+  },
+}).single('logo');
+
+// Guarda el archivo subido como logo del cliente y borra el anterior.
+function guardarLogo(req, cliente) {
+  if (!req.file) return null;
+  const rel = path.relative(STORAGE_DIR, req.file.path).replace(/\\/g, '/');
+  if (cliente && cliente.logo) borrarLogoArchivo(cliente.logo);
+  db.prepare('UPDATE clientes SET logo = ? WHERE id = ?').run(rel, (cliente && cliente.id) || req._nuevoClienteId);
+  return rel;
+}
+
+function borrarLogoArchivo(rel) {
+  try {
+    const abs = path.join(STORAGE_DIR, rel);
+    if (abs.startsWith(STORAGE_DIR) && fs.existsSync(abs)) fs.unlinkSync(abs);
+  } catch (e) { /* noop */ }
+}
 
 function repartoValido(g, e) {
   const rg = Number(g);
@@ -65,16 +107,24 @@ router.get('/nuevo', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const nombre = String(req.body.nombre || '').trim();
-  const color = /^#[0-9a-fA-F]{6}$/.test(req.body.color) ? req.body.color : '#2563eb';
-  const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : 'potencial';
-  if (!nombre) { req.session.flash = { tipo: 'error', msg: 'El nombre es obligatorio.' }; return res.redirect('/clientes/nuevo'); }
-  const info = db.prepare(
-    'INSERT INTO clientes (nombre, color, estado, creado_por) VALUES (?, ?, ?, ?)'
-  ).run(nombre, color, estado, req.session.user.nombre);
-  audit.registrar(req, 'clientes', info.lastInsertRowid, 'crear', `Creó el cliente "${nombre}"`);
-  req.session.flash = { tipo: 'ok', msg: 'Cliente creado.' };
-  res.redirect('/clientes/' + info.lastInsertRowid);
+  logoUpload(req, res, (err) => {
+    if (err) { req.session.flash = { tipo: 'error', msg: err.message }; return res.redirect('/clientes/nuevo'); }
+    const nombre = String(req.body.nombre || '').trim();
+    const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : 'potencial';
+    if (!nombre) {
+      if (req.file) borrarLogoArchivo(path.relative(STORAGE_DIR, req.file.path).replace(/\\/g, '/'));
+      req.session.flash = { tipo: 'error', msg: 'El nombre es obligatorio.' };
+      return res.redirect('/clientes/nuevo');
+    }
+    const info = db.prepare(
+      'INSERT INTO clientes (nombre, estado, creado_por) VALUES (?, ?, ?)'
+    ).run(nombre, estado, req.session.user.nombre);
+    req._nuevoClienteId = info.lastInsertRowid;
+    guardarLogo(req, null);
+    audit.registrar(req, 'clientes', info.lastInsertRowid, 'crear', `Creó el cliente "${nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Cliente creado.' };
+    res.redirect('/clientes/' + info.lastInsertRowid);
+  });
 });
 
 router.get('/:id', (req, res) => {
@@ -109,12 +159,35 @@ router.get('/:id', (req, res) => {
 router.post('/:id', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.redirect('/clientes');
-  const nombre = String(req.body.nombre || '').trim() || cliente.nombre;
-  const color = /^#[0-9a-fA-F]{6}$/.test(req.body.color) ? req.body.color : cliente.color;
-  const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : cliente.estado;
-  db.prepare('UPDATE clientes SET nombre = ?, color = ?, estado = ? WHERE id = ?').run(nombre, color, estado, cliente.id);
-  audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cliente "${nombre}"`);
-  req.session.flash = { tipo: 'ok', msg: 'Cliente actualizado.' };
+  logoUpload(req, res, (err) => {
+    if (err) { req.session.flash = { tipo: 'error', msg: err.message }; return res.redirect('/clientes/' + cliente.id); }
+    const nombre = String(req.body.nombre || '').trim() || cliente.nombre;
+    const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : cliente.estado;
+    db.prepare('UPDATE clientes SET nombre = ?, estado = ? WHERE id = ?').run(nombre, estado, cliente.id);
+    guardarLogo(req, cliente);
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cliente "${nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Cliente actualizado.' };
+    res.redirect('/clientes/' + cliente.id);
+  });
+});
+
+// Servir el logo del cliente (la app entera está detrás de login).
+router.get('/:id/logo', (req, res) => {
+  const cliente = db.prepare('SELECT logo FROM clientes WHERE id = ?').get(req.params.id);
+  if (!cliente || !cliente.logo) return res.status(404).end();
+  const abs = path.join(STORAGE_DIR, cliente.logo);
+  if (!abs.startsWith(STORAGE_DIR) || !fs.existsSync(abs)) return res.status(404).end();
+  res.set('Cache-Control', 'private, max-age=60');
+  res.sendFile(abs);
+});
+
+router.post('/:id/logo/eliminar', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  if (!cliente) return res.redirect('/clientes');
+  if (cliente.logo) borrarLogoArchivo(cliente.logo);
+  db.prepare('UPDATE clientes SET logo = NULL WHERE id = ?').run(cliente.id);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', 'Quitó el logo');
+  req.session.flash = { tipo: 'ok', msg: 'Logo quitado.' };
   res.redirect('/clientes/' + cliente.id);
 });
 
@@ -143,6 +216,7 @@ router.post('/:id/notas', (req, res) => {
 router.post('/:id/eliminar', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.redirect('/clientes');
+  if (cliente.logo) borrarLogoArchivo(cliente.logo);
   db.prepare('DELETE FROM clientes WHERE id = ?').run(cliente.id);
   audit.registrar(req, 'clientes', cliente.id, 'eliminar', `Eliminó el cliente "${cliente.nombre}"`);
   req.session.flash = { tipo: 'ok', msg: 'Cliente eliminado.' };

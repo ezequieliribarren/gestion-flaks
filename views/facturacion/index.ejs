@@ -29,7 +29,7 @@
         <tr class="<%= f.es_potencial ? 'pendiente' : '' %>">
           <td class="px-4 py-3">
             <a href="/clientes/<%= f.cliente_id %>" class="flex items-center gap-2 hover:text-brand-600">
-              <span class="w-2.5 h-2.5 rounded-full inline-block" style="background: <%= f.cliente_color %>"></span><%= f.cliente %>
+              <%- include('../partials/cliente-avatar', { id: f.cliente_id, nombre: f.cliente, logo: f.cliente_logo, size: 20 }) %><%= f.cliente %>
             </a>
           </td>
           <td class="px-4 py-3">

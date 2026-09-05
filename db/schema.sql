@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS clientes (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   nombre     TEXT NOT NULL,
-  color      TEXT NOT NULL DEFAULT '#2563eb',
+  color      TEXT NOT NULL DEFAULT '#2563eb',     -- en desuso (se dejó por compatibilidad)
+  logo       TEXT,                                -- ruta relativa dentro de storage/ (uploads/logos/...)
   estado     TEXT NOT NULL DEFAULT 'potencial',   -- activo | potencial | inactivo (se valida en la app)
   notas      TEXT NOT NULL DEFAULT '',
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),

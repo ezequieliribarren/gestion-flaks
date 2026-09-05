@@ -68,10 +68,9 @@
     <% clientes.forEach(function(c){ var ee = c.estado_efectivo; var reactivado = ee !== c.estado; %>
       <div class="lift bg-white rounded-xl shadow-card hover:shadow-card-hover overflow-hidden flex flex-col <%= c.estado === 'inactivo' && !reactivado ? 'opacity-70' : '' %>">
         <a href="/clientes/<%= c.id %>" class="block">
-          <div class="h-1.5" style="background: <%= c.color %>"></div>
           <div class="p-4 pb-2">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-3 h-3 rounded-full inline-block shrink-0" style="background: <%= c.color %>"></span>
+            <div class="flex items-center gap-2.5 mb-2">
+              <%- include('../partials/cliente-avatar', { id: c.id, nombre: c.nombre, logo: c.logo, size: 36 }) %>
               <span class="font-semibold text-slate-800 truncate"><%= c.nombre %></span>
             </div>
             <div class="text-xs text-slate-500 space-y-0.5">
@@ -103,8 +102,8 @@
         <% clientes.forEach(function(c){ var ee = c.estado_efectivo; var reactivado = ee !== c.estado; %>
           <tr class="<%= c.estado === 'inactivo' && !reactivado ? 'text-slate-400' : '' %>">
             <td class="px-4 py-3">
-              <a href="/clientes/<%= c.id %>" class="flex items-center gap-2 font-medium text-slate-800 hover:text-brand-600">
-                <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background: <%= c.color %>"></span><%= c.nombre %>
+              <a href="/clientes/<%= c.id %>" class="flex items-center gap-2.5 font-medium text-slate-800 hover:text-brand-600">
+                <%- include('../partials/cliente-avatar', { id: c.id, nombre: c.nombre, logo: c.logo, size: 24 }) %><%= c.nombre %>
               </a>
             </td>
             <td class="px-4 py-3">

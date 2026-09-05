@@ -27,7 +27,8 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 
 1. **Login** — usuario + contraseña (sin registro público).
 2. **Tareas** — vistas Hoy / Este mes / Todas, filtros por cliente, prioridad y estado, CRUD + completar.
-3. **Clientes** — vista carpetas o lista; estado **activo / potencial / inactivo** con filtro
+3. **Clientes** — vista carpetas o lista; **logo** opcional por cliente (si no hay, se muestran las
+   iniciales); cambio rápido de estado desde la lista; estado **activo / potencial / inactivo** con filtro
    (por defecto **Activos**) y orden **A→Z** o **mayor facturación**. Los **inactivos** no cuentan
    en la facturación del mes en curso (sí sus cobros históricos); los **potenciales** sólo en la
    proyección. Un cliente inactivo con un trabajo único **potencial** figura como potencial hasta

@@ -13,7 +13,7 @@
 
 <div class="flex items-center justify-between mt-2 mb-1">
   <div class="flex items-center gap-3">
-    <span class="w-5 h-5 rounded-full inline-block" style="background: <%= cliente.color %>"></span>
+    <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 40 }) %>
     <h1 class="text-2xl font-bold text-slate-800"><%= cliente.nombre %></h1>
     <%
       var hayPotencial = unicos.some(function(u){ return u.estado === 'potencial'; });
@@ -169,9 +169,23 @@
 <!-- Editar / eliminar cliente -->
 <div class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-3">Datos del cliente</h2>
+
+  <div class="flex items-start gap-4 mb-4">
+    <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 56 }) %>
+    <form method="POST" action="/clientes/<%= cliente.id %>" enctype="multipart/form-data" class="flex flex-wrap gap-3 items-end">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1"><%= cliente.logo ? 'Cambiar logo' : 'Subir logo' %></label>
+        <input type="file" name="logo" accept="image/*" class="text-sm" />
+      </div>
+      <button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-3 py-1.5">Guardar logo</button>
+      <% if (cliente.logo) { %>
+        <button type="submit" formaction="/clientes/<%= cliente.id %>/logo/eliminar" formenctype="application/x-www-form-urlencoded" class="text-sm text-red-600 hover:underline">Quitar logo</button>
+      <% } %>
+    </form>
+  </div>
+
   <form method="POST" action="/clientes/<%= cliente.id %>" class="flex flex-wrap gap-3 items-end">
     <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="<%= cliente.nombre %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Color</label><input type="color" name="color" value="<%= cliente.color %>" class="h-9 w-16 rounded border border-slate-300" /></div>
     <div>
       <label class="block text-xs text-slate-500 mb-1">Estado</label>
       <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">

@@ -1,0 +1,13 @@
+<%
+  // Espera: { id, nombre, logo, size } — size en px (default 28).
+  var _s = typeof size !== 'undefined' ? size : 28;
+  var _ini = String(nombre || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || '?';
+%>
+<% if (logo) { %>
+  <img src="/clientes/<%= id %>/logo" alt="<%= nombre %>"
+       class="rounded-lg object-contain bg-white border border-slate-200 shrink-0"
+       style="width: <%= _s %>px; height: <%= _s %>px;" />
+<% } else { %>
+  <span class="rounded-lg bg-slate-100 text-slate-500 font-semibold inline-flex items-center justify-center shrink-0"
+        style="width: <%= _s %>px; height: <%= _s %>px; font-size: <%= Math.max(9, Math.round(_s * 0.38)) %>px;"><%= _ini %></span>
+<% } %>

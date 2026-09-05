@@ -46,7 +46,7 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   if (clientesTabla && /CHECK\s*\(\s*estado/i.test(clientesTabla.sql)) {
     try {
       raw.exec('PRAGMA foreign_keys = OFF');
-      raw.exec("CREATE TABLE clientes_new (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, color TEXT NOT NULL DEFAULT '#2563eb', estado TEXT NOT NULL DEFAULT 'potencial', notas TEXT NOT NULL DEFAULT '', creado_en TEXT NOT NULL DEFAULT (datetime('now')), creado_por TEXT)");
+      raw.exec("CREATE TABLE clientes_new (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, color TEXT NOT NULL DEFAULT '#2563eb', logo TEXT, estado TEXT NOT NULL DEFAULT 'potencial', notas TEXT NOT NULL DEFAULT '', creado_en TEXT NOT NULL DEFAULT (datetime('now')), creado_por TEXT)");
       raw.exec(
         'INSERT INTO clientes_new (id, nombre, color, estado, notas, creado_en, creado_por) ' +
         "SELECT id, nombre, COALESCE(color,'#2563eb'), COALESCE(estado,'potencial'), " +
@@ -61,6 +61,11 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
       try { raw.exec('DROP TABLE IF EXISTS clientes_new'); } catch (e) { /* noop */ }
       try { raw.exec('PRAGMA foreign_keys = ON'); } catch (e) { /* noop */ }
     }
+  }
+
+  const colsClientes = raw.all('PRAGMA table_info(clientes)').map((c) => c.name);
+  if (!colsClientes.includes('logo')) {
+    raw.exec('ALTER TABLE clientes ADD COLUMN logo TEXT');
   }
 })();
 

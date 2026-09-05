@@ -74,7 +74,9 @@
             <span class="text-xs px-2 py-0.5 rounded-full <%= badgePrioridad(t.prioridad) %>"><%= t.prioridad %></span>
             <span class="text-xs px-2 py-0.5 rounded-full <%= badgeEstado(t.estado) %>"><%= etiquetaEstado(t.estado) %></span>
             <% if (t.cliente_nombre) { %>
-              <span class="text-xs px-2 py-0.5 rounded-full text-white" style="background: <%= t.cliente_color %>"><%= t.cliente_nombre %></span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 inline-flex items-center gap-1.5">
+                <%- include('../partials/cliente-avatar', { id: t.cliente_id, nombre: t.cliente_nombre, logo: t.cliente_logo, size: 16 }) %><%= t.cliente_nombre %>
+              </span>
             <% } %>
             <% if (t.vencida) { %><span class="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white">Vencida</span><% } %>
           </div>

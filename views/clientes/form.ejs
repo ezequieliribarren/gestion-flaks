@@ -2,14 +2,15 @@
   <a href="/clientes" class="text-sm text-brand-600 hover:underline">&larr; Volver a clientes</a>
   <h1 class="text-2xl font-bold text-slate-800 mt-2 mb-4">Nuevo cliente</h1>
 
-  <form method="POST" action="/clientes" class="bg-white rounded-xl shadow-card p-6 space-y-4">
+  <form method="POST" action="/clientes" enctype="multipart/form-data" class="bg-white rounded-xl shadow-card p-6 space-y-4">
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
       <input name="nombre" required class="w-full rounded-md border border-slate-300 px-3 py-2" />
     </div>
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1">Color identificatorio</label>
-      <input type="color" name="color" value="#2563eb" class="h-10 w-20 rounded border border-slate-300" />
+      <label class="block text-sm font-medium text-slate-700 mb-1">Logo (opcional)</label>
+      <input type="file" name="logo" accept="image/*" class="w-full text-sm" />
+      <p class="text-xs text-slate-400 mt-1">PNG, JPG, WEBP o SVG. Hasta 3 MB. Podés cambiarlo después.</p>
     </div>
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Estado inicial</label>

@@ -46,7 +46,7 @@ router.get('/', (req, res) => {
   if (fCat) { where.push('d.categoria = ?'); params.push(fCat); }
   if (fCliente) { where.push('d.cliente_id = ?'); params.push(fCliente); }
   const docs = db.prepare(`
-    SELECT d.*, c.nombre AS cliente_nombre, c.color AS cliente_color
+    SELECT d.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
     FROM documentos d LEFT JOIN clientes c ON c.id = d.cliente_id
     ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
     ORDER BY d.subido_en DESC
