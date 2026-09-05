@@ -63,17 +63,38 @@ const ESTADO_EFECTIVO = `
         AND EXISTS (SELECT 1 FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'potencial')
        THEN 'potencial' ELSE c.estado END`;
 
-router.get('/', (req, res) => {
-  const vista = req.query.vista === 'lista' ? 'lista' : 'carpetas';
-  // Filtro por estado: por defecto "activo". 'todos' muestra todo.
-  let filtroEstado = 'activo';
-  if (req.query.estado === 'todos') filtroEstado = null;
-  else if (ESTADOS.includes(req.query.estado)) filtroEstado = req.query.estado;
+const ESTADO_PARAMS = ['activo', 'potencial', 'inactivo', 'todos'];
 
-  const orden = req.query.orden === 'facturacion' ? 'facturacion' : 'nombre';
+router.get('/', (req, res) => {
+  // Se recuerda la última vista/filtro/orden/búsqueda en la sesión: si un
+  // parámetro no viene en la URL, se usa el último elegido.
+  const sess = req.session.clientesFiltro || {};
+
+  const vista = ['lista', 'carpetas'].includes(req.query.vista)
+    ? req.query.vista
+    : (['lista', 'carpetas'].includes(sess.vista) ? sess.vista : 'carpetas');
+
+  const estadoParam = ESTADO_PARAMS.includes(req.query.estado)
+    ? req.query.estado
+    : (ESTADO_PARAMS.includes(sess.estado) ? sess.estado : 'activo');
+  const filtroEstado = estadoParam === 'todos' ? null : estadoParam;
+
+  const orden = ['facturacion', 'nombre'].includes(req.query.orden)
+    ? req.query.orden
+    : (sess.orden === 'facturacion' ? 'facturacion' : 'nombre');
+
+  const q = ('q' in req.query) ? String(req.query.q || '').trim() : String(sess.q || '');
+
+  req.session.clientesFiltro = { vista, estado: estadoParam, orden, q };
+
   const ordenSql = orden === 'facturacion'
     ? 'total_facturado DESC, nombre COLLATE NOCASE'
     : `CASE estado_efectivo WHEN 'activo' THEN 0 WHEN 'potencial' THEN 1 ELSE 2 END, nombre COLLATE NOCASE`;
+
+  const where = [];
+  const params = [];
+  if (filtroEstado) { where.push('estado_efectivo = ?'); params.push(filtroEstado); }
+  if (q) { where.push('LOWER(nombre) LIKE LOWER(?)'); params.push('%' + q + '%'); }
 
   const clientes = db.prepare(`
     SELECT * FROM (
@@ -86,9 +107,9 @@ router.get('/', (req, res) => {
         ${ESTADO_EFECTIVO} AS estado_efectivo
       FROM clientes c
     )
-    ${filtroEstado ? 'WHERE estado_efectivo = ?' : ''}
+    ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
     ORDER BY ${ordenSql}
-  `).all(...(filtroEstado ? [filtroEstado] : []));
+  `).all(...params);
 
   const conteo = db.prepare(`
     SELECT
@@ -99,7 +120,7 @@ router.get('/', (req, res) => {
     FROM (SELECT ${ESTADO_EFECTIVO} AS ee FROM clientes c)
   `).get();
 
-  res.render('clientes/index', { titulo: 'Clientes', clientes, vista, filtroEstado, orden, conteo });
+  res.render('clientes/index', { titulo: 'Clientes', clientes, vista, filtroEstado, orden, q, conteo });
 });
 
 router.get('/nuevo', (req, res) => {

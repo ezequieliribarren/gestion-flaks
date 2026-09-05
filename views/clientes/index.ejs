@@ -21,15 +21,37 @@
     if (vista) base.vista = vista;
     base.estado = filtroEstado || 'todos';
     if (orden) base.orden = orden;
+    if (q) base.q = q;
     return new URLSearchParams(Object.assign(base, extra)).toString();
   }
   const n = { activo: conteo.activo || 0, potencial: conteo.potencial || 0, inactivo: conteo.inactivo || 0, total: conteo.total || 0 };
 %>
 
-<div class="flex items-center justify-between mb-5">
+<div class="flex items-center justify-between mb-4 gap-3">
   <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Clientes</h1>
-  <a href="/clientes/nuevo" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-card">+ Agregar cliente</a>
+  <a href="/clientes/nuevo" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-card whitespace-nowrap">+ Agregar cliente</a>
 </div>
+
+<!-- Buscador -->
+<form method="GET" action="/clientes" id="buscador" class="relative mb-3">
+  <input type="hidden" name="vista" value="<%= vista %>" />
+  <input type="hidden" name="estado" value="<%= filtroEstado || 'todos' %>" />
+  <input type="hidden" name="orden" value="<%= orden %>" />
+  <input type="search" name="q" value="<%= q %>" placeholder="Buscar cliente por nombre…" autocomplete="off"
+         class="w-full rounded-lg border border-slate-300 bg-white pl-10 pr-9 py-2.5 text-sm shadow-card focus:outline-none focus:ring-2 focus:ring-brand-400" />
+  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+  <% if (q) { %>
+    <a href="/clientes?<%= qs({ q: '' }) %>" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</a>
+  <% } %>
+</form>
+<script>
+  (function () {
+    var f = document.getElementById('buscador');
+    if (!f) return;
+    var inp = f.querySelector('input[name="q"]'), t;
+    inp.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { f.submit(); }, 450); });
+  })();
+</script>
 
 <div class="flex flex-wrap items-center gap-2 mb-5">
   <!-- Filtro por estado -->
@@ -59,7 +81,9 @@
 
 <% if (!clientes.length) { %>
   <div class="bg-white rounded-xl shadow-card p-10 text-center text-slate-500">
-    <%= filtroEstado ? 'No hay clientes en este estado.' : 'Todavía no hay clientes cargados.' %>
+    <% if (q) { %>Ningún cliente coincide con «<%= q %>»<% if (filtroEstado) { %> en este filtro<% } %>.
+    <% } else if (filtroEstado) { %>No hay clientes en este estado.
+    <% } else { %>Todavía no hay clientes cargados.<% } %>
   </div>
 <% } %>
 
