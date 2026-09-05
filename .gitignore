@@ -8,3 +8,6 @@ storage/uploads/*
 
 npm-debug.log*
 .DS_Store
+
+# Planilla original (la data ya queda en db/datos-iniciales.json)
+anterior/

@@ -6,7 +6,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node db/seed.js"
+    "seed": "node db/seed.js",
+    "import": "node db/importar.js",
+    "generar-datos": "node scripts/generar-datos-iniciales.js"
   },
   "engines": {
     "node": ">=18"
@@ -20,5 +22,8 @@
     "express-session": "^1.18.0",
     "multer": "^2.3.0",
     "node-sqlite3-wasm": "^0.8.60"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
   }
 }

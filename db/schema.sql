@@ -88,6 +88,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
   fecha      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS app_meta (
+  clave TEXT PRIMARY KEY,
+  valor TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
 CREATE INDEX IF NOT EXISTS idx_recurrentes_cliente ON trabajos_recurrentes(cliente_id);

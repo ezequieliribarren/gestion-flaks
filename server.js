@@ -11,6 +11,7 @@ const expressLayouts = require('express-ejs-layouts');
 
 const db = require('./db');
 const { seedUsers } = require('./db/seed-users');
+const { importarDatosIniciales } = require('./db/importar');
 const { requireAuth } = require('./middleware/auth');
 const fmt = require('./lib/format');
 
@@ -26,6 +27,13 @@ try {
   console.log('---------------------------------------------------------');
 } catch (e) {
   console.error('Error sincronizando usuarios:', e);
+}
+
+// Importa (una sola vez) los datos históricos de la planilla anterior.
+try {
+  importarDatosIniciales();
+} catch (e) {
+  console.error('Error importando datos iniciales:', e);
 }
 
 const app = express();

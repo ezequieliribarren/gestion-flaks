@@ -100,6 +100,23 @@ Si el "largo de contraseña" no coincide con lo que esperás, revisá el valor e
 `npm run seed` (en la terminal de la app) sigue existiendo y además carga los datos de ejemplo
 si `SEED_DEMO_DATA=true`.
 
+### Datos históricos de la planilla anterior
+
+`db/datos-iniciales.json` tiene los clientes, la facturación (trabajos únicos) y los gastos
+extraídos de la planilla vieja (`anterior/TODO MARCADOR.xlsx`). Al arrancar, la app los importa
+**una sola vez** (deja una marca en `app_meta`). Todo lo importado queda con
+`creado_por = 'import-xlsx'`.
+
+- `npm run import` → importa si todavía no se hizo.
+- `npm run import -- --reset` → borra lo importado (clientes/trabajos/gastos con esa marca) y
+  vuelve a importar. No toca nada cargado a mano por German o Ezequiel.
+- `npm run generar-datos` → regenera el JSON desde el `.xlsx` (requiere la devDependency `xlsx`
+  y el archivo en `anterior/`).
+
+Los trabajos sin reparto German/Ezequiel en la planilla se importan 50/50. Los clientes marcados
+como "mensuales" quedan con una nota para cargarles el trabajo recurrente con su monto. Los
+egresos de tipo honorarios/retiros no se importan como gasto (falsearían la ganancia de la Caja).
+
 ### Persistencia
 
 - La base vive en `data/flaks.sqlite` (se crea sola) y los archivos en `storage/uploads/`.

@@ -1,0 +1,2751 @@
+{
+  "_generado": "2026-09-05T17:24:06.612Z",
+  "_origen": "anterior/TODO MARCADOR.xlsx",
+  "clientes": [
+    {
+      "nombre": "SENKO",
+      "color": "#2563eb",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "ARTANIUM",
+      "color": "#16a34a",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "TENTACIONES",
+      "color": "#f59e0b",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "LUSQTOFF TIGRE",
+      "color": "#dc2626",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "SISTEMA CONTINUO",
+      "color": "#7c3aed",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "PSICOTEMAS",
+      "color": "#0891b2",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ELECTRO A LA ORDEN",
+      "color": "#db2777",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ALICOACH",
+      "color": "#65a30d",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "TC LA REVISTA",
+      "color": "#ea580c",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "SANTA MILONGUITA",
+      "color": "#4f46e5",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "ARIEL IRIGOYEN",
+      "color": "#0d9488",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "TOBYCO",
+      "color": "#b45309",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "MELESIA",
+      "color": "#2563eb",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "MOTOSWIFT",
+      "color": "#16a34a",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "AZUL CIELO",
+      "color": "#f59e0b",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "RUMA",
+      "color": "#dc2626",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "IANNACCI",
+      "color": "#7c3aed",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ID BRAND",
+      "color": "#0891b2",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "TECNO BUTY",
+      "color": "#db2777",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "LAS MARIAS",
+      "color": "#65a30d",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ESMERALDA HEBE",
+      "color": "#ea580c",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "WINMAN",
+      "color": "#4f46e5",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "BRODERI",
+      "color": "#0d9488",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "INNOVA",
+      "color": "#b45309",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "NO TAN LOCA",
+      "color": "#2563eb",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "CLAUSEN",
+      "color": "#16a34a",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "LUSQTOFF HURLINGHAM",
+      "color": "#f59e0b",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "SPEKEABLE",
+      "color": "#dc2626",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "FILOMENA",
+      "color": "#7c3aed",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ANDIELCO",
+      "color": "#0891b2",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "CLEARLINE",
+      "color": "#db2777",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "FARMACIA STRYCEK",
+      "color": "#65a30d",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "TIN TIN",
+      "color": "#ea580c",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "SISTEMA CONTINUO GF",
+      "color": "#4f46e5",
+      "estado": "activo",
+      "notas": "Cliente con trabajo mensual según la planilla anterior. Cargá el trabajo recurrente con su monto en esta ficha."
+    },
+    {
+      "nombre": "ALICIA",
+      "color": "#0d9488",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "NESTOR",
+      "color": "#b45309",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "IVO",
+      "color": "#2563eb",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "VALERIA",
+      "color": "#16a34a",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "SENKO - ARTANIUM",
+      "color": "#f59e0b",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "BARRA",
+      "color": "#dc2626",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "EXEQUIEL",
+      "color": "#7c3aed",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ROSANA MARCAS",
+      "color": "#0891b2",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "SENKO - ARTANIUM-SC-SCGR",
+      "color": "#db2777",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ROLLER MOTORIZADAS",
+      "color": "#65a30d",
+      "estado": "activo",
+      "notas": ""
+    },
+    {
+      "nombre": "ERICK BRAND U",
+      "color": "#ea580c",
+      "estado": "activo",
+      "notas": ""
+    }
+  ],
+  "trabajos_unicos": [
+    {
+      "cliente": "ALICIA",
+      "nombre": "LANDING + BLOG (cuota 1 - 3)",
+      "monto": 121666.67,
+      "fecha": "2025-08-02",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NESTOR",
+      "nombre": "LANDING (cuota 1 - 3)",
+      "monto": 96666.67,
+      "fecha": "2025-08-03",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NESTOR",
+      "nombre": "LANDING (cuota 2 - 3)",
+      "monto": 96666.67,
+      "fecha": "2025-08-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NESTOR",
+      "nombre": "LANDING (cuota 3 - 3)",
+      "monto": 96666.67,
+      "fecha": "2025-08-05",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "MULTIPAGINA",
+      "monto": 187500,
+      "fecha": "2025-08-06",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "MULTIPAGINA",
+      "monto": 230000,
+      "fecha": "2025-09-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "LANDING + BLOG (cuota 2 - 3)",
+      "monto": 121666.67,
+      "fecha": "2025-09-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2025-09-02",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "IVO",
+      "nombre": "LANDING (cuota 1 - 3)",
+      "monto": 96666.67,
+      "fecha": "2025-09-03",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "VALERIA",
+      "nombre": "LANDING (cuota 1 - 3)",
+      "monto": 93330,
+      "fecha": "2025-09-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LAS MARIAS",
+      "nombre": "TIENDADIGITAL (cuota 1 - 2)",
+      "monto": 75000,
+      "fecha": "2025-09-05",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "LANDING + BLOG (cuota 3 - 3)",
+      "monto": 121666.67,
+      "fecha": "2025-10-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "VALERIA",
+      "nombre": "LANDING (cuota 2 - 3)",
+      "monto": 93330,
+      "fecha": "2025-10-02",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "VALERIA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2025-10-03",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LAS MARIAS",
+      "nombre": "TIENDADIGITAL (cuota 2 - 2)",
+      "monto": 75000,
+      "fecha": "2025-10-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2025-10-05",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NESTOR",
+      "nombre": "REDES",
+      "monto": 100000,
+      "fecha": "2025-10-06",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SENKO - ARTANIUM",
+      "nombre": "META ADS",
+      "monto": 500000,
+      "fecha": "2025-10-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2025-10-08",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "META ADS",
+      "monto": 100000,
+      "fecha": "2025-10-09",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "VALERIA",
+      "nombre": "LANDING (cuota 3 - 3)",
+      "monto": 93330,
+      "fecha": "2026-01-21",
+      "reparto_german": 25,
+      "reparto_ezequiel": 75
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2025-11-01",
+      "reparto_german": 33,
+      "reparto_ezequiel": 67
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "MOTOSWIFT",
+      "nombre": "MERCADO ADS",
+      "monto": 150000,
+      "fecha": "2025-11-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "SENKO - ARTANIUM",
+      "nombre": "META ADS",
+      "monto": 500000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2025-11-27",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "META ADS",
+      "monto": 100000,
+      "fecha": "2025-11-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 23000,
+      "fecha": "2025-11-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "BRODERI",
+      "nombre": "MEJORAS TD",
+      "monto": 100000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ROSANA MARCAS",
+      "nombre": "LANDING (cuota 1-3)",
+      "monto": 131666.67,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ESMERALDA HEBE",
+      "nombre": "TIENDADIGITAL (cuota 1-2)",
+      "monto": 40000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2025-11-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "MULTIPAGINA (cuota 3-3)",
+      "monto": 175000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "WINMAN",
+      "nombre": "TIENDA DIGITAL",
+      "monto": 73750,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ARTANIUM",
+      "nombre": "KOMMO",
+      "monto": 250000,
+      "fecha": "2025-11-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2025-12-01",
+      "reparto_german": 33,
+      "reparto_ezequiel": 67
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SENKO - ARTANIUM",
+      "nombre": "META ADS",
+      "monto": 500000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2025-12-27",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "META ADS",
+      "monto": 50000,
+      "fecha": "2025-12-20",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 23000,
+      "fecha": "2025-12-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ROSANA MARCAS",
+      "nombre": "LANDING (cuota 2-3)",
+      "monto": 130000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2025-12-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "WINMAN",
+      "nombre": "TIENDA DIGITAL (cuota 2-2)",
+      "monto": 73750,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "WINMAN",
+      "nombre": "PRODUCTOS",
+      "monto": 55000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ESMERALDA HEBE",
+      "nombre": "TIENDADIGITAL (cuota 2-2)",
+      "monto": 40000,
+      "fecha": "2025-12-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "IANNACCI",
+      "nombre": "MULTI-PAGINA (cuota 2-2)",
+      "monto": 220000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "AZUL CIELO",
+      "nombre": "REDES",
+      "monto": 150000,
+      "fecha": "2025-12-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICIA",
+      "nombre": "Cobro",
+      "monto": 25000,
+      "fecha": "2026-01-10",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-01-16",
+      "reparto_german": 33,
+      "reparto_ezequiel": 67
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2026-01-16",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SENKO - ARTANIUM",
+      "nombre": "META ADS",
+      "monto": 500000,
+      "fecha": "2026-01-29",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-01-27",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "META ADS",
+      "monto": 100000,
+      "fecha": "2026-01-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 26000,
+      "fecha": "2026-01-06",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ROSANA MARCAS",
+      "nombre": "LANDING (cuota 3-3)",
+      "monto": 130000,
+      "fecha": "2026-01-22",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-01-21",
+      "reparto_german": 17,
+      "reparto_ezequiel": 83
+    },
+    {
+      "cliente": "IANNACCI",
+      "nombre": "MULTI-PAGINA (cuota 2-2)",
+      "monto": 220000,
+      "fecha": "2026-01-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "AZUL CIELO",
+      "nombre": "REDES",
+      "monto": 150000,
+      "fecha": "2026-01-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "MULTI-PAGINA (cuota 1-3)",
+      "monto": 200000,
+      "fecha": "2026-01-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "MODIFICACIONES TIENDA NUBE (cuota 1-2)",
+      "monto": 50000,
+      "fecha": "2026-01-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "REDES (cuota 1-2)",
+      "monto": 80000,
+      "fecha": "2026-01-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "MANTENIMIENTO (cuota 1-2)",
+      "monto": 17500,
+      "fecha": "2026-01-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SISTEMA CONTINUO",
+      "nombre": "IMAGENES (cuota 1-1)",
+      "monto": 50000,
+      "fecha": "2026-01-29",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "MULTI-PAGINA (cuota 2-3)",
+      "monto": 150000,
+      "fecha": "2026-02-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ALICOACH",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2026-02-15",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-02-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2026-02-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "REDES",
+      "monto": 225000,
+      "fecha": "2026-02-12",
+      "reparto_german": 83,
+      "reparto_ezequiel": 17
+    },
+    {
+      "cliente": "SENKO - ARTANIUM-SC-SCGR",
+      "nombre": "META ADS",
+      "monto": 1750000,
+      "fecha": "2026-02-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-02-28",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "META ADS",
+      "monto": 100000,
+      "fecha": "2026-02-15",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 26000,
+      "fecha": "2026-02-15",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-02-12",
+      "reparto_german": 17,
+      "reparto_ezequiel": 83
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "MODIFICACIONES TIENDA NUBE (cuota 2-2)",
+      "monto": 50000,
+      "fecha": "2026-02-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "REDES (cuota 2-2)",
+      "monto": 80000,
+      "fecha": "2026-02-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "MANTENIMIENTO",
+      "monto": 17500,
+      "fecha": "2026-02-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "PAUTA META",
+      "monto": 100000,
+      "fecha": "2026-02-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "MULTI-PAGINA (cuota 3-3)",
+      "monto": 150000,
+      "fecha": "2026-03-12",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "PAUTA META",
+      "monto": 50000,
+      "fecha": "2026-03-12",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "REDES",
+      "monto": 80000,
+      "fecha": "2026-03-12",
+      "reparto_german": 9,
+      "reparto_ezequiel": 91
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "MANTENIMIENTO TIENDA",
+      "monto": 35000,
+      "fecha": "2026-03-12",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TECNO BUTY",
+      "nombre": "KOMMO",
+      "monto": 75000,
+      "fecha": "2026-03-12",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-03-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2026-03-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "REDES",
+      "monto": 300000,
+      "fecha": "2026-03-12",
+      "reparto_german": 83,
+      "reparto_ezequiel": 17
+    },
+    {
+      "cliente": "SENKO - ARTANIUM-SC-SCGR",
+      "nombre": "META ADS",
+      "monto": 1980000,
+      "fecha": "2026-03-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-03-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 28000,
+      "fecha": "2026-03-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 26000,
+      "fecha": "2026-03-12",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ALICOACH",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2026-03-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-03-12",
+      "reparto_german": 17,
+      "reparto_ezequiel": 83
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "PAGO EXPANSION + MANTENIMIENTO (cuota 1-2)",
+      "monto": 70000,
+      "fecha": "2026-03-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "REDES",
+      "monto": 175000,
+      "fecha": "2026-03-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-04-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "META ADS",
+      "monto": 125000,
+      "fecha": "2026-04-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "EXEQUIEL",
+      "nombre": "REDES",
+      "monto": 300000,
+      "fecha": "2026-04-07",
+      "reparto_german": 83,
+      "reparto_ezequiel": 17
+    },
+    {
+      "cliente": "SENKO - ARTANIUM-SC-SCGR",
+      "nombre": "META ADS",
+      "monto": 1800000,
+      "fecha": "2026-04-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-04-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 28000,
+      "fecha": "2026-04-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 26000,
+      "fecha": "2026-04-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ALICOACH",
+      "nombre": "MANTENIMIENTO",
+      "monto": 25000,
+      "fecha": "2026-03-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-04-01",
+      "reparto_german": 17,
+      "reparto_ezequiel": 83
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "REDES",
+      "monto": 350000,
+      "fecha": "2026-04-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "GOOGLE ADS",
+      "monto": 150000,
+      "fecha": "2026-05-01",
+      "reparto_german": 20,
+      "reparto_ezequiel": 80
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "REDES + META ADS",
+      "monto": 350000,
+      "fecha": "2026-05-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "PSICOTEMAS",
+      "nombre": "ULTIMO MES META ADS",
+      "monto": 132000,
+      "fecha": "2026-05-07",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SISTEMA CONTINUO",
+      "nombre": "INTEGRAL",
+      "monto": 1800000,
+      "fecha": "2026-05-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "MELESIA",
+      "nombre": "MERCADO LIBRE ADS",
+      "monto": 150000,
+      "fecha": "2026-05-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BRODERI",
+      "nombre": "MANTENIMIENTO",
+      "monto": 30000,
+      "fecha": "2026-05-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 28000,
+      "fecha": "2026-05-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ARIEL IRIGOYEN",
+      "nombre": "MANTENIMIENTO",
+      "monto": 26000,
+      "fecha": "2026-05-07",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "MANTENIMIENTO",
+      "monto": 36000,
+      "fecha": "2026-05-01",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "CLAUSEN",
+      "nombre": "LANDING ENTELADOS + MULTI-PAGE CLAUSEN",
+      "monto": 700000,
+      "fecha": "2026-05-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-06-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-05-04",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "Cobro",
+      "monto": 150000,
+      "fecha": "2026-06-30",
+      "reparto_german": 23,
+      "reparto_ezequiel": 77
+    },
+    {
+      "cliente": "LUSQTOFF HURLINGHAM",
+      "nombre": "Cobro (cuota 1-3)",
+      "monto": 354000,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "Cobro",
+      "monto": 100000,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "Pago tarde, se lo queda eze para ajustes",
+      "monto": 125000,
+      "fecha": "2026-07-17",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "Cobro",
+      "monto": 125000,
+      "fecha": "2026-06-17",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SISTEMA CONTINUO",
+      "nombre": "Cobro",
+      "monto": 2200000,
+      "fecha": "2026-06-02",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "MELESIA",
+      "nombre": "Cobro",
+      "monto": 150000,
+      "fecha": "2026-06-26",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "BRODERI",
+      "nombre": "Cobro",
+      "monto": 102500,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BRODERI",
+      "nombre": "Cobro",
+      "monto": 32500,
+      "fecha": "2026-06-17",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SANTA MILONGUITA",
+      "nombre": "Cobro",
+      "monto": 28000,
+      "fecha": "2026-06-26",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "Cobro",
+      "monto": 36000,
+      "fecha": "2026-06-26",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "TENTACIONES",
+      "nombre": "Cobro",
+      "monto": 275000,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ROLLER MOTORIZADAS",
+      "nombre": "Cobro",
+      "monto": 35000,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NO TAN LOCA",
+      "nombre": "Cobro",
+      "monto": 125000,
+      "fecha": "2026-06-26",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "CLAUSEN",
+      "nombre": "MANTENIMIENTO SEO",
+      "monto": 35000,
+      "fecha": "2026-07-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "NO TAN LOCA",
+      "nombre": "Cobro",
+      "monto": 125000,
+      "fecha": "2026-07-11",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SISTEMA CONTINUO",
+      "nombre": "Cobro",
+      "monto": 2000000,
+      "fecha": "2026-07-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF HURLINGHAM",
+      "nombre": "Cobro (cuota 2-3)",
+      "monto": 354000,
+      "fecha": "2026-07-03",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "Cobro",
+      "monto": 175000,
+      "fecha": "2026-07-31",
+      "reparto_german": 20,
+      "reparto_ezequiel": 80
+    },
+    {
+      "cliente": "LUSQTOFF HURLINGHAM",
+      "nombre": "Cobro (cuota 3-3)",
+      "monto": 354000,
+      "fecha": "2026-08-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FARMACIA STRYCEK",
+      "nombre": "Vino de google ADS (cuota 1-3)",
+      "monto": 200000,
+      "fecha": "2026-07-27",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FARMACIA STRYCEK",
+      "nombre": "Cobro",
+      "monto": 390000,
+      "fecha": "2026-07-27",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "CLEARLINE",
+      "nombre": "Tienda digital",
+      "monto": 275000,
+      "fecha": "2026-07-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TIN TIN",
+      "nombre": "Tienda digital (cuota 1-2)",
+      "monto": 137500,
+      "fecha": "2026-07-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FARMACIA STRYCEK",
+      "nombre": "Multi page (cuota 1-3)",
+      "monto": 200000,
+      "fecha": "2026-07-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ERICK BRAND U",
+      "nombre": "Rediseño Alumni 70 usd (cuota 1-2)",
+      "monto": 56250,
+      "fecha": "2026-07-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FARMACIA STRYCEK",
+      "nombre": "Multi page (cuota 2-3)",
+      "monto": 200000,
+      "fecha": "2026-08-09",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FARMACIA STRYCEK",
+      "nombre": "Multi page (cuota 3-3)",
+      "monto": 190000,
+      "fecha": "2026-09-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TIN TIN",
+      "nombre": "Tienda digital (cuota 2-2)",
+      "monto": 137500,
+      "fecha": "2026-08-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ERICK BRAND U",
+      "nombre": "Rediseño Alumni 50% restante (cuota 2-2)",
+      "monto": 56250,
+      "fecha": "2026-08-13",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "SISTEMA CONTINUO",
+      "nombre": "Cobro",
+      "monto": 1900000,
+      "fecha": "2026-08-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "PSICOTEMAS",
+      "nombre": "REDISEÑO (cuota 1-2)",
+      "monto": 110000,
+      "fecha": "2026-07-31",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "PSICOTEMAS",
+      "nombre": "REDISEÑO (cuota 2-2)",
+      "monto": 110000,
+      "fecha": "2026-08-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF HURLINGHAM",
+      "nombre": "Cobro (cuota 3-3)",
+      "monto": 354000,
+      "fecha": "2026-08-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "LUSQTOFF TIGRE",
+      "nombre": "Cobro",
+      "monto": 175000,
+      "fecha": "2026-08-01",
+      "reparto_german": 17,
+      "reparto_ezequiel": 83
+    },
+    {
+      "cliente": "TENTACIONES",
+      "nombre": "Cobro",
+      "monto": 275000,
+      "fecha": "2026-08-09",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "CLAUSEN",
+      "nombre": "Cobro",
+      "monto": 35000,
+      "fecha": "2026-08-14",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "MANTENIMIENTO",
+      "monto": 45000,
+      "fecha": "2026-07-14",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "BARRA",
+      "nombre": "Cobro",
+      "monto": 45000,
+      "fecha": "2026-08-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "Cobro",
+      "monto": 36000,
+      "fecha": "2026-07-31",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "TOBYCO",
+      "nombre": "Cobro",
+      "monto": 36000,
+      "fecha": "2026-08-14",
+      "reparto_german": 0,
+      "reparto_ezequiel": 100
+    },
+    {
+      "cliente": "SPEKEABLE",
+      "nombre": "50% inicial (cuota 1-2)",
+      "monto": 245000,
+      "fecha": "2026-08-08",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FILOMENA",
+      "nombre": "25% (cuota 1-4)",
+      "monto": 68000,
+      "fecha": "2026-08-14",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FILOMENA",
+      "nombre": "Cobro (cuota 2-4)",
+      "monto": 68750,
+      "fecha": "2026-08-24",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "CLEARLINE",
+      "nombre": "REDES",
+      "monto": 137500,
+      "fecha": "2026-08-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ELECTRO A LA ORDEN",
+      "nombre": "REDES",
+      "monto": 137500,
+      "fecha": "2026-08-21",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "ANDIELCO",
+      "nombre": "Tienda digital (cuota 1-2)",
+      "monto": 137500,
+      "fecha": "2026-08-19",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "CLEARLINE",
+      "nombre": "DISEÑO CARPETA",
+      "monto": 45000,
+      "fecha": "2026-08-20",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FILOMENA",
+      "nombre": "Cobro (cuota 3-4)",
+      "monto": 68000,
+      "fecha": "2026-09-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    },
+    {
+      "cliente": "FILOMENA",
+      "nombre": "Cobro (cuota 4-4)",
+      "monto": 68000,
+      "fecha": "2026-09-01",
+      "reparto_german": 50,
+      "reparto_ezequiel": 50
+    }
+  ],
+  "gastos": [
+    {
+      "descripcion": "HERRAMIENTA - MOVAVI",
+      "monto": 48201.38,
+      "tipo": "unico",
+      "fecha": "2025-06-13",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 4200,
+      "tipo": "unico",
+      "fecha": "2025-06-17",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 20150,
+      "tipo": "unico",
+      "fecha": "2025-06-19",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Externo",
+      "monto": 11800,
+      "tipo": "unico",
+      "fecha": "2025-06-19",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 14045,
+      "tipo": "unico",
+      "fecha": "2025-06-19",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 900,
+      "tipo": "unico",
+      "fecha": "2025-07-01",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "HERRAMIENTA - PLAN HOSTING",
+      "monto": 18000,
+      "tipo": "unico",
+      "fecha": "2025-07-01",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - LÍNEA FLAKS",
+      "monto": 6855.22,
+      "tipo": "unico",
+      "fecha": "2025-07-01",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA GOOGLE ADS",
+      "monto": 60000,
+      "tipo": "unico",
+      "fecha": "2025-07-04",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "Externo",
+      "monto": 14960,
+      "tipo": "unico",
+      "fecha": "2025-07-04",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "PAUTA GOOGLE ADS",
+      "monto": 30000,
+      "tipo": "unico",
+      "fecha": "2025-07-13",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA GOOGLE ADS",
+      "monto": 30000,
+      "tipo": "unico",
+      "fecha": "2025-07-13",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA GOOGLE ADS",
+      "monto": 30000,
+      "tipo": "unico",
+      "fecha": "2025-07-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA GOOGLE ADS",
+      "monto": 30000,
+      "tipo": "unico",
+      "fecha": "2025-07-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 5200,
+      "tipo": "unico",
+      "fecha": "2025-07-28",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 5160,
+      "tipo": "unico",
+      "fecha": "2025-07-30",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Comida",
+      "monto": 11600,
+      "tipo": "unico",
+      "fecha": "2025-07-30",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "PAUTA TIK TOK",
+      "monto": 7330.4,
+      "tipo": "unico",
+      "fecha": "2025-07-29",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5358.4,
+      "tipo": "unico",
+      "fecha": "2025-07-30",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5861.6,
+      "tipo": "unico",
+      "fecha": "2025-08-01",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "Externo",
+      "monto": 24913.33,
+      "tipo": "unico",
+      "fecha": "2025-08-05",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "HERRAMIENTA - RENOVACIÓN DOMINIO",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2025-08-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 3231.9,
+      "tipo": "unico",
+      "fecha": "2025-08-07",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 3697.4,
+      "tipo": "unico",
+      "fecha": "2025-08-07",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 3231.9,
+      "tipo": "unico",
+      "fecha": "2025-08-07",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 3697.4,
+      "tipo": "unico",
+      "fecha": "2025-08-07",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "Externo",
+      "monto": 14267,
+      "tipo": "unico",
+      "fecha": "2025-08-08",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "Externo",
+      "monto": 17698.33,
+      "tipo": "unico",
+      "fecha": "2025-08-08",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 2358.5,
+      "tipo": "unico",
+      "fecha": "2025-08-11",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 4149.17,
+      "tipo": "unico",
+      "fecha": "2025-08-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 2358.5,
+      "tipo": "unico",
+      "fecha": "2025-08-11",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 4149.17,
+      "tipo": "unico",
+      "fecha": "2025-08-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 4643,
+      "tipo": "unico",
+      "fecha": "2025-08-14",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 4643,
+      "tipo": "unico",
+      "fecha": "2025-08-14",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5232,
+      "tipo": "unico",
+      "fecha": "2025-08-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5232,
+      "tipo": "unico",
+      "fecha": "2025-08-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1321.02,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1321.02,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1327.53,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1327.53,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1321.02,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1321.02,
+      "tipo": "unico",
+      "fecha": "2025-08-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1327.53,
+      "tipo": "unico",
+      "fecha": "2025-08-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1327.53,
+      "tipo": "unico",
+      "fecha": "2025-08-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 663.76,
+      "tipo": "unico",
+      "fecha": "2025-08-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 663.76,
+      "tipo": "unico",
+      "fecha": "2025-08-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 2.01",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 2.01",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 2.01",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - retirado de reservas",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1335.64,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 3.02",
+      "monto": 1975.08,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 4.48",
+      "monto": 1975.08,
+      "tipo": "unico",
+      "fecha": "2025-08-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 4.48",
+      "monto": 2929.92,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 2929.92,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 2929.92,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - retirado de reservas tobyco",
+      "monto": 2929.92,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - queda en reservas $2500,40",
+      "monto": 4508.7,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 6.78",
+      "monto": 4508.7,
+      "tipo": "unico",
+      "fecha": "2025-08-25",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 9.92",
+      "monto": 6745.6,
+      "tipo": "unico",
+      "fecha": "2025-08-26",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - 14.72",
+      "monto": 6745.6,
+      "tipo": "unico",
+      "fecha": "2025-08-26",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 9891.84,
+      "tipo": "unico",
+      "fecha": "2025-08-28",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - recuperado de 2da cuota nestor",
+      "monto": 9891.84,
+      "tipo": "unico",
+      "fecha": "2025-09-28",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - RAPIPRO",
+      "monto": 3999.5,
+      "tipo": "unico",
+      "fecha": "2025-09-01",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - RAPIPRO",
+      "monto": 3999.5,
+      "tipo": "unico",
+      "fecha": "2025-09-01",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 11075.21,
+      "tipo": "unico",
+      "fecha": "2025-09-04",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 11075.21,
+      "tipo": "unico",
+      "fecha": "2025-09-04",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 11930.83,
+      "tipo": "unico",
+      "fecha": "2025-09-05",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 11930.83,
+      "tipo": "unico",
+      "fecha": "2025-09-05",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1422.85,
+      "tipo": "unico",
+      "fecha": "2025-09-10",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1422.85,
+      "tipo": "unico",
+      "fecha": "2025-09-10",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - LÍNEA FLAKS",
+      "monto": 7050,
+      "tipo": "unico",
+      "fecha": "2025-10-18",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1573.86,
+      "tipo": "unico",
+      "fecha": "2025-10-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 14525.89,
+      "tipo": "unico",
+      "fecha": "2025-10-01",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 14525.89,
+      "tipo": "unico",
+      "fecha": "2025-10-01",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 11962.5,
+      "tipo": "unico",
+      "fecha": "2025-10-03",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - retirado de reservas",
+      "monto": 11962.5,
+      "tipo": "unico",
+      "fecha": "2025-11-04",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 14984.65,
+      "tipo": "unico",
+      "fecha": "2025-11-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - se resta $5000 de reservas",
+      "monto": 9513.75,
+      "tipo": "unico",
+      "fecha": "2025-11-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - se resta $5000 de reservas german debe $4500",
+      "monto": 9513.75,
+      "tipo": "unico",
+      "fecha": "2025-11-20",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA",
+      "monto": 12790,
+      "tipo": "unico",
+      "fecha": "2025-11-20",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT borren debe $8290 cancelado de viaje $8268",
+      "monto": 12790,
+      "tipo": "unico",
+      "fecha": "2025-11-21",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META - mercado pago partes iguales",
+      "monto": 18500,
+      "tipo": "unico",
+      "fecha": "2025-12-28",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - mercado pago partes iguales",
+      "monto": 18500,
+      "tipo": "unico",
+      "fecha": "2025-12-29",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - German debe la mitad",
+      "monto": 3628.5,
+      "tipo": "unico",
+      "fecha": "2025-12-09",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - German debe la mitad",
+      "monto": 3628.5,
+      "tipo": "unico",
+      "fecha": "2025-12-09",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5981.13,
+      "tipo": "unico",
+      "fecha": "2025-12-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5981.13,
+      "tipo": "unico",
+      "fecha": "2025-12-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5936.88,
+      "tipo": "unico",
+      "fecha": "2025-12-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 5936.88,
+      "tipo": "unico",
+      "fecha": "2025-12-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT",
+      "monto": 10317.63,
+      "tipo": "unico",
+      "fecha": "2025-12-18",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT german debe $5228 saldado de pagos",
+      "monto": 10317.63,
+      "tipo": "unico",
+      "fecha": "2025-12-19",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 23033,
+      "tipo": "unico",
+      "fecha": "2025-01-29",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - Saldado de Esmeralda Hebe 2do pago Ger debe $3033",
+      "monto": 23033,
+      "tipo": "unico",
+      "fecha": "2025-01-30",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 23107.5,
+      "tipo": "unico",
+      "fecha": "2025-01-02",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - Ger debe el total (saldado)",
+      "monto": 23107.5,
+      "tipo": "unico",
+      "fecha": "2025-01-02",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "2 MESES VUELO GER - Ger debe el total (saldado)",
+      "monto": 16000,
+      "tipo": "unico",
+      "fecha": "2026-01-02",
+      "categoria": "Viáticos"
+    },
+    {
+      "descripcion": "MICROFONOS",
+      "monto": 35250,
+      "tipo": "unico",
+      "fecha": "2026-01-02",
+      "categoria": "Equipamiento"
+    },
+    {
+      "descripcion": "MICROFONOS - Ger debe $6890 (enviado mp)",
+      "monto": 35250,
+      "tipo": "unico",
+      "fecha": "2026-01-02",
+      "categoria": "Equipamiento"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 21563.71,
+      "tipo": "unico",
+      "fecha": "2026-01-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - Ger debe el total (saldado iannaci)",
+      "monto": 21563.71,
+      "tipo": "unico",
+      "fecha": "2026-01-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 23030.86,
+      "tipo": "unico",
+      "fecha": "2026-01-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 23030.86,
+      "tipo": "unico",
+      "fecha": "2026-01-19",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "ALMUERZO FLAKS",
+      "monto": 13500,
+      "tipo": "unico",
+      "fecha": "2026-01-20",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "ALMUERZO FLAKS - German debe $36530",
+      "monto": 13500,
+      "tipo": "unico",
+      "fecha": "2026-01-20",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT German debe $26388 + $35000 (prestamo) Total: 61388",
+      "monto": 10142.75,
+      "tipo": "unico",
+      "fecha": "2026-01-21",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT Saldado (vuelo de febrero German no paga)",
+      "monto": 10142.75,
+      "tipo": "unico",
+      "fecha": "2026-01-21",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 23009.9,
+      "tipo": "unico",
+      "fecha": "2026-02-26",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - Ger debe total (saldado con id brand 67500 - 23009)",
+      "monto": 23009.9,
+      "tipo": "unico",
+      "fecha": "2026-02-26",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "Comida - $8,500.00",
+      "monto": 17000,
+      "tipo": "unico",
+      "fecha": "2026-02-10",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "Dominio Electroalaorden - $4,500.00",
+      "monto": 9000,
+      "tipo": "unico",
+      "fecha": "2026-02-10",
+      "categoria": "Hosting"
+    },
+    {
+      "descripcion": "ALMUERZO FLAKS - $6,000.00",
+      "monto": 12000,
+      "tipo": "unico",
+      "fecha": "2026-02-07",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "CAPCUT - 13,99 USD",
+      "monto": 20000,
+      "tipo": "unico",
+      "fecha": "2026-02-10",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "Gasto",
+      "monto": 3525,
+      "tipo": "unico",
+      "fecha": "2026-02-10",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "Gasto",
+      "monto": 3525,
+      "tipo": "unico",
+      "fecha": "2026-02-10",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "HERRAMIENTAS - CANVA",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2026-02-19",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META - Ger pagó 15500 para futuros descuentos. se proyectó 4500*7 y se le descontó un día de pauta cobrado (1269*2)",
+      "monto": 1269,
+      "tipo": "unico",
+      "fecha": "2026-03-10",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META",
+      "monto": 1269,
+      "tipo": "unico",
+      "fecha": "2026-03-10",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PAUTA META - PAGO GER PAUTA FUTURISMO",
+      "monto": 15500,
+      "tipo": "unico",
+      "fecha": "2026-03-12",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "GASTO EQUIPARACIÓN - NOS OLVIDAMOS DE PASAR ALGO",
+      "monto": 18108.51,
+      "tipo": "unico",
+      "fecha": "2026-03-18",
+      "categoria": "Equipamiento"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT 13,99 USD",
+      "monto": 19586,
+      "tipo": "unico",
+      "fecha": "2026-03-17",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - RAPI PRO",
+      "monto": 8900,
+      "tipo": "unico",
+      "fecha": "2026-03-19",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CANVA",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2026-03-19",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PAUTA META - 32,22 USD",
+      "monto": 45816.84,
+      "tipo": "unico",
+      "fecha": "2026-03-22",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - HOSTING SECUNDARIO IA",
+      "monto": 45600,
+      "tipo": "unico",
+      "fecha": "2026-03-22",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "GASTO TECNOLOGICO - LIMPIEZA NOTEBOOK ASUS",
+      "monto": 75000,
+      "tipo": "unico",
+      "fecha": "2026-03-22",
+      "categoria": "Equipamiento"
+    },
+    {
+      "descripcion": "ALMUERZO FLAKS - ANTITESIS",
+      "monto": 37500,
+      "tipo": "unico",
+      "fecha": "2026-04-14",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "ALMUERZO FLAKS - hamburguesas",
+      "monto": 19823.21,
+      "tipo": "unico",
+      "fecha": "2026-04-17",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CHAT GPT",
+      "monto": 29400,
+      "tipo": "unico",
+      "fecha": "2026-04-17",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CLAUDE",
+      "monto": 29000,
+      "tipo": "unico",
+      "fecha": "2026-04-17",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "MERIENDA - café Martinez cloude",
+      "monto": 11600,
+      "tipo": "unico",
+      "fecha": "2026-04-24",
+      "categoria": "Comida"
+    },
+    {
+      "descripcion": "PAUTA META - 11.03",
+      "monto": 15938.35,
+      "tipo": "unico",
+      "fecha": "2026-04-10",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CLAUDE",
+      "monto": 29000,
+      "tipo": "unico",
+      "fecha": "2026-05-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT 13,99 USD",
+      "monto": 20285.5,
+      "tipo": "unico",
+      "fecha": "2026-05-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT 13,99 USD",
+      "monto": 20285.5,
+      "tipo": "unico",
+      "fecha": "2026-04-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CANVA",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2026-04-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CANVA",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2026-05-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CARGA MASIVA PRO (DAR DE BAJA)",
+      "monto": 8000,
+      "tipo": "unico",
+      "fecha": "2026-05-07",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - Para importación de datos lusqtoff",
+      "monto": 8000,
+      "tipo": "unico",
+      "fecha": "2026-05-01",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "Gasto - AJUSTE FINAL MARZO",
+      "monto": 47991.33,
+      "tipo": "unico",
+      "fecha": "2026-03-31",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "Gasto - AJUSTE FINAL ABRIL",
+      "monto": 16829.64,
+      "tipo": "unico",
+      "fecha": "2026-04-30",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "Gasto - AJUSTE FINAL MAYO",
+      "monto": 33214.5,
+      "tipo": "unico",
+      "fecha": "2026-05-31",
+      "categoria": "Otros"
+    },
+    {
+      "descripcion": "HOSTING - RENOVACION",
+      "monto": 218184.6,
+      "tipo": "unico",
+      "fecha": "2026-06-02",
+      "categoria": "Hosting"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CLAUDE",
+      "monto": 29000,
+      "tipo": "unico",
+      "fecha": "2026-06-26",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT 13,99 USD",
+      "monto": 20285.5,
+      "tipo": "unico",
+      "fecha": "2026-06-26",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "DOMINIO NO TAN LOCA",
+      "monto": 8500,
+      "tipo": "unico",
+      "fecha": "2026-06-26",
+      "categoria": "Hosting"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CLICKUP",
+      "monto": 39000,
+      "tipo": "unico",
+      "fecha": "2026-06-26",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - Claude anual 180 USD",
+      "monto": 282247.2,
+      "tipo": "unico",
+      "fecha": "2026-07-17",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - Google ONE mensual 4,99 USD",
+      "monto": 7824.52,
+      "tipo": "unico",
+      "fecha": "2026-07-17",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PUBLICIDAD - GOOGLE ADS",
+      "monto": 150000,
+      "tipo": "unico",
+      "fecha": "2026-07-17",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PUBLICIDAD - Google ads (borren dio su parte en efectivo)",
+      "monto": 100000,
+      "tipo": "unico",
+      "fecha": "2026-07-27",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PUBLICIDAD - Meta ads",
+      "monto": 45015,
+      "tipo": "unico",
+      "fecha": "2026-07-28",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT 13,99",
+      "monto": 20985,
+      "tipo": "unico",
+      "fecha": "2026-07-18",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - CAPCUT ANUAL Vence el 31/07/2027 usd 51,99",
+      "monto": 77985,
+      "tipo": "unico",
+      "fecha": "2026-07-18",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "HERRAMIENTA - click up 10 usd",
+      "monto": 15000,
+      "tipo": "unico",
+      "fecha": "2026-07-04",
+      "categoria": "Herramientas"
+    },
+    {
+      "descripcion": "PUBLICIDAD - Google Ads",
+      "monto": 100000,
+      "tipo": "unico",
+      "fecha": "2026-08-06",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PUBLICIDAD - GOOGLE ADS",
+      "monto": 100000,
+      "tipo": "unico",
+      "fecha": "2026-08-14",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PUBLICIDAD - META ADS",
+      "monto": 46876.8,
+      "tipo": "unico",
+      "fecha": "2026-08-14",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "PUBLICIDAD - META ADS pagado con ARQ 30,61 USD",
+      "monto": 45541.89,
+      "tipo": "unico",
+      "fecha": "2026-08-18",
+      "categoria": "Publicidad"
+    },
+    {
+      "descripcion": "HERRAMIENTA - MOVISTAR julio y agosto",
+      "monto": 10666.81,
+      "tipo": "unico",
+      "fecha": "2026-08-24",
+      "categoria": "Herramientas"
+    }
+  ]
+}
