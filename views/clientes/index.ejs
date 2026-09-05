@@ -1,0 +1,67 @@
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold text-slate-800">Clientes</h1>
+  <a href="/clientes/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2">+ Agregar cliente</a>
+</div>
+
+<div class="flex gap-1 mb-4 bg-white rounded-lg p-1 shadow-sm w-fit">
+  <a href="/clientes?vista=carpetas" class="px-4 py-1.5 text-sm rounded-md <%= vista === 'carpetas' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>">Carpetas</a>
+  <a href="/clientes?vista=lista" class="px-4 py-1.5 text-sm rounded-md <%= vista === 'lista' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>">Lista</a>
+</div>
+
+<% if (!clientes.length) { %>
+  <div class="bg-white rounded-lg shadow-sm p-8 text-center text-slate-500">Todavía no hay clientes cargados.</div>
+<% } %>
+
+<% if (vista === 'carpetas') { %>
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    <% clientes.forEach(function(c){ %>
+      <a href="/clientes/<%= c.id %>" class="block bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
+        <div class="h-2" style="background: <%= c.color %>"></div>
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 rounded-full inline-block" style="background: <%= c.color %>"></span>
+            <span class="font-semibold text-slate-800 truncate"><%= c.nombre %></span>
+          </div>
+          <span class="text-xs px-2 py-0.5 rounded-full <%= c.estado === 'activo' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' %>">
+            <%= c.estado === 'activo' ? 'Activo' : 'Potencial' %>
+          </span>
+          <div class="text-xs text-slate-500 mt-3">
+            <div><%= fmt.formatARS(c.mensual) %> / mes</div>
+            <div><%= c.tareas_abiertas %> tarea(s) abierta(s)</div>
+          </div>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-left">
+        <tr>
+          <th class="px-4 py-3">Cliente</th>
+          <th class="px-4 py-3">Estado</th>
+          <th class="px-4 py-3 text-right">Mensual</th>
+          <th class="px-4 py-3 text-right">Tareas abiertas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% clientes.forEach(function(c){ %>
+          <tr class="border-t border-slate-100 hover:bg-slate-50">
+            <td class="px-4 py-3">
+              <a href="/clientes/<%= c.id %>" class="flex items-center gap-2 font-medium text-slate-800 hover:text-blue-600">
+                <span class="w-3 h-3 rounded-full inline-block" style="background: <%= c.color %>"></span><%= c.nombre %>
+              </a>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-xs px-2 py-0.5 rounded-full <%= c.estado === 'activo' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' %>">
+                <%= c.estado === 'activo' ? 'Activo' : 'Potencial' %>
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right"><%= fmt.formatARS(c.mensual) %></td>
+            <td class="px-4 py-3 text-right"><%= c.tareas_abiertas %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } %>

@@ -1,0 +1,44 @@
+<div class="max-w-xl mx-auto">
+  <a href="/tareas" class="text-sm text-blue-600 hover:underline">&larr; Volver a tareas</a>
+  <h1 class="text-2xl font-bold text-slate-800 mt-2 mb-4">Nueva tarea</h1>
+
+  <form method="POST" action="/tareas" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
+      <input name="nombre" required value="<%= tarea.nombre || '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+      <textarea name="descripcion" rows="3" class="w-full rounded-md border border-slate-300 px-3 py-2"><%= tarea.descripcion || '' %></textarea>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Prioridad</label>
+        <select name="prioridad" class="w-full rounded-md border border-slate-300 px-3 py-2">
+          <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= tarea.prioridad === p ? 'selected' : '' %>><%= p %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Estado</label>
+        <select name="estado" class="w-full rounded-md border border-slate-300 px-3 py-2">
+          <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= tarea.estado === e ? 'selected' : '' %>><%= e %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de cierre / vencimiento</label>
+        <input type="date" name="fecha_cierre" value="<%= tarea.fecha_cierre ? String(tarea.fecha_cierre).slice(0,10) : '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+        <select name="cliente_id" class="w-full rounded-md border border-slate-300 px-3 py-2">
+          <option value="">Sin cliente</option>
+          <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(tarea.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm">Crear tarea</button>
+      <a href="/tareas" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>
+    </div>
+  </form>
+</div>

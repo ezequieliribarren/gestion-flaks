@@ -1,0 +1,52 @@
+<div class="flex items-center justify-between mb-1">
+  <h1 class="text-2xl font-bold text-slate-800">Gastos</h1>
+  <a href="/gastos/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2">+ Cargar gasto</a>
+</div>
+<p class="text-sm text-slate-500 mb-4"><%= fmt.nombreMes(mes) %> <%= anio %></p>
+
+<%- include('../partials/periodo', { mes: mes, anio: anio }) %>
+
+<div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-slate-500 text-left">
+      <tr>
+        <th class="px-4 py-3">Descripción</th>
+        <th class="px-4 py-3">Categoría</th>
+        <th class="px-4 py-3">Tipo</th>
+        <th class="px-4 py-3">Fecha</th>
+        <th class="px-4 py-3 text-right">Monto</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!filas.length) { %>
+        <tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Sin gastos para este mes.</td></tr>
+      <% } %>
+      <% filas.forEach(function(g){ %>
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">
+            <%= g.descripcion %>
+            <%- include('../partials/audit', { ultima: g.ultima }) %>
+          </td>
+          <td class="px-4 py-3 text-slate-500"><%= g.categoria || '—' %></td>
+          <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= g.tipo === 'recurrente' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' %>"><%= g.tipo === 'recurrente' ? 'Recurrente' : 'Único' %></span></td>
+          <td class="px-4 py-3 text-slate-500"><%= g.tipo === 'recurrente' ? 'Mensual' : fmt.formatFecha(g.fecha) %></td>
+          <td class="px-4 py-3 text-right font-medium"><%= fmt.formatARS(g.monto) %></td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <a href="/gastos/<%= g.id %>/editar" class="text-xs text-blue-600 hover:underline">Editar</a>
+            <form method="POST" action="/gastos/<%= g.id %>/eliminar" class="inline" onsubmit="return confirm('¿Eliminar este gasto?')">
+              <button class="text-xs text-red-600 hover:underline ml-2">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+    <tfoot class="bg-slate-50 font-semibold text-slate-800 border-t-2 border-slate-200">
+      <tr>
+        <td class="px-4 py-3" colspan="4">Total de gastos del mes</td>
+        <td class="px-4 py-3 text-right"><%= fmt.formatARS(total) %></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

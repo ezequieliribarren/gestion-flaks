@@ -1,0 +1,81 @@
+<h1 class="text-2xl font-bold text-slate-800 mb-4">Documentos</h1>
+
+<div class="grid md:grid-cols-3 gap-4">
+  <!-- Subir -->
+  <div class="bg-white rounded-lg shadow-sm p-5 md:col-span-1">
+    <h2 class="font-semibold text-slate-800 mb-3">Subir documento</h2>
+    <form method="POST" action="/documentos" enctype="multipart/form-data" class="space-y-3 text-sm">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Archivo (PDF, Word, TXT) *</label>
+        <input type="file" name="archivo" required accept=".pdf,.doc,.docx,.txt" class="w-full text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Categoría</label>
+        <select name="categoria" class="w-full rounded-md border border-slate-300 px-2 py-1.5">
+          <% CATEGORIAS.forEach(function(c){ %><option value="<%= c %>"><%= c.charAt(0).toUpperCase()+c.slice(1) %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Cliente (opcional)</label>
+        <select name="cliente_id" class="w-full rounded-md border border-slate-300 px-2 py-1.5">
+          <option value="">Sin cliente</option>
+          <% clientes.forEach(function(c){ %><option value="<%= c.id %>"><%= c.nombre %></option><% }); %>
+        </select>
+      </div>
+      <button class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2">Subir</button>
+    </form>
+  </div>
+
+  <!-- Listado -->
+  <div class="md:col-span-2">
+    <form method="GET" action="/documentos" class="bg-white rounded-lg shadow-sm p-4 mb-4 flex flex-wrap gap-3 items-end text-sm">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Categoría</label>
+        <select name="categoria" class="rounded-md border border-slate-300 px-2 py-1.5">
+          <option value="">Todas</option>
+          <% CATEGORIAS.forEach(function(c){ %><option value="<%= c %>" <%= filtros.categoria === c ? 'selected' : '' %>><%= c %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Cliente</label>
+        <select name="cliente" class="rounded-md border border-slate-300 px-2 py-1.5">
+          <option value="">Todos</option>
+          <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(filtros.cliente) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
+        </select>
+      </div>
+      <button class="bg-slate-700 hover:bg-slate-800 text-white rounded-md px-3 py-1.5">Filtrar</button>
+      <a href="/documentos" class="text-slate-500 hover:underline">Limpiar</a>
+    </form>
+
+    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-500 text-left">
+          <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Categoría</th><th class="px-4 py-3">Cliente</th><th class="px-4 py-3">Subido</th><th class="px-4 py-3"></th></tr>
+        </thead>
+        <tbody>
+          <% if (!docs.length) { %>
+            <tr><td colspan="5" class="px-4 py-6 text-center text-slate-500">No hay documentos.</td></tr>
+          <% } %>
+          <% docs.forEach(function(d){ %>
+            <tr class="border-t border-slate-100">
+              <td class="px-4 py-3"><a href="/documentos/<%= d.id %>/descargar" class="text-blue-600 hover:underline"><%= d.nombre_original %></a></td>
+              <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"><%= d.categoria %></span></td>
+              <td class="px-4 py-3">
+                <% if (d.cliente_nombre) { %>
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background: <%= d.cliente_color %>"></span><%= d.cliente_nombre %></span>
+                <% } else { %><span class="text-slate-400">—</span><% } %>
+              </td>
+              <td class="px-4 py-3 text-slate-500 text-xs"><%= fmt.formatFecha(d.subido_en) %> · <%= d.subido_por %></td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <a href="/documentos/<%= d.id %>/descargar" class="text-xs text-blue-600 hover:underline">Descargar</a>
+                <form method="POST" action="/documentos/<%= d.id %>/eliminar" class="inline" onsubmit="return confirm('¿Eliminar este documento?')">
+                  <button class="text-xs text-red-600 hover:underline ml-2">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

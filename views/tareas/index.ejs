@@ -1,0 +1,108 @@
+<%
+  function badgePrioridad(p){
+    return { alta:'bg-red-100 text-red-700', media:'bg-amber-100 text-amber-700', baja:'bg-slate-100 text-slate-600' }[p] || 'bg-slate-100';
+  }
+  function badgeEstado(e){
+    return { pendiente:'bg-slate-100 text-slate-600', en_progreso:'bg-blue-100 text-blue-700', completada:'bg-green-100 text-green-700' }[e] || 'bg-slate-100';
+  }
+  function etiquetaEstado(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
+  function qs(extra){
+    const base = { vista: vista };
+    if (filtros.cliente) base.cliente = filtros.cliente;
+    if (filtros.prioridad) base.prioridad = filtros.prioridad;
+    if (filtros.estado) base.estado = filtros.estado;
+    return new URLSearchParams(Object.assign(base, extra)).toString();
+  }
+%>
+
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold text-slate-800">Tareas</h1>
+  <a href="/tareas/nueva" class="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2">+ Nueva tarea</a>
+</div>
+
+<div class="flex gap-1 mb-4 bg-white rounded-lg p-1 shadow-sm w-fit">
+  <% [['hoy','Hoy'],['mes','Este mes'],['todas','Todas']].forEach(function(v){ %>
+    <a href="/tareas?<%= qs({ vista: v[0] }) %>"
+       class="px-4 py-1.5 text-sm rounded-md <%= vista === v[0] ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
+  <% }); %>
+</div>
+
+<form method="GET" action="/tareas" class="bg-white rounded-lg shadow-sm p-4 mb-4 flex flex-wrap gap-3 items-end text-sm">
+  <input type="hidden" name="vista" value="<%= vista %>" />
+  <div>
+    <label class="block text-xs text-slate-500 mb-1">Cliente</label>
+    <select name="cliente" class="rounded-md border border-slate-300 px-2 py-1.5">
+      <option value="">Todos</option>
+      <% clientes.forEach(function(c){ %>
+        <option value="<%= c.id %>" <%= String(filtros.cliente) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs text-slate-500 mb-1">Prioridad</label>
+    <select name="prioridad" class="rounded-md border border-slate-300 px-2 py-1.5">
+      <option value="">Todas</option>
+      <% PRIORIDADES.forEach(function(p){ %>
+        <option value="<%= p %>" <%= filtros.prioridad === p ? 'selected' : '' %>><%= p.charAt(0).toUpperCase()+p.slice(1) %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs text-slate-500 mb-1">Estado</label>
+    <select name="estado" class="rounded-md border border-slate-300 px-2 py-1.5">
+      <option value="">Todos</option>
+      <% ESTADOS.forEach(function(e){ %>
+        <option value="<%= e %>" <%= filtros.estado === e ? 'selected' : '' %>><%= etiquetaEstado(e) %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="bg-slate-700 hover:bg-slate-800 text-white rounded-md px-3 py-1.5">Filtrar</button>
+  <a href="/tareas?vista=<%= vista %>" class="text-slate-500 hover:underline">Limpiar</a>
+</form>
+
+<% if (!tareas.length) { %>
+  <div class="bg-white rounded-lg shadow-sm p-8 text-center text-slate-500">No hay tareas para esta vista.</div>
+<% } %>
+
+<div class="space-y-3">
+  <% tareas.forEach(function(t){ %>
+    <div class="bg-white rounded-lg shadow-sm p-4 <%= t.estado === 'completada' ? 'opacity-60' : '' %>">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <a href="/tareas/<%= t.id %>" class="font-semibold text-slate-800 hover:text-blue-600 <%= t.estado === 'completada' ? 'line-through' : '' %>"><%= t.nombre %></a>
+            <span class="text-xs px-2 py-0.5 rounded-full <%= badgePrioridad(t.prioridad) %>"><%= t.prioridad %></span>
+            <span class="text-xs px-2 py-0.5 rounded-full <%= badgeEstado(t.estado) %>"><%= etiquetaEstado(t.estado) %></span>
+            <% if (t.cliente_nombre) { %>
+              <span class="text-xs px-2 py-0.5 rounded-full text-white" style="background: <%= t.cliente_color %>"><%= t.cliente_nombre %></span>
+            <% } %>
+            <% if (t.vencida) { %><span class="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white">Vencida</span><% } %>
+          </div>
+          <% if (t.descripcion) { %><p class="text-sm text-slate-600 mt-1"><%= t.descripcion %></p><% } %>
+          <div class="text-xs text-slate-400 mt-2">
+            Creada el <%= fmt.formatFecha(t.fecha_creacion) %>
+            <% if (t.fecha_cierre) { %> · Vence el <%= fmt.formatFecha(t.fecha_cierre) %><% } %>
+          </div>
+          <%- include('../partials/audit', { ultima: t.ultima }) %>
+        </div>
+        <div class="flex flex-col gap-2 shrink-0">
+          <% if (t.estado !== 'completada') { %>
+            <form method="POST" action="/tareas/<%= t.id %>/estado">
+              <input type="hidden" name="estado" value="completada" />
+              <button class="text-xs bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 w-full">✓ Completar</button>
+            </form>
+          <% } else { %>
+            <form method="POST" action="/tareas/<%= t.id %>/estado">
+              <input type="hidden" name="estado" value="pendiente" />
+              <button class="text-xs bg-slate-200 hover:bg-slate-300 rounded px-2 py-1 w-full">Reabrir</button>
+            </form>
+          <% } %>
+          <a href="/tareas/<%= t.id %>" class="text-xs text-center bg-slate-100 hover:bg-slate-200 rounded px-2 py-1">Editar</a>
+          <form method="POST" action="/tareas/<%= t.id %>/eliminar" onsubmit="return confirm('¿Eliminar esta tarea?')">
+            <button class="text-xs text-red-600 hover:underline w-full">Eliminar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+</div>

@@ -1,0 +1,24 @@
+{
+  "name": "flaks-gestion",
+  "version": "1.0.0",
+  "description": "Plataforma de gestión interna de Flaks (tareas, clientes, facturación, gastos, caja y documentos).",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db/seed.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.0",
+    "multer": "^2.3.0"
+  }
+}

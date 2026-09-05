@@ -1,0 +1,60 @@
+<h1 class="text-2xl font-bold text-slate-800 mb-1">Caja</h1>
+<p class="text-sm text-slate-500 mb-4"><%= fmt.nombreMes(mes) %> <%= anio %> · facturación menos gastos</p>
+
+<%- include('../partials/periodo', { mes: mes, anio: anio, incluirPotenciales: incluirPotenciales, mostrarPotenciales: true }) %>
+
+<% if (incluirPotenciales) { %>
+  <div class="mb-3 text-xs bg-amber-100 text-amber-800 border border-amber-200 rounded px-3 py-2">
+    Vista de proyección: incluye la facturación de clientes potenciales.
+  </div>
+<% } %>
+
+<div class="grid sm:grid-cols-3 gap-4">
+  <div class="bg-white rounded-lg shadow-sm p-5">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Facturado</div>
+    <div class="text-2xl font-bold text-green-700 mt-1"><%= fmt.formatARS(caja.facturacion.totales.total) %></div>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm p-5">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Gastos</div>
+    <div class="text-2xl font-bold text-red-700 mt-1">− <%= fmt.formatARS(caja.gastos.total) %></div>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm p-5">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Ganancia neta</div>
+    <div class="text-2xl font-bold <%= caja.netoTotal >= 0 ? 'text-slate-800' : 'text-red-700' %> mt-1"><%= fmt.formatARS(caja.netoTotal) %></div>
+  </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm p-5 mt-4">
+  <h2 class="font-semibold text-slate-800 mb-1">Reparto por persona</h2>
+  <p class="text-xs text-slate-400 mb-4">
+    Cada uno recibe su parte de la facturación según el reparto cargado por trabajo.
+    Los gastos se descuentan <%= caja.repartoGastosGermanPct %>% a German y <%= 100 - caja.repartoGastosGermanPct %>% a Ezequiel
+    (configurable con <code class="bg-slate-100 px-1 rounded">GASTOS_REPARTO_GERMAN</code> en el .env).
+  </p>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-left">
+        <tr><th class="px-4 py-2"></th><th class="px-4 py-2 text-right">German</th><th class="px-4 py-2 text-right">Ezequiel</th></tr>
+      </thead>
+      <tbody>
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-2 text-slate-600">Parte de facturación</td>
+          <td class="px-4 py-2 text-right"><%= fmt.formatARS(caja.facturacion.totales.german) %></td>
+          <td class="px-4 py-2 text-right"><%= fmt.formatARS(caja.facturacion.totales.ezequiel) %></td>
+        </tr>
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-2 text-slate-600">Gastos a cargo</td>
+          <td class="px-4 py-2 text-right text-red-600">− <%= fmt.formatARS(caja.gastosGerman) %></td>
+          <td class="px-4 py-2 text-right text-red-600">− <%= fmt.formatARS(caja.gastosEzequiel) %></td>
+        </tr>
+      </tbody>
+      <tfoot class="bg-slate-50 font-semibold text-slate-800 border-t-2 border-slate-200">
+        <tr>
+          <td class="px-4 py-2">Ganancia neta</td>
+          <td class="px-4 py-2 text-right <%= caja.netoGerman >= 0 ? '' : 'text-red-700' %>"><%= fmt.formatARS(caja.netoGerman) %></td>
+          <td class="px-4 py-2 text-right <%= caja.netoEzequiel >= 0 ? '' : 'text-red-700' %>"><%= fmt.formatARS(caja.netoEzequiel) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

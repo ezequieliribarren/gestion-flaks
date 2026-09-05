@@ -1,0 +1,92 @@
+'use strict';
+
+require('dotenv').config();
+
+const path = require('path');
+const fs = require('fs');
+const express = require('express');
+const session = require('express-session');
+const SQLiteStore = require('./lib/session-store')(session);
+const expressLayouts = require('express-ejs-layouts');
+
+const db = require('./db');
+const { requireAuth } = require('./middleware/auth');
+const fmt = require('./lib/format');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const PROD = process.env.NODE_ENV === 'production';
+if (PROD) app.set('trust proxy', 1);
+
+// --- Carpetas persistentes ---
+const STORAGE_DIR = path.join(__dirname, 'storage');
+const UPLOADS_DIR = path.join(STORAGE_DIR, 'uploads');
+for (const dir of [STORAGE_DIR, UPLOADS_DIR, db.DATA_DIR]) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+// --- Vistas ---
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layout');
+
+// --- Middlewares base ---
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+app.use(
+  session({
+    store: new SQLiteStore(),
+    secret: process.env.SESSION_SECRET || 'flaks-dev-secret-cambiar',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: PROD,
+    },
+  })
+);
+
+// Helpers disponibles en todas las vistas.
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.user || null;
+  res.locals.currentPath = req.path;
+  res.locals.fmt = fmt;
+  res.locals.flash = req.session.flash || null;
+  delete req.session.flash;
+  next();
+});
+
+// --- Rutas ---
+app.use('/', require('./routes/auth'));
+app.use('/tareas', requireAuth, require('./routes/tareas'));
+app.use('/clientes', requireAuth, require('./routes/clientes'));
+app.use('/facturacion', requireAuth, require('./routes/facturacion'));
+app.use('/gastos', requireAuth, require('./routes/gastos'));
+app.use('/caja', requireAuth, require('./routes/caja'));
+app.use('/documentos', requireAuth, require('./routes/documentos'));
+
+app.get('/', requireAuth, (req, res) => res.redirect('/tareas'));
+
+// 404
+app.use((req, res) => {
+  res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'La página que buscás no existe.' });
+});
+
+// Errores
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).render('error', {
+    titulo: 'Error',
+    mensaje: 'Ocurrió un error inesperado. Revisá los datos e intentá de nuevo.',
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Flaks Gestión escuchando en http://localhost:${PORT}`);
+});

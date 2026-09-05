@@ -1,0 +1,6 @@
+<% if (ultima) { %>
+  <p class="text-xs text-slate-400">
+    Última modificación por <span class="font-medium text-slate-500"><%= ultima.usuario %></span>
+    (<%= ultima.accion %>) el <%= fmt.formatFechaHora(ultima.fecha) %>
+  </p>
+<% } %>

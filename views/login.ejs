@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingresar · Flaks Gestión</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-white rounded-xl shadow-lg p-8">
+    <h1 class="text-2xl font-bold text-slate-800 mb-1">Flaks Gestión</h1>
+    <p class="text-sm text-slate-500 mb-6">Ingresá con tu usuario</p>
+    <% if (error) { %>
+      <div class="mb-4 rounded-md bg-red-100 text-red-800 border border-red-200 px-4 py-2 text-sm"><%= error %></div>
+    <% } %>
+    <form method="POST" action="/login" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
+        <input name="usuario" autocomplete="username" required autofocus
+          class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+        <input type="password" name="password" autocomplete="current-password" required
+          class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md py-2.5">Ingresar</button>
+    </form>
+  </div>
+</body>
+</html>
