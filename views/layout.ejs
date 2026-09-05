@@ -19,8 +19,8 @@
             },
           },
           boxShadow: {
-            card: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.08)',
-            'card-hover': '0 2px 4px 0 rgb(15 23 42 / 0.05), 0 12px 28px -6px rgb(15 23 42 / 0.16)',
+            card: '0 0 0 1px rgb(15 23 42 / 0.04), 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.10)',
+            'card-hover': '0 0 0 1px rgb(32 77 219 / 0.10), 0 2px 6px 0 rgb(15 23 42 / 0.06), 0 16px 36px -10px rgb(15 23 42 / 0.20)',
           },
         },
       },
@@ -32,7 +32,32 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
   <style>
     :root { color-scheme: light; }
-    body { font-feature-settings: 'cv11', 'ss01'; -webkit-font-smoothing: antialiased; }
+    body {
+      font-feature-settings: 'cv11', 'ss01';
+      -webkit-font-smoothing: antialiased;
+      background-color: #f1f5f9;
+      background-image:
+        radial-gradient(900px 500px at 100% -5%, rgba(52,102,240,.10), transparent 60%),
+        radial-gradient(700px 500px at -10% 110%, rgba(52,102,240,.07), transparent 55%);
+      background-attachment: fixed;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 55%, #131c31 100%);
+    }
+    .nav-link { position: relative; transition: background-color .15s ease, color .15s ease; }
+    .nav-link.is-active {
+      background: linear-gradient(90deg, rgba(52,102,240,.30), rgba(52,102,240,.08));
+      color: #fff;
+    }
+    .nav-link.is-active::before {
+      content: ''; position: absolute; left: -8px; top: 8px; bottom: 8px; width: 3px;
+      border-radius: 999px; background: #598dfc;
+    }
+    .brand-mark {
+      background: linear-gradient(135deg, #3466f0, #598dfc);
+      box-shadow: 0 6px 16px -4px rgba(52,102,240,.6);
+    }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @keyframes toastIn { from { opacity: 0; transform: translateY(-14px) scale(.96); } to { opacity: 1; transform: none; } }
@@ -74,12 +99,15 @@
 <body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <aside class="hidden md:flex md:flex-col w-56 bg-slate-900 text-slate-300 shrink-0">
-      <div class="px-5 py-4 border-b border-white/10">
-        <div class="text-lg font-bold text-white tracking-tight">Flaks</div>
-        <div class="text-[11px] text-slate-400 -mt-0.5">Gestión interna</div>
+    <aside class="sidebar hidden md:flex md:flex-col w-60 text-slate-300 shrink-0">
+      <div class="px-5 py-5 flex items-center gap-3">
+        <span class="brand-mark w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-lg">F</span>
+        <div>
+          <div class="text-base font-bold text-white tracking-tight leading-none">Flaks</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Gestión interna</div>
+        </div>
       </div>
-      <nav class="flex-1 py-3 space-y-0.5 px-2">
+      <nav class="flex-1 py-2 space-y-1 px-3">
         <% const nav = [
           ['/tareas', 'Tareas', '📝'],
           ['/clientes', 'Clientes', '👥'],
@@ -89,22 +117,24 @@
           ['/documentos', 'Documentos', '📁'],
         ]; %>
         <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
-          <a href="<%= item[0] %>" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm <%= activo ? 'bg-white/10 text-white font-medium' : 'hover:bg-white/5 hover:text-white' %>">
+          <a href="<%= item[0] %>" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm <%= activo ? 'is-active' : 'hover:bg-white/5 hover:text-white' %>">
             <span class="text-base leading-none"><%= item[2] %></span><span><%= item[1] %></span>
           </a>
         <% }); %>
       </nav>
-      <div class="px-4 py-4 border-t border-white/10 text-xs">
+      <div class="px-4 py-4 mx-3 mb-3 rounded-xl bg-white/5 text-xs">
         <div class="mb-2 text-slate-400">Sesión: <span class="text-white font-medium"><%= currentUser ? currentUser.nombre : '' %></span></div>
-        <form method="POST" action="/logout"><button class="btn text-brand-300 hover:text-brand-200">Cerrar sesión</button></form>
+        <form method="POST" action="/logout"><button class="btn text-brand-300 hover:text-brand-200 font-medium">Cerrar sesión</button></form>
       </div>
     </aside>
 
     <!-- Contenido -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Header móvil -->
-      <header class="md:hidden bg-slate-900 text-white flex items-center justify-between px-4 py-3 sticky top-0 z-20">
-        <span class="font-bold">Flaks</span>
+      <header class="sidebar md:hidden text-white flex items-center justify-between px-4 py-3 sticky top-0 z-20">
+        <span class="flex items-center gap-2 font-bold">
+          <span class="brand-mark w-7 h-7 rounded-lg flex items-center justify-center text-sm">F</span> Flaks
+        </span>
         <details class="relative">
           <summary class="list-none cursor-pointer select-none px-2 py-1 rounded hover:bg-white/10">☰ Menú</summary>
           <div class="absolute right-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-card z-30 py-1 overflow-hidden">
