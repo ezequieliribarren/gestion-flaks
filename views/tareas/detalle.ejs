@@ -1,5 +1,5 @@
 <div class="max-w-xl mx-auto">
-  <a href="/tareas" class="text-sm text-blue-600 hover:underline">&larr; Volver a tareas</a>
+  <a href="/tareas" class="text-sm text-brand-600 hover:underline">&larr; Volver a tareas</a>
   <h1 class="text-2xl font-bold text-slate-800 mt-2 mb-1">Editar tarea</h1>
   <p class="text-xs text-slate-400 mb-4">
     Creada el <%= fmt.formatFecha(tarea.fecha_creacion) %>
@@ -7,7 +7,7 @@
     <% if (tarea.ultima_modificacion_por) { %> · Última modificación por <%= tarea.ultima_modificacion_por %> el <%= fmt.formatFechaHora(tarea.ultima_modificacion_en) %><% } %>
   </p>
 
-  <form method="POST" action="/tareas/<%= tarea.id %>" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+  <form method="POST" action="/tareas/<%= tarea.id %>" class="bg-white rounded-xl shadow-card p-6 space-y-4">
     <input type="hidden" name="volver_a" value="/tareas" />
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
@@ -43,12 +43,12 @@
       </div>
     </div>
     <div class="flex gap-2">
-      <button class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm">Guardar cambios</button>
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-md px-4 py-2 text-sm">Guardar cambios</button>
       <a href="/tareas" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>
     </div>
   </form>
 
-  <div class="bg-white rounded-lg shadow-sm p-6 mt-4">
+  <div class="bg-white rounded-xl shadow-card p-6 mt-4">
     <h2 class="text-sm font-semibold text-slate-700">Auditoría</h2>
     <%- include('../partials/historial', { historial: historial }) %>
     <form method="POST" action="/tareas/<%= tarea.id %>/eliminar" onsubmit="return confirm('¿Eliminar esta tarea?')" class="mt-4">

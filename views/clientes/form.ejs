@@ -1,8 +1,8 @@
 <div class="max-w-md mx-auto">
-  <a href="/clientes" class="text-sm text-blue-600 hover:underline">&larr; Volver a clientes</a>
+  <a href="/clientes" class="text-sm text-brand-600 hover:underline">&larr; Volver a clientes</a>
   <h1 class="text-2xl font-bold text-slate-800 mt-2 mb-4">Nuevo cliente</h1>
 
-  <form method="POST" action="/clientes" class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+  <form method="POST" action="/clientes" class="bg-white rounded-xl shadow-card p-6 space-y-4">
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
       <input name="nombre" required class="w-full rounded-md border border-slate-300 px-3 py-2" />
@@ -16,10 +16,11 @@
       <select name="estado" class="w-full rounded-md border border-slate-300 px-3 py-2">
         <option value="potencial">Potencial (todavía no se le cobró)</option>
         <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo (ya no trabajamos con él)</option>
       </select>
     </div>
     <div class="flex gap-2">
-      <button class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm">Crear cliente</button>
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-md px-4 py-2 text-sm">Crear cliente</button>
       <a href="/clientes" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>
     </div>
   </form>

@@ -9,9 +9,9 @@
   </div>
 <% } %>
 
-<div class="bg-white rounded-lg shadow-sm overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead class="bg-slate-50 text-slate-500 text-left">
+<div class="bg-white rounded-xl shadow-card overflow-x-auto">
+  <table class="zebra w-full text-sm">
+    <thead class="bg-slate-50 text-slate-500 text-left border-b border-slate-100">
       <tr>
         <th class="px-4 py-3">Cliente</th>
         <th class="px-4 py-3">Concepto</th>
@@ -26,9 +26,9 @@
         <tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Sin facturación para este mes.</td></tr>
       <% } %>
       <% filas.forEach(function(f){ %>
-        <tr class="border-t border-slate-100">
+        <tr>
           <td class="px-4 py-3">
-            <a href="/clientes/<%= f.cliente_id %>" class="flex items-center gap-2 hover:text-blue-600">
+            <a href="/clientes/<%= f.cliente_id %>" class="flex items-center gap-2 hover:text-brand-600">
               <span class="w-2.5 h-2.5 rounded-full inline-block" style="background: <%= f.cliente_color %>"></span><%= f.cliente %>
               <% if (f.cliente_estado === 'potencial') { %><span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">potencial</span><% } %>
             </a>

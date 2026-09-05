@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between mb-1">
   <h1 class="text-2xl font-bold text-slate-800">Gastos</h1>
-  <a href="/gastos/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2">+ Cargar gasto</a>
+  <a href="/gastos/nuevo" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm rounded-md px-4 py-2">+ Cargar gasto</a>
 </div>
 <p class="text-sm text-slate-500 mb-4"><%= fmt.nombreMes(mes) %> <%= anio %></p>
 
@@ -14,7 +14,7 @@
 <% } %>
 
 <!-- Cuenta corriente del mes -->
-<div class="bg-white rounded-lg shadow-sm p-5 mb-4">
+<div class="bg-white rounded-xl shadow-card p-5 mb-4">
   <h2 class="font-semibold text-slate-800 mb-1">Cuenta corriente de <%= fmt.nombreMes(mes) %> <%= anio %></h2>
   <p class="text-xs text-slate-400 mb-4">Gastos de este mes marcados como "no saldados". Se igualan pagando la diferencia a fin de mes.</p>
 
@@ -48,16 +48,16 @@
       <form method="POST" action="/gastos/saldar" onsubmit="return confirm('Registrar el pago y saldar la cuenta corriente de este mes? Los gastos van a pasar a Caja.')">
         <input type="hidden" name="mes" value="<%= mes %>" />
         <input type="hidden" name="anio" value="<%= anio %>" />
-        <button class="bg-green-600 hover:bg-green-700 text-white text-sm rounded-md px-4 py-2 whitespace-nowrap">Registrar pago y saldar</button>
+        <button class="btn bg-green-600 hover:bg-green-700 text-white text-sm rounded-md px-4 py-2 whitespace-nowrap">Registrar pago y saldar</button>
       </form>
     </div>
   <% } %>
 </div>
 
 <!-- Tabla de gastos -->
-<div class="bg-white rounded-lg shadow-sm overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead class="bg-slate-50 text-slate-500 text-left">
+<div class="bg-white rounded-xl shadow-card overflow-x-auto">
+  <table class="zebra w-full text-sm">
+    <thead class="bg-slate-50 text-slate-500 text-left border-b border-slate-100">
       <tr>
         <th class="px-4 py-3">Descripción</th>
         <th class="px-4 py-3">Categoría</th>
@@ -74,7 +74,7 @@
         <tr><td colspan="8" class="px-4 py-6 text-center text-slate-500">Sin gastos para este mes.</td></tr>
       <% } %>
       <% filas.forEach(function(g){ %>
-        <tr class="border-t border-slate-100 <%= g.saldado ? '' : 'bg-amber-50/50' %>">
+        <tr class="<%= g.saldado ? '' : 'pendiente' %> <%= nuevoId === g.id ? 'row-new' : '' %>">
           <td class="px-4 py-3">
             <%= g.descripcion %>
             <%- include('../partials/audit', { ultima: g.ultima }) %>
@@ -99,7 +99,7 @@
             <% } %>
           </td>
           <td class="px-4 py-3 whitespace-nowrap">
-            <a href="/gastos/<%= g.id %>/editar" class="text-xs text-blue-600 hover:underline">Editar</a>
+            <a href="/gastos/<%= g.id %>/editar" class="text-xs text-brand-600 hover:underline">Editar</a>
             <form method="POST" action="/gastos/<%= g.id %>/eliminar" class="inline" onsubmit="return confirm('¿Eliminar este gasto?')">
               <button class="text-xs text-red-600 hover:underline ml-2">Eliminar</button>
             </form>
@@ -126,7 +126,7 @@
 
 <!-- Historial de saldos -->
 <% if (saldos && saldos.length) { %>
-  <div class="bg-white rounded-lg shadow-sm p-5 mt-4">
+  <div class="bg-white rounded-xl shadow-card p-5 mt-4">
     <h2 class="font-semibold text-slate-800 mb-3">Últimos saldos registrados</h2>
     <ul class="space-y-1 text-sm text-slate-600">
       <% saldos.forEach(function(s){ %>

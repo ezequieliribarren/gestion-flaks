@@ -27,7 +27,7 @@ raw.exec('PRAGMA foreign_keys = ON');
 // Esquema (idempotente).
 raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
 
-// Migraciones sobre bases ya creadas (ALTER que schema.sql no aplica).
+// Migraciones sobre bases ya creadas (cambios que schema.sql no aplica solo).
 (function migrar() {
   const colsGastos = raw.all('PRAGMA table_info(gastos)').map((c) => c.name);
   if (!colsGastos.includes('pagado_por')) {
@@ -35,6 +35,30 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   }
   if (!colsGastos.includes('saldado')) {
     raw.exec('ALTER TABLE gastos ADD COLUMN saldado INTEGER NOT NULL DEFAULT 1');
+  }
+
+  // clientes.estado tenía un CHECK que no permitía 'inactivo' → reconstruir la tabla.
+  const clientesTabla = raw.all(
+    "SELECT sql FROM sqlite_master WHERE type='table' AND name='clientes'"
+  )[0];
+  if (clientesTabla && /CHECK\s*\(\s*estado/i.test(clientesTabla.sql)) {
+    try {
+      raw.exec('PRAGMA foreign_keys = OFF');
+      raw.exec("CREATE TABLE clientes_new (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, color TEXT NOT NULL DEFAULT '#2563eb', estado TEXT NOT NULL DEFAULT 'potencial', notas TEXT NOT NULL DEFAULT '', creado_en TEXT NOT NULL DEFAULT (datetime('now')), creado_por TEXT)");
+      raw.exec(
+        'INSERT INTO clientes_new (id, nombre, color, estado, notas, creado_en, creado_por) ' +
+        "SELECT id, nombre, COALESCE(color,'#2563eb'), COALESCE(estado,'potencial'), " +
+        "COALESCE(notas,''), COALESCE(creado_en, datetime('now')), creado_por FROM clientes"
+      );
+      raw.exec('DROP TABLE clientes');
+      raw.exec('ALTER TABLE clientes_new RENAME TO clientes');
+      raw.exec('PRAGMA foreign_keys = ON');
+      console.log('Migración: clientes.estado ahora admite "inactivo".');
+    } catch (err) {
+      console.error('Fallo la migración de clientes.estado:', err.message);
+      try { raw.exec('DROP TABLE IF EXISTS clientes_new'); } catch (e) { /* noop */ }
+      try { raw.exec('PRAGMA foreign_keys = ON'); } catch (e) { /* noop */ }
+    }
   }
 })();
 

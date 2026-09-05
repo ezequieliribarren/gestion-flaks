@@ -5,26 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ingresar · Flaks Gestión</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        colors: { brand: { 400: '#598dfc', 500: '#3466f0', 600: '#204ddb', 700: '#1b3db5' } },
+      } },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes shake { 10%,90%{transform:translateX(-1px)} 30%,70%{transform:translateX(3px)} 50%{transform:translateX(-4px)} }
+    .card-in { animation: cardIn .4s cubic-bezier(.22,.61,.36,1) both; }
+    .shake { animation: shake .4s ease both; }
+    .btn { transition: transform .12s ease, background-color .15s ease; }
+    .btn:active { transform: scale(.98); }
+    body { background: radial-gradient(1200px 500px at 50% -10%, #1e293b, #0f172a); }
+  </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-white rounded-xl shadow-lg p-8">
-    <h1 class="text-2xl font-bold text-slate-800 mb-1">Flaks Gestión</h1>
-    <p class="text-sm text-slate-500 mb-6">Ingresá con tu usuario</p>
+<body class="min-h-screen flex items-center justify-center p-4 font-sans">
+  <div class="card-in w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 <%= error ? 'shake' : '' %>">
+    <div class="flex items-center gap-2.5 mb-1">
+      <span class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">F</span>
+      <h1 class="text-xl font-bold text-slate-800 tracking-tight">Flaks Gestión</h1>
+    </div>
+    <p class="text-sm text-slate-500 mb-6 ml-0.5">Ingresá con tu usuario</p>
     <% if (error) { %>
-      <div class="mb-4 rounded-md bg-red-100 text-red-800 border border-red-200 px-4 py-2 text-sm"><%= error %></div>
+      <div class="mb-4 rounded-lg bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 text-sm"><%= error %></div>
     <% } %>
     <form method="POST" action="/login" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
         <input name="usuario" autocomplete="username" required autofocus
-          class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
         <input type="password" name="password" autocomplete="current-password" required
-          class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" />
       </div>
-      <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md py-2.5">Ingresar</button>
+      <button class="btn w-full bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg py-2.5 shadow-sm">Ingresar</button>
     </form>
   </div>
 </body>

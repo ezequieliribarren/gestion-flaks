@@ -15,19 +15,19 @@
   }
 %>
 
-<div class="flex items-center justify-between mb-4">
-  <h1 class="text-2xl font-bold text-slate-800">Tareas</h1>
-  <a href="/tareas/nueva" class="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2">+ Nueva tarea</a>
+<div class="flex items-center justify-between mb-5">
+  <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Tareas</h1>
+  <a href="/tareas/nueva" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-sm">+ Nueva tarea</a>
 </div>
 
-<div class="flex gap-1 mb-4 bg-white rounded-lg p-1 shadow-sm w-fit">
+<div class="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-card w-fit">
   <% [['hoy','Hoy'],['mes','Este mes'],['todas','Todas']].forEach(function(v){ %>
     <a href="/tareas?<%= qs({ vista: v[0] }) %>"
-       class="px-4 py-1.5 text-sm rounded-md <%= vista === v[0] ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
+       class="btn px-4 py-1.5 text-sm rounded-lg <%= vista === v[0] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
   <% }); %>
 </div>
 
-<form method="GET" action="/tareas" class="bg-white rounded-lg shadow-sm p-4 mb-4 flex flex-wrap gap-3 items-end text-sm">
+<form method="GET" action="/tareas" class="bg-white rounded-xl shadow-card p-4 mb-4 flex flex-wrap gap-3 items-end text-sm">
   <input type="hidden" name="vista" value="<%= vista %>" />
   <div>
     <label class="block text-xs text-slate-500 mb-1">Cliente</label>
@@ -56,21 +56,21 @@
       <% }); %>
     </select>
   </div>
-  <button class="bg-slate-700 hover:bg-slate-800 text-white rounded-md px-3 py-1.5">Filtrar</button>
+  <button class="btn bg-slate-800 hover:bg-slate-900 text-white rounded-md px-3 py-1.5">Filtrar</button>
   <a href="/tareas?vista=<%= vista %>" class="text-slate-500 hover:underline">Limpiar</a>
 </form>
 
 <% if (!tareas.length) { %>
-  <div class="bg-white rounded-lg shadow-sm p-8 text-center text-slate-500">No hay tareas para esta vista.</div>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">No hay tareas para esta vista.</div>
 <% } %>
 
 <div class="space-y-3">
   <% tareas.forEach(function(t){ %>
-    <div class="bg-white rounded-lg shadow-sm p-4 <%= t.estado === 'completada' ? 'opacity-60' : '' %>">
+    <div class="lift bg-white rounded-xl shadow-card hover:shadow-card-hover p-4 <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'ring-1 ring-red-200' : '' %>">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <a href="/tareas/<%= t.id %>" class="font-semibold text-slate-800 hover:text-blue-600 <%= t.estado === 'completada' ? 'line-through' : '' %>"><%= t.nombre %></a>
+            <a href="/tareas/<%= t.id %>" class="font-semibold text-slate-800 hover:text-brand-600 <%= t.estado === 'completada' ? 'line-through' : '' %>"><%= t.nombre %></a>
             <span class="text-xs px-2 py-0.5 rounded-full <%= badgePrioridad(t.prioridad) %>"><%= t.prioridad %></span>
             <span class="text-xs px-2 py-0.5 rounded-full <%= badgeEstado(t.estado) %>"><%= etiquetaEstado(t.estado) %></span>
             <% if (t.cliente_nombre) { %>
@@ -89,7 +89,7 @@
           <% if (t.estado !== 'completada') { %>
             <form method="POST" action="/tareas/<%= t.id %>/estado">
               <input type="hidden" name="estado" value="completada" />
-              <button class="text-xs bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 w-full">✓ Completar</button>
+              <button class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 w-full">✓ Completar</button>
             </form>
           <% } else { %>
             <form method="POST" action="/tareas/<%= t.id %>/estado">

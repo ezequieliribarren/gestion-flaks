@@ -27,7 +27,9 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 
 1. **Login** — usuario + contraseña (sin registro público).
 2. **Tareas** — vistas Hoy / Este mes / Todas, filtros por cliente, prioridad y estado, CRUD + completar.
-3. **Clientes** — vista carpetas (tarjetas con color) o lista; activos vs. potenciales.
+3. **Clientes** — vista carpetas (tarjetas con color) o lista; estado **activo / potencial / inactivo**
+   con filtro por estado. Los **inactivos** no cuentan en la facturación del mes en curso (sí siguen
+   apareciendo sus cobros históricos); los **potenciales** sólo cuentan en la proyección.
 4. **Cliente (detalle)** — cobro mensual total, checklist de tareas del mes, trabajos recurrentes,
    trabajos únicos (ambos con reparto German/Ezequiel), anotaciones libres.
 5. **Facturación** — planilla por mes/año: recurrentes activos + únicos del mes, totales y subtotal por persona.

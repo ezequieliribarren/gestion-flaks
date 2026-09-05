@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   nombre     TEXT NOT NULL,
   color      TEXT NOT NULL DEFAULT '#2563eb',
-  estado     TEXT NOT NULL DEFAULT 'potencial' CHECK (estado IN ('activo','potencial')),
+  estado     TEXT NOT NULL DEFAULT 'potencial',   -- activo | potencial | inactivo (se valida en la app)
   notas      TEXT NOT NULL DEFAULT '',
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
   creado_por TEXT

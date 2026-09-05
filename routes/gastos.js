@@ -24,6 +24,7 @@ router.get('/', (req, res) => {
     titulo: 'Gastos',
     anio,
     mes,
+    nuevoId: req.query.nuevo ? Number(req.query.nuevo) : null,
     filas,
     total: g.total,
     totalSaldado: g.totalSaldado,
@@ -87,8 +88,8 @@ router.post('/', (req, res) => {
   `).run({ ...d, usuario: req.session.user.nombre });
   const estado = d.saldado ? 'saldado' : 'a cuenta corriente';
   audit.registrar(req, 'gastos', info.lastInsertRowid, 'crear', `Cargó gasto "${d.descripcion}" (${d.monto}) pagado por ${d.pagado_por || 's/d'} — ${estado}`);
-  req.session.flash = { tipo: 'ok', msg: 'Gasto cargado.' };
-  res.redirect('/gastos?anio=' + String(d.fecha).slice(0, 4) + '&mes=' + Number(String(d.fecha).slice(5, 7)));
+  req.session.flash = { tipo: 'ok', msg: d.saldado ? 'Gasto cargado. Ya figura en Caja.' : 'Gasto cargado a la cuenta corriente.' };
+  res.redirect('/gastos?anio=' + String(d.fecha).slice(0, 4) + '&mes=' + Number(String(d.fecha).slice(5, 7)) + '&nuevo=' + info.lastInsertRowid);
 });
 
 router.post('/saldar', (req, res) => {

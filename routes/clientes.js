@@ -6,7 +6,7 @@ const audit = require('../lib/audit');
 
 const router = express.Router();
 
-const ESTADOS = ['activo', 'potencial'];
+const ESTADOS = ['activo', 'potencial', 'inactivo'];
 
 function repartoValido(g, e) {
   const rg = Number(g);
@@ -17,14 +17,32 @@ function repartoValido(g, e) {
 
 router.get('/', (req, res) => {
   const vista = req.query.vista === 'lista' ? 'lista' : 'carpetas';
+  const filtroEstado = ESTADOS.includes(req.query.estado) ? req.query.estado : null;
+
+  const where = filtroEstado ? 'WHERE c.estado = ?' : '';
+  const params = filtroEstado ? [filtroEstado] : [];
+
   const clientes = db.prepare(`
     SELECT c.*,
       (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS mensual,
       (SELECT COUNT(*) FROM tareas WHERE cliente_id = c.id AND estado != 'completada') AS tareas_abiertas
     FROM clientes c
-    ORDER BY c.estado, c.nombre
-  `).all();
-  res.render('clientes/index', { titulo: 'Clientes', clientes, vista });
+    ${where}
+    ORDER BY
+      CASE c.estado WHEN 'activo' THEN 0 WHEN 'potencial' THEN 1 ELSE 2 END,
+      c.nombre
+  `).all(...params);
+
+  const conteo = db.prepare(`
+    SELECT
+      SUM(estado = 'activo')    AS activo,
+      SUM(estado = 'potencial') AS potencial,
+      SUM(estado = 'inactivo')  AS inactivo,
+      COUNT(*)                  AS total
+    FROM clientes
+  `).get();
+
+  res.render('clientes/index', { titulo: 'Clientes', clientes, vista, filtroEstado, conteo });
 });
 
 router.get('/nuevo', (req, res) => {

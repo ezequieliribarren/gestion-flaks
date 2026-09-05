@@ -10,11 +10,11 @@
 <% } %>
 
 <div class="grid sm:grid-cols-3 gap-4">
-  <div class="bg-white rounded-lg shadow-sm p-5">
+  <div class="bg-white rounded-xl shadow-card p-5">
     <div class="text-xs text-slate-500 uppercase tracking-wide">Facturado</div>
     <div class="text-2xl font-bold text-green-700 mt-1"><%= fmt.formatARS(caja.facturacion.totales.total) %></div>
   </div>
-  <div class="bg-white rounded-lg shadow-sm p-5">
+  <div class="bg-white rounded-xl shadow-card p-5">
     <div class="text-xs text-slate-500 uppercase tracking-wide">Gastos</div>
     <div class="text-2xl font-bold text-red-700 mt-1">− <%= fmt.formatARS(caja.gastos.total) %></div>
     <% if (caja.gastosPendientes > 0) { %>
@@ -24,13 +24,13 @@
       </div>
     <% } %>
   </div>
-  <div class="bg-white rounded-lg shadow-sm p-5">
+  <div class="bg-white rounded-xl shadow-card p-5">
     <div class="text-xs text-slate-500 uppercase tracking-wide">Ganancia neta</div>
     <div class="text-2xl font-bold <%= caja.netoTotal >= 0 ? 'text-slate-800' : 'text-red-700' %> mt-1"><%= fmt.formatARS(caja.netoTotal) %></div>
   </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-sm p-5 mt-4">
+<div class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-1">Reparto por persona</h2>
   <p class="text-xs text-slate-400 mb-4">
     Cada uno recibe su parte de la facturación según el reparto cargado por trabajo.
