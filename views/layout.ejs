@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title><%= typeof titulo !== 'undefined' ? titulo + ' · ' : '' %>Flaks Gestión</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -91,6 +91,11 @@
 
     .nav-link { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
 
+    @media (max-width: 640px) {
+      h1 { font-size: 1.35rem; line-height: 1.9rem; }
+      input:not([type="checkbox"]):not([type="radio"]), textarea { font-size: 16px; } /* evita el zoom de iOS al enfocar */
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
     }
@@ -135,29 +140,34 @@
         <span class="flex items-center gap-2 font-bold">
           <span class="brand-mark w-7 h-7 rounded-lg flex items-center justify-center text-sm">F</span> Flaks
         </span>
-        <details class="relative">
-          <summary class="list-none cursor-pointer select-none px-2 py-1 rounded hover:bg-white/10">☰ Menú</summary>
-          <div class="absolute right-0 mt-2 w-48 bg-white text-slate-800 rounded-xl shadow-card z-30 py-1 overflow-hidden">
-            <% nav.forEach(function(item){ %>
-              <a class="block px-4 py-2.5 text-sm hover:bg-slate-100" href="<%= item[0] %>"><%= item[2] %> <%= item[1] %></a>
-            <% }); %>
-            <form method="POST" action="/logout"><button class="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-slate-100">Cerrar sesión</button></form>
-          </div>
-        </details>
+        <span class="text-xs text-slate-300 flex items-center gap-3">
+          <%= currentUser ? currentUser.nombre : '' %>
+          <form method="POST" action="/logout"><button class="text-brand-300">Salir</button></form>
+        </span>
       </header>
 
-      <main class="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
+      <main class="flex-1 px-3 py-4 sm:px-8 sm:py-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
         <div class="page-enter">
           <%- body %>
         </div>
       </main>
-      <footer class="text-center text-xs text-slate-400 py-5">Flaks Gestión · uso interno</footer>
+      <footer class="hidden md:block text-center text-xs text-slate-400 py-5">Flaks Gestión · uso interno</footer>
     </div>
   </div>
 
+  <!-- Barra de navegación inferior (mobile) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 grid grid-cols-6 pb-[env(safe-area-inset-bottom)]">
+    <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
+      <a href="<%= item[0] %>" class="flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] <%= activo ? 'text-brand-600' : 'text-slate-400' %>">
+        <span class="text-lg leading-none"><%= item[2] %></span>
+        <span class="leading-none"><%= item[1] %></span>
+      </a>
+    <% }); %>
+  </nav>
+
   <!-- Toast (flash) -->
   <% if (typeof flash !== 'undefined' && flash) { %>
-    <div id="toast" class="toast fixed top-4 right-4 left-4 sm:left-auto z-50 sm:w-96">
+    <div id="toast" class="toast fixed top-16 sm:top-4 right-3 left-3 sm:left-auto z-50 sm:w-96">
       <div class="relative overflow-hidden rounded-xl shadow-card border <%= flash.tipo === 'error' ? 'bg-white border-red-200' : 'bg-white border-green-200' %>">
         <div class="flex items-start gap-3 p-4">
           <% if (flash.tipo === 'error') { %>

@@ -94,8 +94,8 @@
           <th class="px-4 py-3 font-medium">Cliente</th>
           <th class="px-4 py-3 font-medium">Estado</th>
           <th class="px-4 py-3 font-medium text-right">Mensual</th>
-          <th class="px-4 py-3 font-medium text-right">Facturado total</th>
-          <th class="px-4 py-3 font-medium text-right">Tareas abiertas</th>
+          <th class="px-4 py-3 font-medium text-right hidden sm:table-cell">Facturado total</th>
+          <th class="px-4 py-3 font-medium text-right hidden sm:table-cell">Tareas abiertas</th>
         </tr>
       </thead>
       <tbody>
@@ -111,8 +111,8 @@
               <% if (reactivado) { %><span class="text-[11px] text-amber-600 block mt-1">presupuesto pendiente</span><% } %>
             </td>
             <td class="px-4 py-3 text-right tabular-nums"><%= fmt.formatARS(c.mensual) %></td>
-            <td class="px-4 py-3 text-right tabular-nums font-medium"><%= fmt.formatARS(c.total_facturado) %></td>
-            <td class="px-4 py-3 text-right tabular-nums"><%= c.tareas_abiertas %></td>
+            <td class="px-4 py-3 text-right tabular-nums font-medium hidden sm:table-cell"><%= fmt.formatARS(c.total_facturado) %></td>
+            <td class="px-4 py-3 text-right tabular-nums hidden sm:table-cell"><%= c.tareas_abiertas %></td>
           </tr>
         <% }); %>
       </tbody>

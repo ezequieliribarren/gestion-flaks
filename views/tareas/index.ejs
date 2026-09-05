@@ -27,11 +27,11 @@
   <% }); %>
 </div>
 
-<form method="GET" action="/tareas" class="bg-white rounded-xl shadow-card p-4 mb-4 flex flex-wrap gap-3 items-end text-sm">
+<form method="GET" action="/tareas" class="bg-white rounded-xl shadow-card p-4 mb-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:items-end text-sm">
   <input type="hidden" name="vista" value="<%= vista %>" />
   <div>
     <label class="block text-xs text-slate-500 mb-1">Cliente</label>
-    <select name="cliente" class="rounded-md border border-slate-300 px-2 py-1.5">
+    <select name="cliente" onchange="this.form.submit()" class="w-full sm:w-auto rounded-lg border border-slate-300 px-3 py-2">
       <option value="">Todos</option>
       <% clientes.forEach(function(c){ %>
         <option value="<%= c.id %>" <%= String(filtros.cliente) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option>
@@ -40,7 +40,7 @@
   </div>
   <div>
     <label class="block text-xs text-slate-500 mb-1">Prioridad</label>
-    <select name="prioridad" class="rounded-md border border-slate-300 px-2 py-1.5">
+    <select name="prioridad" onchange="this.form.submit()" class="w-full sm:w-auto rounded-lg border border-slate-300 px-3 py-2">
       <option value="">Todas</option>
       <% PRIORIDADES.forEach(function(p){ %>
         <option value="<%= p %>" <%= filtros.prioridad === p ? 'selected' : '' %>><%= p.charAt(0).toUpperCase()+p.slice(1) %></option>
@@ -49,15 +49,17 @@
   </div>
   <div>
     <label class="block text-xs text-slate-500 mb-1">Estado</label>
-    <select name="estado" class="rounded-md border border-slate-300 px-2 py-1.5">
+    <select name="estado" onchange="this.form.submit()" class="w-full sm:w-auto rounded-lg border border-slate-300 px-3 py-2">
       <option value="">Todos</option>
       <% ESTADOS.forEach(function(e){ %>
         <option value="<%= e %>" <%= filtros.estado === e ? 'selected' : '' %>><%= etiquetaEstado(e) %></option>
       <% }); %>
     </select>
   </div>
-  <button class="btn bg-slate-800 hover:bg-slate-900 text-white rounded-md px-3 py-1.5">Filtrar</button>
-  <a href="/tareas?vista=<%= vista %>" class="text-slate-500 hover:underline">Limpiar</a>
+  <noscript><button class="btn bg-slate-800 text-white rounded-lg px-3 py-2">Filtrar</button></noscript>
+  <% if (filtros.cliente || filtros.prioridad || filtros.estado) { %>
+    <a href="/tareas?vista=<%= vista %>" class="col-span-2 sm:col-span-1 text-brand-600 hover:underline self-center">Limpiar filtros</a>
+  <% } %>
 </form>
 
 <% if (!tareas.length) { %>

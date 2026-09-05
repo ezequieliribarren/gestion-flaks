@@ -38,7 +38,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/nuevo', (req, res) => {
-  res.render('gastos/form', { titulo: 'Cargar gasto', gasto: {}, TIPOS, SOCIOS, currentUserNombre: req.session.user.nombre });
+  const hoy = new Date();
+  const hoyISO = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+  res.render('gastos/nuevo', { titulo: 'Cargar gasto', SOCIOS, currentUserNombre: req.session.user.nombre, hoyISO });
 });
 
 router.get('/:id/editar', (req, res) => {
@@ -46,6 +48,11 @@ router.get('/:id/editar', (req, res) => {
   if (!gasto) return res.redirect('/gastos');
   res.render('gastos/form', { titulo: 'Editar gasto', gasto, TIPOS, SOCIOS, currentUserNombre: req.session.user.nombre });
 });
+
+function hoyISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function leer(body, user) {
   const tipo = TIPOS.includes(body.tipo) ? body.tipo : 'unico';
@@ -64,7 +71,7 @@ function leer(body, user) {
     descripcion: String(body.descripcion || '').trim(),
     monto: Number(body.monto || 0),
     tipo,
-    fecha: body.fecha ? String(body.fecha).slice(0, 10) : null,
+    fecha: body.fecha ? String(body.fecha).slice(0, 10) : hoyISO(),
     categoria: String(body.categoria || '').trim() || null,
     activo: body.activo === '0' ? 0 : 1,
     pagado_por,

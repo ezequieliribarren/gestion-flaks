@@ -1,38 +1,38 @@
-<div class="flex items-center justify-between mb-1">
-  <h1 class="text-2xl font-bold text-slate-800">Gastos</h1>
-  <a href="/gastos/nuevo" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm rounded-md px-4 py-2">+ Cargar gasto</a>
+<div class="flex items-center justify-between mb-1 gap-3">
+  <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Gastos</h1>
+  <a href="/gastos/nuevo" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-sm whitespace-nowrap">+ Cargar gasto</a>
 </div>
 <p class="text-sm text-slate-500 mb-4"><%= fmt.nombreMes(mes) %> <%= anio %></p>
 
 <%- include('../partials/periodo', { mes: mes, anio: anio }) %>
 
 <% if (ccGlobal.total > 0 && Math.abs(ccGlobal.total - totalPendiente) > 0.5) { %>
-  <div class="mb-4 text-xs bg-amber-100 text-amber-800 border border-amber-200 rounded px-3 py-2">
+  <div class="mb-4 text-xs bg-amber-100 text-amber-800 border border-amber-200 rounded-lg px-3 py-2">
     En total hay <strong><%= fmt.formatARS(ccGlobal.total) %></strong> en gastos sin saldar (contando todos los meses).
     <% if (!ccGlobal.igualado) { %> Hoy <strong><%= ccGlobal.deQuien %></strong> le debería <strong><%= fmt.formatARS(ccGlobal.montoAIgualar) %></strong> a <strong><%= ccGlobal.aQuien %></strong>.<% } %>
   </div>
 <% } %>
 
 <!-- Cuenta corriente del mes -->
-<div class="bg-white rounded-xl shadow-card p-5 mb-4">
+<div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
   <h2 class="font-semibold text-slate-800 mb-1">Cuenta corriente de <%= fmt.nombreMes(mes) %> <%= anio %></h2>
   <p class="text-xs text-slate-400 mb-4">Gastos de este mes marcados como "no saldados". Se igualan pagando la diferencia a fin de mes.</p>
 
   <% if (totalPendiente <= 0) { %>
     <p class="text-sm text-slate-500">No hay gastos pendientes de saldar este mes. 🎉</p>
   <% } else { %>
-    <div class="grid sm:grid-cols-3 gap-3 text-sm">
+    <div class="grid grid-cols-3 gap-2 sm:gap-3 text-sm">
       <div class="rounded-lg bg-slate-50 p-3">
         <div class="text-xs text-slate-500">Puso German</div>
-        <div class="text-lg font-semibold"><%= fmt.formatARS(cc.frenteGerman) %></div>
+        <div class="text-base sm:text-lg font-semibold"><%= fmt.formatARS(cc.frenteGerman) %></div>
       </div>
       <div class="rounded-lg bg-slate-50 p-3">
         <div class="text-xs text-slate-500">Puso Ezequiel</div>
-        <div class="text-lg font-semibold"><%= fmt.formatARS(cc.frenteEzequiel) %></div>
+        <div class="text-base sm:text-lg font-semibold"><%= fmt.formatARS(cc.frenteEzequiel) %></div>
       </div>
       <div class="rounded-lg bg-slate-50 p-3">
-        <div class="text-xs text-slate-500">Le toca a cada uno (50%)</div>
-        <div class="text-lg font-semibold"><%= fmt.formatARS(cc.baseCadaUno) %></div>
+        <div class="text-xs text-slate-500">A cada uno (50%)</div>
+        <div class="text-base sm:text-lg font-semibold"><%= fmt.formatARS(cc.baseCadaUno) %></div>
       </div>
     </div>
 
@@ -48,24 +48,69 @@
       <form method="POST" action="/gastos/saldar" onsubmit="return confirm('Registrar el pago y saldar la cuenta corriente de este mes? Los gastos van a pasar a Caja.')">
         <input type="hidden" name="mes" value="<%= mes %>" />
         <input type="hidden" name="anio" value="<%= anio %>" />
-        <button class="btn bg-green-600 hover:bg-green-700 text-white text-sm rounded-md px-4 py-2 whitespace-nowrap">Registrar pago y saldar</button>
+        <button class="btn w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 whitespace-nowrap">Registrar pago y saldar</button>
       </form>
     </div>
   <% } %>
 </div>
 
-<!-- Tabla de gastos -->
-<div class="bg-white rounded-xl shadow-card overflow-x-auto">
+<%
+  function badgeSaldado(g){
+    if (g.tipo === 'recurrente') return '<span class="text-xs text-slate-400">—</span>';
+    return g.saldado
+      ? '<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">Saldado</span>'
+      : '<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Pendiente</span>';
+  }
+%>
+
+<!-- Lista de gastos: tarjetas en mobile, tabla en desktop -->
+<div class="md:hidden space-y-2">
+  <% if (!filas.length) { %>
+    <div class="bg-white rounded-xl shadow-card p-6 text-center text-slate-500">Sin gastos para este mes.</div>
+  <% } %>
+  <% filas.forEach(function(g){ %>
+    <div class="bg-white rounded-xl shadow-card p-4 <%= g.saldado ? '' : 'border-l-4 border-amber-300' %> <%= nuevoId === g.id ? 'row-new' : '' %>">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="font-medium text-slate-800"><%= g.descripcion %></div>
+          <div class="text-xs text-slate-400 mt-0.5">
+            <%= g.tipo === 'recurrente' ? 'Recurrente · mensual' : fmt.formatFecha(g.fecha) %>
+            <% if (g.categoria) { %> · <%= g.categoria %><% } %>
+            <% if (g.pagado_por) { %> · pagó <%= g.pagado_por %><% } %>
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="font-semibold text-slate-800"><%= fmt.formatARS(g.monto) %></div>
+          <div class="mt-1"><%- badgeSaldado(g) %></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 mt-3 pt-2 border-t border-slate-100 text-sm">
+        <a href="/gastos/<%= g.id %>/editar" class="text-brand-600">Editar</a>
+        <form method="POST" action="/gastos/<%= g.id %>/eliminar" onsubmit="return confirm('¿Eliminar este gasto?')">
+          <button class="text-red-600">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  <% }); %>
+  <div class="bg-white rounded-xl shadow-card p-4 text-sm">
+    <div class="flex justify-between font-semibold"><span>Saldado — pasa a Caja</span><span><%= fmt.formatARS(totalSaldado) %></span></div>
+    <% if (totalPendiente > 0) { %>
+      <div class="flex justify-between text-amber-800 mt-1"><span>Pendiente de saldar</span><span><%= fmt.formatARS(totalPendiente) %></span></div>
+    <% } %>
+  </div>
+</div>
+
+<div class="hidden md:block bg-white rounded-xl shadow-card overflow-x-auto">
   <table class="zebra w-full text-sm">
     <thead class="bg-slate-50 text-slate-500 text-left border-b border-slate-100">
       <tr>
-        <th class="px-4 py-3">Descripción</th>
-        <th class="px-4 py-3">Categoría</th>
-        <th class="px-4 py-3">Tipo</th>
-        <th class="px-4 py-3">Fecha</th>
-        <th class="px-4 py-3">Pagó</th>
-        <th class="px-4 py-3 text-right">Monto</th>
-        <th class="px-4 py-3">Saldado</th>
+        <th class="px-4 py-3 font-medium">Descripción</th>
+        <th class="px-4 py-3 font-medium">Categoría</th>
+        <th class="px-4 py-3 font-medium">Tipo</th>
+        <th class="px-4 py-3 font-medium">Fecha</th>
+        <th class="px-4 py-3 font-medium">Pagó</th>
+        <th class="px-4 py-3 font-medium text-right">Monto</th>
+        <th class="px-4 py-3 font-medium">Saldado</th>
         <th class="px-4 py-3"></th>
       </tr>
     </thead>
@@ -84,20 +129,7 @@
           <td class="px-4 py-3 text-slate-500"><%= g.tipo === 'recurrente' ? 'Mensual' : fmt.formatFecha(g.fecha) %></td>
           <td class="px-4 py-3 text-slate-600"><%= g.pagado_por || '—' %></td>
           <td class="px-4 py-3 text-right font-medium"><%= fmt.formatARS(g.monto) %></td>
-          <td class="px-4 py-3">
-            <% if (g.tipo === 'recurrente') { %>
-              <span class="text-xs text-slate-400">—</span>
-            <% } else { %>
-              <form method="POST" action="/gastos/<%= g.id %>/saldado" class="inline">
-                <input type="hidden" name="valor" value="<%= g.saldado ? '0' : '1' %>" />
-                <% if (g.saldado) { %>
-                  <button class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200" title="Marcar como no saldado">Sí ✓</button>
-                <% } else { %>
-                  <button class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200" title="Marcar como saldado">Pendiente</button>
-                <% } %>
-              </form>
-            <% } %>
-          </td>
+          <td class="px-4 py-3"><%- badgeSaldado(g) %></td>
           <td class="px-4 py-3 whitespace-nowrap">
             <a href="/gastos/<%= g.id %>/editar" class="text-xs text-brand-600 hover:underline">Editar</a>
             <form method="POST" action="/gastos/<%= g.id %>/eliminar" class="inline" onsubmit="return confirm('¿Eliminar este gasto?')">
@@ -126,17 +158,16 @@
 
 <!-- Historial de saldos -->
 <% if (saldos && saldos.length) { %>
-  <div class="bg-white rounded-xl shadow-card p-5 mt-4">
+  <div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mt-4">
     <h2 class="font-semibold text-slate-800 mb-3">Últimos saldos registrados</h2>
     <ul class="space-y-1 text-sm text-slate-600">
       <% saldos.forEach(function(s){ %>
-        <li class="flex justify-between border-b border-slate-100 pb-1">
+        <li class="flex justify-between gap-3 border-b border-slate-100 pb-1">
           <span>
             <span class="text-slate-400"><%= fmt.formatFecha(s.fecha) %></span> ·
             <strong><%= s.de_quien %></strong> le pagó a <strong><%= s.a_quien %></strong>
-            <% if (s.detalle) { %><span class="text-slate-400">(<%= s.detalle %>)</span><% } %>
           </span>
-          <span class="font-medium"><%= fmt.formatARS(s.monto) %></span>
+          <span class="font-medium whitespace-nowrap"><%= fmt.formatARS(s.monto) %></span>
         </li>
       <% }); %>
     </ul>
