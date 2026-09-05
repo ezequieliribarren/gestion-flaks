@@ -6,11 +6,11 @@ const express = require('express');
 const multer = require('multer');
 const db = require('../db');
 const audit = require('../lib/audit');
+const { STORAGE_DIR, UPLOADS_DIR } = require('../lib/paths');
 
 const router = express.Router();
 
 const CATEGORIAS = ['presupuesto', 'tutorial', 'otro'];
-const UPLOADS_DIR = path.join(__dirname, '..', 'storage', 'uploads');
 
 const EXT_PERMITIDAS = ['.pdf', '.doc', '.docx', '.txt'];
 
@@ -67,7 +67,7 @@ router.post('/', (req, res) => {
     if (!req.file) { req.session.flash = { tipo: 'error', msg: 'Seleccioná un archivo.' }; return res.redirect('/documentos'); }
     const categoria = CATEGORIAS.includes(req.body.categoria) ? req.body.categoria : 'otro';
     const cliente_id = req.body.cliente_id ? Number(req.body.cliente_id) : null;
-    const rel = path.relative(path.join(__dirname, '..', 'storage'), req.file.path).replace(/\\/g, '/');
+    const rel = path.relative(STORAGE_DIR, req.file.path).replace(/\\/g, '/');
     const info = db.prepare(`
       INSERT INTO documentos (nombre_original, ruta_archivo, categoria, cliente_id, subido_por)
       VALUES (?, ?, ?, ?, ?)
@@ -81,8 +81,8 @@ router.post('/', (req, res) => {
 router.get('/:id/descargar', (req, res) => {
   const doc = db.prepare('SELECT * FROM documentos WHERE id = ?').get(req.params.id);
   if (!doc) return res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'El documento no existe.' });
-  const abs = path.join(__dirname, '..', 'storage', doc.ruta_archivo);
-  if (!abs.startsWith(path.join(__dirname, '..', 'storage')) || !fs.existsSync(abs)) {
+  const abs = path.join(STORAGE_DIR, doc.ruta_archivo);
+  if (!abs.startsWith(STORAGE_DIR) || !fs.existsSync(abs)) {
     return res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'El archivo no está disponible.' });
   }
   res.download(abs, doc.nombre_original);
@@ -91,8 +91,8 @@ router.get('/:id/descargar', (req, res) => {
 router.post('/:id/eliminar', (req, res) => {
   const doc = db.prepare('SELECT * FROM documentos WHERE id = ?').get(req.params.id);
   if (!doc) return res.redirect('/documentos');
-  const abs = path.join(__dirname, '..', 'storage', doc.ruta_archivo);
-  try { if (abs.startsWith(path.join(__dirname, '..', 'storage')) && fs.existsSync(abs)) fs.unlinkSync(abs); } catch (e) { /* noop */ }
+  const abs = path.join(STORAGE_DIR, doc.ruta_archivo);
+  try { if (abs.startsWith(STORAGE_DIR) && fs.existsSync(abs)) fs.unlinkSync(abs); } catch (e) { /* noop */ }
   db.prepare('DELETE FROM documentos WHERE id = ?').run(doc.id);
   audit.registrar(req, 'documentos', doc.id, 'eliminar', `Eliminó "${doc.nombre_original}"`);
   req.session.flash = { tipo: 'ok', msg: 'Documento eliminado.' };

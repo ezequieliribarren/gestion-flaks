@@ -3,7 +3,6 @@
 require('dotenv').config();
 
 const path = require('path');
-const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
 const SQLiteStore = require('./lib/session-store')(session);
@@ -41,12 +40,10 @@ const PORT = process.env.PORT || 3000;
 const PROD = process.env.NODE_ENV === 'production';
 if (PROD) app.set('trust proxy', 1);
 
-// --- Carpetas persistentes ---
-const STORAGE_DIR = path.join(__dirname, 'storage');
-const UPLOADS_DIR = path.join(STORAGE_DIR, 'uploads');
-for (const dir of [STORAGE_DIR, UPLOADS_DIR, db.DATA_DIR]) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
+// --- Carpetas persistentes (lib/paths.js las crea; ubicación configurable por env) ---
+const { DATA_DIR, STORAGE_DIR } = require('./lib/paths');
+console.log('Datos en:', DATA_DIR);
+console.log('Documentos en:', STORAGE_DIR);
 
 // --- Vistas ---
 app.set('view engine', 'ejs');

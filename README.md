@@ -126,12 +126,34 @@ Los trabajos sin reparto German/Ezequiel en la planilla se importan 50/50. Los c
 como "mensuales" quedan con una nota para cargarles el trabajo recurrente con su monto. Los
 egresos de tipo honorarios/retiros no se importan como gasto (falsearían la ganancia de la Caja).
 
-### Persistencia
+### Persistencia — IMPORTANTE
 
-- La base vive en `data/flaks.sqlite` (se crea sola) y los archivos en `storage/uploads/`.
-- Ambas carpetas están **dentro del proyecto**, así que sobreviven a los reinicios.
-- **No** borrar `data/` ni `storage/` en los redeploys. Para respaldar, copiar esas dos carpetas.
-- `data/` y `storage/uploads/*` están en `.gitignore` para no versionar datos reales.
+La base (`flaks.sqlite`) y los documentos subidos **no** están en git. Si el deploy por Git de
+Hostinger **reemplaza la carpeta del proyecto en cada push** (build en `hbuilds/…`), entonces
+`data/` y `storage/` se borran en cada deploy y se pierde todo lo cargado desde el dashboard.
+
+**Solución (hacerlo sí o sí en Hostinger):** guardar los datos FUERA de la carpeta del proyecto y
+apuntar la app con dos variables de entorno:
+
+| Variable | Valor (ejemplo) |
+|---|---|
+| `FLAKS_DATA_DIR` | `/home/uXXXXXXXX/flaks-datos` |
+| `FLAKS_STORAGE_DIR` | `/home/uXXXXXXXX/flaks-storage` |
+
+Creá esas dos carpetas una vez (con el Administrador de archivos, al lado de `domains/`, no dentro
+del proyecto) y cargá las variables. La app crea ahí `flaks.sqlite` y guarda los documentos, y ya
+**ningún deploy las toca**. En los logs, al arrancar, imprime `Datos en: …` y `Documentos en: …`
+para que confirmes la ruta.
+
+Si NO se definen, usa `./data` y `./storage` dentro del proyecto (bien para desarrollo local o
+para hostings que sí preservan esas carpetas).
+
+**Respaldo:** copiar la carpeta `FLAKS_DATA_DIR` (o `data/`). Es un único archivo `.sqlite`.
+
+- `data/`, `storage/uploads/*` y `anterior/` están en `.gitignore`.
+- El import de `db/datos-iniciales.json` corre **una sola vez** (marca en `app_meta`); sobre una
+  base existente nunca pisa lo cargado a mano. Si la base se recrea vacía (deploy que borró
+  `data/`), el import vuelve a correr y por eso "vuelven" los datos viejos.
 
 ## Estructura
 

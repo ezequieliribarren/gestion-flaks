@@ -3,14 +3,11 @@
 const path = require('path');
 const fs = require('fs');
 const { Database } = require('node-sqlite3-wasm');
+const { DATA_DIR, DB_PATH } = require('../lib/paths');
 
-// La base vive dentro del proyecto, en /data, para que sea persistente en Hostinger.
 // Usamos node-sqlite3-wasm (SQLite compilado a WebAssembly): API síncrona, sin
 // compilación nativa ni node-gyp — funciona en cualquier hosting compartido.
-const DATA_DIR = path.join(__dirname, '..', 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-const DB_PATH = path.join(DATA_DIR, 'flaks.sqlite');
+// La ubicación de la base la define lib/paths.js (env FLAKS_DATA_DIR o ./data).
 const LOCK_DIR = DB_PATH + '.lock';
 
 // El VFS de node-sqlite3-wasm usa una carpeta ".lock" mientras escribe. Si un
