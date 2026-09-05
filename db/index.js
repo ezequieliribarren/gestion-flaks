@@ -37,6 +37,11 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
     raw.exec('ALTER TABLE gastos ADD COLUMN saldado INTEGER NOT NULL DEFAULT 1');
   }
 
+  const colsUnicos = raw.all('PRAGMA table_info(trabajos_unicos)').map((c) => c.name);
+  if (!colsUnicos.includes('estado')) {
+    raw.exec("ALTER TABLE trabajos_unicos ADD COLUMN estado TEXT NOT NULL DEFAULT 'realizado'");
+  }
+
   // clientes.estado tenía un CHECK que no permitía 'inactivo' → reconstruir la tabla.
   const clientesTabla = raw.all(
     "SELECT sql FROM sqlite_master WHERE type='table' AND name='clientes'"

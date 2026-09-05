@@ -15,34 +15,49 @@ function repartoValido(g, e) {
   return { rg, re };
 }
 
+// estado_efectivo: un cliente inactivo con un trabajo único "potencial" figura como potencial.
+const ESTADO_EFECTIVO = `
+  CASE WHEN c.estado = 'inactivo'
+        AND EXISTS (SELECT 1 FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'potencial')
+       THEN 'potencial' ELSE c.estado END`;
+
 router.get('/', (req, res) => {
   const vista = req.query.vista === 'lista' ? 'lista' : 'carpetas';
-  const filtroEstado = ESTADOS.includes(req.query.estado) ? req.query.estado : null;
+  // Filtro por estado: por defecto "activo". 'todos' muestra todo.
+  let filtroEstado = 'activo';
+  if (req.query.estado === 'todos') filtroEstado = null;
+  else if (ESTADOS.includes(req.query.estado)) filtroEstado = req.query.estado;
 
-  const where = filtroEstado ? 'WHERE c.estado = ?' : '';
-  const params = filtroEstado ? [filtroEstado] : [];
+  const orden = req.query.orden === 'facturacion' ? 'facturacion' : 'nombre';
+  const ordenSql = orden === 'facturacion'
+    ? 'total_facturado DESC, nombre COLLATE NOCASE'
+    : `CASE estado_efectivo WHEN 'activo' THEN 0 WHEN 'potencial' THEN 1 ELSE 2 END, nombre COLLATE NOCASE`;
 
   const clientes = db.prepare(`
-    SELECT c.*,
-      (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS mensual,
-      (SELECT COUNT(*) FROM tareas WHERE cliente_id = c.id AND estado != 'completada') AS tareas_abiertas
-    FROM clientes c
-    ${where}
-    ORDER BY
-      CASE c.estado WHEN 'activo' THEN 0 WHEN 'potencial' THEN 1 ELSE 2 END,
-      c.nombre
-  `).all(...params);
+    SELECT * FROM (
+      SELECT c.*,
+        (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS mensual,
+        (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1)
+          + (SELECT COALESCE(SUM(monto),0) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'realizado') AS total_facturado,
+        (SELECT COUNT(*) FROM tareas WHERE cliente_id = c.id AND estado != 'completada') AS tareas_abiertas,
+        (SELECT COUNT(*) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'potencial') AS trabajos_potenciales,
+        ${ESTADO_EFECTIVO} AS estado_efectivo
+      FROM clientes c
+    )
+    ${filtroEstado ? 'WHERE estado_efectivo = ?' : ''}
+    ORDER BY ${ordenSql}
+  `).all(...(filtroEstado ? [filtroEstado] : []));
 
   const conteo = db.prepare(`
     SELECT
-      SUM(estado = 'activo')    AS activo,
-      SUM(estado = 'potencial') AS potencial,
-      SUM(estado = 'inactivo')  AS inactivo,
-      COUNT(*)                  AS total
-    FROM clientes
+      SUM(ee = 'activo')    AS activo,
+      SUM(ee = 'potencial') AS potencial,
+      SUM(ee = 'inactivo')  AS inactivo,
+      COUNT(*)              AS total
+    FROM (SELECT ${ESTADO_EFECTIVO} AS ee FROM clientes c)
   `).get();
 
-  res.render('clientes/index', { titulo: 'Clientes', clientes, vista, filtroEstado, conteo });
+  res.render('clientes/index', { titulo: 'Clientes', clientes, vista, filtroEstado, orden, conteo });
 });
 
 router.get('/nuevo', (req, res) => {
@@ -164,6 +179,8 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
 });
 
 // --- Trabajos únicos ---
+const ESTADOS_TRABAJO = ['realizado', 'potencial'];
+
 router.post('/:id/unicos', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.redirect('/clientes');
@@ -171,13 +188,14 @@ router.post('/:id/unicos', (req, res) => {
   const monto = Number(req.body.monto || 0);
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
   const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
+  const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : 'realizado';
   if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo único inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
   db.prepare(`
-    INSERT INTO trabajos_unicos (cliente_id, nombre, monto, fecha, reparto_german, reparto_ezequiel)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(cliente.id, nombre, monto, fecha, rep.rg, rep.re);
-  audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó trabajo único "${nombre}" (${monto})`);
-  req.session.flash = { tipo: 'ok', msg: 'Trabajo único agregado.' };
+    INSERT INTO trabajos_unicos (cliente_id, nombre, monto, fecha, reparto_german, reparto_ezequiel, estado)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(cliente.id, nombre, monto, fecha, rep.rg, rep.re, estado);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó trabajo único "${nombre}" (${monto}) — ${estado}`);
+  req.session.flash = { tipo: 'ok', msg: estado === 'potencial' ? 'Trabajo potencial agregado.' : 'Trabajo único agregado.' };
   res.redirect('/clientes/' + cliente.id + '#unicos');
 });
 
@@ -185,18 +203,36 @@ router.post('/:id/unicos/:tid', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
   if (!cliente || !t) return res.redirect('/clientes');
+
   if (req.body._accion === 'eliminar') {
     db.prepare('DELETE FROM trabajos_unicos WHERE id = ?').run(t.id);
     audit.registrar(req, 'clientes', cliente.id, 'editar', `Eliminó trabajo único "${t.nombre}"`);
     req.session.flash = { tipo: 'ok', msg: 'Trabajo único eliminado.' };
     return res.redirect('/clientes/' + cliente.id + '#unicos');
   }
+
+  // Confirmar un trabajo potencial -> realizado (y reactivar al cliente si estaba inactivo/potencial).
+  if (req.body._accion === 'confirmar' || req.body._accion === 'volver_potencial') {
+    const nuevoEstado = req.body._accion === 'confirmar' ? 'realizado' : 'potencial';
+    db.prepare('UPDATE trabajos_unicos SET estado = ? WHERE id = ?').run(nuevoEstado, t.id);
+    let extra = '';
+    if (nuevoEstado === 'realizado' && cliente.estado !== 'activo') {
+      db.prepare("UPDATE clientes SET estado = 'activo' WHERE id = ?").run(cliente.id);
+      extra = ' El cliente pasó a Activo.';
+    }
+    audit.registrar(req, 'clientes', cliente.id, 'editar',
+      nuevoEstado === 'realizado' ? `Confirmó el trabajo "${t.nombre}".${extra}` : `Marcó "${t.nombre}" como potencial`);
+    req.session.flash = { tipo: 'ok', msg: (nuevoEstado === 'realizado' ? 'Trabajo confirmado.' : 'Trabajo marcado como potencial.') + extra };
+    return res.redirect('/clientes/' + cliente.id + '#unicos');
+  }
+
   const nombre = String(req.body.nombre || '').trim() || t.nombre;
   const monto = req.body.monto != null ? Number(req.body.monto) : t.monto;
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : t.fecha;
   const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: t.reparto_german, re: t.reparto_ezequiel };
-  db.prepare('UPDATE trabajos_unicos SET nombre=?, monto=?, fecha=?, reparto_german=?, reparto_ezequiel=? WHERE id=?')
-    .run(nombre, monto, fecha, rep.rg, rep.re, t.id);
+  const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : t.estado;
+  db.prepare('UPDATE trabajos_unicos SET nombre=?, monto=?, fecha=?, reparto_german=?, reparto_ezequiel=?, estado=? WHERE id=?')
+    .run(nombre, monto, fecha, rep.rg, rep.re, estado, t.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó trabajo único "${nombre}"`);
   req.session.flash = { tipo: 'ok', msg: 'Trabajo único actualizado.' };
   res.redirect('/clientes/' + cliente.id + '#unicos');

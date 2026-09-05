@@ -15,8 +15,13 @@
   <div class="flex items-center gap-3">
     <span class="w-5 h-5 rounded-full inline-block" style="background: <%= cliente.color %>"></span>
     <h1 class="text-2xl font-bold text-slate-800"><%= cliente.nombre %></h1>
-    <% var ec = estadoCliente(cliente.estado); %>
+    <%
+      var hayPotencial = unicos.some(function(u){ return u.estado === 'potencial'; });
+      var estadoEfec = (cliente.estado === 'inactivo' && hayPotencial) ? 'potencial' : cliente.estado;
+      var ec = estadoCliente(estadoEfec);
+    %>
     <span class="text-xs font-medium px-2 py-0.5 rounded-full <%= ec[1] %>"><%= ec[0] %></span>
+    <% if (estadoEfec !== cliente.estado) { %><span class="text-xs text-amber-600">(inactivo con presupuesto pendiente)</span><% } %>
   </div>
 </div>
 <%- include('../partials/audit', { ultima: ultima }) %>
@@ -100,23 +105,32 @@
 
 <!-- Trabajos únicos -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
-  <h2 class="font-semibold text-slate-800 mb-3">Trabajos de una sola vez</h2>
+  <h2 class="font-semibold text-slate-800 mb-1">Trabajos de una sola vez</h2>
+  <p class="text-xs text-slate-400 mb-3">Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar: sólo suma en la proyección de Facturación. Al confirmarlo pasa a <strong>realizado</strong> y cuenta como facturación real.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Fecha</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th></th></tr>
+        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Fecha</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th></tr>
       </thead>
       <tbody>
-        <% unicos.forEach(function(u){ %>
-          <tr class="border-b border-slate-100">
+        <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
+          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : '' %>">
             <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>">
               <td class="py-2 pr-2"><input name="nombre" value="<%= u.nombre %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
               <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= u.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
               <td class="py-2 px-2"><input name="fecha" type="date" value="<%= String(u.fecha).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
               <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" value="<%= u.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
               <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= u.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
+              <td class="py-2 px-2">
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full <%= pot ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700' %>"><%= pot ? 'Potencial' : 'Realizado' %></span>
+              </td>
               <td class="py-2 px-2 whitespace-nowrap">
                 <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
+                <% if (pot) { %>
+                  <button name="_accion" value="confirmar" class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 ml-1">Confirmar</button>
+                <% } else { %>
+                  <button name="_accion" value="volver_potencial" class="text-xs text-amber-700 hover:underline ml-1">→ Potencial</button>
+                <% } %>
                 <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
               </td>
             </form>
@@ -132,6 +146,13 @@
     <div><label class="block text-xs text-slate-500 mb-1">Fecha</label><input name="fecha" type="date" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Estado</label>
+      <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
+        <option value="realizado">Realizado</option>
+        <option value="potencial">Potencial (presupuesto)</option>
+      </select>
+    </div>
     <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar</button>
   </form>
 </div>

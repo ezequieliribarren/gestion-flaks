@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS trabajos_unicos (
   fecha            TEXT NOT NULL,
   reparto_german   REAL NOT NULL DEFAULT 50,
   reparto_ezequiel REAL NOT NULL DEFAULT 50,
+  estado           TEXT NOT NULL DEFAULT 'realizado',   -- realizado | potencial (presupuesto sin confirmar)
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

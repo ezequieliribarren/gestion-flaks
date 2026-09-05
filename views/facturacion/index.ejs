@@ -26,16 +26,16 @@
         <tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">Sin facturación para este mes.</td></tr>
       <% } %>
       <% filas.forEach(function(f){ %>
-        <tr>
+        <tr class="<%= f.es_potencial ? 'pendiente' : '' %>">
           <td class="px-4 py-3">
             <a href="/clientes/<%= f.cliente_id %>" class="flex items-center gap-2 hover:text-brand-600">
               <span class="w-2.5 h-2.5 rounded-full inline-block" style="background: <%= f.cliente_color %>"></span><%= f.cliente %>
-              <% if (f.cliente_estado === 'potencial') { %><span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">potencial</span><% } %>
             </a>
           </td>
           <td class="px-4 py-3">
             <%= f.concepto %>
             <% if (f.tipo === 'unico' && f.fecha) { %><span class="text-xs text-slate-400">(<%= fmt.formatFecha(f.fecha) %>)</span><% } %>
+            <% if (f.es_potencial) { %><span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 ml-1">potencial</span><% } %>
           </td>
           <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= f.tipo === 'recurrente' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' %>"><%= f.tipo === 'recurrente' ? 'Recurrente' : 'Único' %></span></td>
           <td class="px-4 py-3 text-right font-medium"><%= fmt.formatARS(f.monto) %></td>
