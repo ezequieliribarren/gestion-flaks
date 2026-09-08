@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS contenido_links (
   cliente_id   INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
   url          TEXT NOT NULL,
   url_norm     TEXT NOT NULL,                     -- versión normalizada para detectar repetidos
+  empresa      TEXT NOT NULL DEFAULT '',          -- sub-marca / local del cliente
   realizado    INTEGER NOT NULL DEFAULT 0,
   realizado_en TEXT,                              -- fecha en que se marcó como usado/realizado
   nota         TEXT NOT NULL DEFAULT '',

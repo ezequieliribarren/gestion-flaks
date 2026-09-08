@@ -71,6 +71,12 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
 
   const colsUsers = raw.all('PRAGMA table_info(users)').map((c) => c.name);
   if (!colsUsers.includes('rol')) raw.exec("ALTER TABLE users ADD COLUMN rol TEXT NOT NULL DEFAULT 'admin'");
+
+  const tieneLinks = raw.all("SELECT name FROM sqlite_master WHERE type='table' AND name='contenido_links'").length;
+  if (tieneLinks) {
+    const colsLinks = raw.all('PRAGMA table_info(contenido_links)').map((c) => c.name);
+    if (!colsLinks.includes('empresa')) raw.exec("ALTER TABLE contenido_links ADD COLUMN empresa TEXT NOT NULL DEFAULT ''");
+  }
 })();
 
 // --- Adaptador con la interfaz de better-sqlite3 que usa el resto del código ---

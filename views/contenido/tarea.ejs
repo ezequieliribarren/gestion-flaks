@@ -63,10 +63,21 @@
   <form method="POST" action="<%= base %>/links">
     <textarea name="links" rows="3" required placeholder="Pegá uno o varios links (uno por línea)"
               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono"></textarea>
-    <button class="btn mt-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar a la lista</button>
+    <div class="flex flex-wrap items-end gap-2 mt-2">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Empresa (para todos los links pegados)</label>
+        <input name="empresa" list="empresas-list" placeholder="Sub-marca / local"
+               class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar a la lista</button>
+    </div>
   </form>
   <p class="text-xs text-slate-400 mt-2">La plataforma avisa si un link ya se usó antes (en este cliente o en otro) para que no se repita.</p>
 </div>
+
+<datalist id="empresas-list">
+  <% (empresas || []).forEach(function(e){ %><option value="<%= e %>"></option><% }); %>
+</datalist>
 
 <!-- Hoja de links -->
 <% if (!links.length) { %>
@@ -87,6 +98,10 @@
     <% links.forEach(function(l, idx){ var s = estadoLink(l); %>
       <div class="bg-white rounded-xl shadow-card p-3 <%= l.uso_previo ? 'border-l-4 border-red-300' : '' %>">
         <a href="<%= l.url %>" target="_blank" rel="noopener" class="text-brand-600 text-sm break-all"><%= l.url %></a>
+        <form method="POST" action="<%= base %>/links/<%= l.id %>/empresa" class="mt-2">
+          <input name="empresa" list="empresas-list" value="<%= l.empresa %>" placeholder="Empresa" onchange="this.form.submit()"
+                 class="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs" />
+        </form>
         <div class="flex items-center justify-between mt-2">
           <span class="text-xs <%= s.cls %>"><%= s.txt %></span>
           <div class="flex items-center gap-3">
@@ -112,6 +127,7 @@
         <tr>
           <th class="px-3 py-3 font-medium w-8">#</th>
           <th class="px-3 py-3 font-medium">Link</th>
+          <th class="px-3 py-3 font-medium">Empresa</th>
           <th class="px-3 py-3 font-medium">Estado</th>
           <th class="px-3 py-3 font-medium text-center">Realizado</th>
           <th class="px-3 py-3"></th>
@@ -121,8 +137,14 @@
         <% links.forEach(function(l, idx){ var s = estadoLink(l); %>
           <tr class="<%= l.uso_previo ? 'pendiente' : '' %>">
             <td class="px-3 py-2 text-slate-400"><%= idx + 1 %></td>
-            <td class="px-3 py-2 max-w-[420px]">
+            <td class="px-3 py-2 max-w-[360px]">
               <a href="<%= l.url %>" target="_blank" rel="noopener" class="text-brand-600 hover:underline break-all"><%= l.url %></a>
+            </td>
+            <td class="px-3 py-2">
+              <form method="POST" action="<%= base %>/links/<%= l.id %>/empresa">
+                <input name="empresa" list="empresas-list" value="<%= l.empresa %>" placeholder="—" onchange="this.form.submit()"
+                       class="w-28 rounded border border-slate-200 px-2 py-1 text-xs" />
+              </form>
             </td>
             <td class="px-3 py-2 <%= s.cls %>"><%= s.txt %></td>
             <td class="px-3 py-2 text-center">

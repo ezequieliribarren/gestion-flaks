@@ -126,11 +126,16 @@ router.get('/:id/tareas/:tid', (req, res) => {
     uso_previo: usoPrevio(l.url_norm, l.id),
   }));
 
+  const empresas = db.prepare(
+    "SELECT DISTINCT empresa FROM contenido_links WHERE cliente_id = ? AND empresa <> '' ORDER BY empresa COLLATE NOCASE"
+  ).all(cliente.id).map((r) => r.empresa);
+
   res.render('contenido/tarea', {
     titulo: tarea.titulo,
     cliente,
     tarea,
     links,
+    empresas,
     TIPOS,
     ESTADOS_TAREA,
     historial: audit.historial('contenido', tarea.id),
@@ -168,9 +173,10 @@ router.post('/:id/tareas/:tid/links', (req, res) => {
   if (!tarea) return res.redirect('/contenido/' + req.params.id);
 
   const crudos = String(req.body.links || '').split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+  const empresa = String(req.body.empresa || '').trim();
   const ins = db.prepare(`
-    INSERT INTO contenido_links (tarea_id, cliente_id, url, url_norm, creado_por)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO contenido_links (tarea_id, cliente_id, url, url_norm, empresa, creado_por)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
   const existentes = new Set(
     db.prepare('SELECT url_norm FROM contenido_links WHERE tarea_id = ?').all(tarea.id).map((r) => r.url_norm)
@@ -182,7 +188,7 @@ router.post('/:id/tareas/:tid/links', (req, res) => {
     if (!norm) continue;
     if (existentes.has(norm)) { repetidosEnTarea++; continue; }
     existentes.add(norm);
-    ins.run(tarea.id, tarea.cliente_id, url, norm, req.session.user.nombre);
+    ins.run(tarea.id, tarea.cliente_id, url, norm, empresa, req.session.user.nombre);
     agregados++;
   }
   tocarTarea(req, tarea.id);
@@ -202,6 +208,14 @@ router.post('/:id/tareas/:tid/links/:lid/realizado', (req, res) => {
     .run(valor, valor ? hoyISO() : null, link.id);
   tocarTarea(req, link.tarea_id);
   audit.registrar(req, 'contenido', link.tarea_id, 'editar', valor ? `Marcó un link como usado/realizado` : 'Desmarcó un link');
+  res.redirect('/contenido/' + req.params.id + '/tareas/' + req.params.tid);
+});
+
+router.post('/:id/tareas/:tid/links/:lid/empresa', (req, res) => {
+  const link = db.prepare('SELECT * FROM contenido_links WHERE id = ? AND tarea_id = ?').get(req.params.lid, req.params.tid);
+  if (!link) return res.redirect('/contenido/' + req.params.id + '/tareas/' + req.params.tid);
+  db.prepare('UPDATE contenido_links SET empresa = ? WHERE id = ?').run(String(req.body.empresa || '').trim(), link.id);
+  tocarTarea(req, link.tarea_id);
   res.redirect('/contenido/' + req.params.id + '/tareas/' + req.params.tid);
 });
 
