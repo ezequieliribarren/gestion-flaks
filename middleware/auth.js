@@ -12,4 +12,14 @@ function requireAuth(req, res, next) {
   return res.redirect('/login');
 }
 
-module.exports = { requireAuth };
+function esAdmin(user) {
+  return !!user && user.rol !== 'contenido';
+}
+
+// Bloquea a los usuarios que sólo tienen acceso al módulo Contenido.
+function soloAdmin(req, res, next) {
+  if (esAdmin(req.session && req.session.user)) return next();
+  return res.redirect('/contenido');
+}
+
+module.exports = { requireAuth, soloAdmin, esAdmin };

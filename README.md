@@ -27,6 +27,12 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 
 1. **Login** — usuario + contraseña (sin registro público).
 2. **Tareas** — vistas Hoy / Este mes / Todas, filtros por cliente, prioridad y estado, CRUD + completar.
+2b. **Contenido** — módulo para los clientes de **redes sociales**. Lista sólo los clientes marcados
+   con "redes". Cada uno tiene su **plan**, un link a su **Google Sheet de planificación** (lo carga
+   un admin) y sus **tareas de contenido** (historias, reels, posteos…). Una tarea de contenido es
+   una "hoja" donde se pegan links (uno o varios a la vez); cada link tiene un tilde **Realizado** y
+   la plataforma **avisa si ese link ya se usó antes** (en este cliente o en otro) y en qué fecha,
+   para que no se repita. Se puede compartir con un **usuario que sólo ve Contenido** (ver más abajo).
 3. **Clientes** — vista carpetas o lista; **logo** opcional por cliente (si no hay, se muestran las
    iniciales); cambio rápido de estado desde la lista; estado **activo / potencial / inactivo** con filtro
    (por defecto **Activos**) y orden **A→Z** o **mayor facturación**. Los **inactivos** no cuentan
@@ -109,6 +115,23 @@ Si el "largo de contraseña" no coincide con lo que esperás, revisá el valor e
 
 `npm run seed` (en la terminal de la app) sigue existiendo y además carga los datos de ejemplo
 si `SEED_DEMO_DATA=true`.
+
+### Usuario que sólo ve "Contenido"
+
+Se crea igual que German y Ezequiel: con **variables de entorno**.
+
+| Variable | Descripción |
+|---|---|
+| `CONTENIDO_USERNAME` | Usuario para loguearse. |
+| `CONTENIDO_PASSWORD` | Contraseña. |
+| `CONTENIDO_NOMBRE` | Nombre a mostrar (opcional, por defecto "Contenido"). |
+
+Si las cargás y hacés **Restart**, la app crea ese usuario con rol `contenido`: al entrar sólo ve el
+módulo **Contenido** (cualquier otra URL lo redirige ahí) y no puede tocar el plan ni el link del
+Sheet de cada cliente (eso queda para los admin). German y Ezequiel quedan como rol `admin`.
+
+Si no las cargás, ese usuario simplemente no existe. Para agregar más usuarios de contenido en el
+futuro hay que sumar otra tanda de variables (o pasar a un alta de usuarios desde la interfaz).
 
 ### Datos históricos de la planilla anterior
 

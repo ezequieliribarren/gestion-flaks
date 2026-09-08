@@ -1,0 +1,148 @@
+<%
+  function etTipo(t){ return { historias:'Historias', reels:'Reels', posteos:'Posteos', carrusel:'Carrusel', otro:'Otro' }[t] || t; }
+  function etEstado(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
+  var base = '/contenido/' + cliente.id + '/tareas/' + tarea.id;
+  var hechos = links.filter(function(l){ return l.realizado; }).length;
+%>
+
+<a href="/contenido/<%= cliente.id %>" class="text-sm text-brand-600 hover:underline">&larr; <%= cliente.nombre %></a>
+
+<div class="flex items-start justify-between gap-3 mt-2 mb-1">
+  <h1 class="text-2xl font-bold text-slate-800"><%= tarea.titulo %></h1>
+  <div class="flex gap-2 shrink-0">
+    <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-50 text-brand-700"><%= etTipo(tarea.tipo) %></span>
+    <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"><%= etEstado(tarea.estado) %></span>
+  </div>
+</div>
+<p class="text-xs text-slate-400 mb-4">
+  <%= hechos %>/<%= links.length %> links realizados
+  <% if (tarea.ultima_modificacion_por) { %> · última modificación por <%= tarea.ultima_modificacion_por %> el <%= fmt.formatFechaHora(tarea.ultima_modificacion_en) %><% } %>
+</p>
+
+<!-- Editar tarea -->
+<details class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+  <summary class="text-sm font-semibold text-slate-700 cursor-pointer">Editar tarea de contenido</summary>
+  <form method="POST" action="<%= base %>" class="mt-3 space-y-3">
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Título</label>
+      <input name="titulo" value="<%= tarea.titulo %>" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Tipo</label>
+        <select name="tipo" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <% TIPOS.forEach(function(t){ %><option value="<%= t %>" <%= tarea.tipo === t ? 'selected' : '' %>><%= etTipo(t) %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Estado</label>
+        <select name="estado" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <% ESTADOS_TAREA.forEach(function(e){ %><option value="<%= e %>" <%= tarea.estado === e ? 'selected' : '' %>><%= etEstado(e) %></option><% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Fecha</label>
+        <input type="date" name="fecha_objetivo" value="<%= tarea.fecha_objetivo ? String(tarea.fecha_objetivo).slice(0,10) : '' %>" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Notas</label>
+      <textarea name="descripcion" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><%= tarea.descripcion %></textarea>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
+      <button type="submit" formaction="<%= base %>/eliminar" onclick="return confirm('¿Eliminar esta tarea de contenido y todos sus links?')"
+              class="text-sm text-red-600 hover:underline">Eliminar tarea</button>
+    </div>
+  </form>
+</details>
+
+<!-- Agregar links -->
+<div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+  <h2 class="font-semibold text-slate-800 mb-2">Agregar links</h2>
+  <form method="POST" action="<%= base %>/links">
+    <textarea name="links" rows="3" required placeholder="Pegá uno o varios links (uno por línea)"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono"></textarea>
+    <button class="btn mt-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar a la lista</button>
+  </form>
+  <p class="text-xs text-slate-400 mt-2">La plataforma avisa si un link ya se usó antes (en este cliente o en otro) para que no se repita.</p>
+</div>
+
+<!-- Hoja de links -->
+<% if (!links.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">Todavía no hay links cargados.</div>
+<% } else { %>
+  <%
+    function estadoLink(l){
+      if (l.uso_previo) {
+        return { txt: '⚠ Ya usado el ' + fmt.formatFecha(l.uso_previo.realizado_en) + (l.uso_previo.cliente_id != cliente.id ? ' · ' + l.uso_previo.cliente : ''), cls: 'text-red-600' };
+      }
+      if (l.realizado) return { txt: 'Usado el ' + fmt.formatFecha(l.realizado_en), cls: 'text-green-600' };
+      return { txt: 'Sin usar', cls: 'text-slate-400' };
+    }
+  %>
+
+  <!-- mobile -->
+  <div class="sm:hidden space-y-2">
+    <% links.forEach(function(l, idx){ var s = estadoLink(l); %>
+      <div class="bg-white rounded-xl shadow-card p-3 <%= l.uso_previo ? 'border-l-4 border-red-300' : '' %>">
+        <a href="<%= l.url %>" target="_blank" rel="noopener" class="text-brand-600 text-sm break-all"><%= l.url %></a>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-xs <%= s.cls %>"><%= s.txt %></span>
+          <div class="flex items-center gap-3">
+            <form method="POST" action="<%= base %>/links/<%= l.id %>/realizado">
+              <label class="flex items-center gap-1.5 text-xs cursor-pointer">
+                <input type="checkbox" onchange="this.form.submit()" <%= l.realizado ? 'checked' : '' %> class="w-4 h-4" />
+                Realizado
+              </label>
+            </form>
+            <form method="POST" action="<%= base %>/links/<%= l.id %>/eliminar" onsubmit="return confirm('¿Eliminar este link?')">
+              <button class="text-xs text-red-500">🗑</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- desktop -->
+  <div class="hidden sm:block bg-white rounded-xl shadow-card overflow-x-auto">
+    <table class="zebra w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-left border-b border-slate-100">
+        <tr>
+          <th class="px-3 py-3 font-medium w-8">#</th>
+          <th class="px-3 py-3 font-medium">Link</th>
+          <th class="px-3 py-3 font-medium">Estado</th>
+          <th class="px-3 py-3 font-medium text-center">Realizado</th>
+          <th class="px-3 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% links.forEach(function(l, idx){ var s = estadoLink(l); %>
+          <tr class="<%= l.uso_previo ? 'pendiente' : '' %>">
+            <td class="px-3 py-2 text-slate-400"><%= idx + 1 %></td>
+            <td class="px-3 py-2 max-w-[420px]">
+              <a href="<%= l.url %>" target="_blank" rel="noopener" class="text-brand-600 hover:underline break-all"><%= l.url %></a>
+            </td>
+            <td class="px-3 py-2 <%= s.cls %>"><%= s.txt %></td>
+            <td class="px-3 py-2 text-center">
+              <form method="POST" action="<%= base %>/links/<%= l.id %>/realizado">
+                <input type="checkbox" onchange="this.form.submit()" <%= l.realizado ? 'checked' : '' %> class="w-4 h-4 align-middle" />
+              </form>
+            </td>
+            <td class="px-3 py-2">
+              <form method="POST" action="<%= base %>/links/<%= l.id %>/eliminar" onsubmit="return confirm('¿Eliminar este link?')">
+                <button class="text-xs text-red-500 hover:underline">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mt-4">
+  <h2 class="text-sm font-semibold text-slate-700">Historial</h2>
+  <%- include('../partials/historial', { historial: historial }) %>
+</div>

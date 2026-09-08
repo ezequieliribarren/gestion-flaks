@@ -113,13 +113,16 @@
         </div>
       </div>
       <nav class="flex-1 py-2 space-y-1 px-3">
-        <% const nav = [
+        <% const nav = esAdmin ? [
           ['/tareas', 'Tareas', '📝'],
+          ['/contenido', 'Contenido', '📸'],
           ['/clientes', 'Clientes', '👥'],
           ['/facturacion', 'Facturación', '💰'],
           ['/gastos', 'Gastos', '🧾'],
           ['/caja', 'Caja', '📊'],
           ['/documentos', 'Documentos', '📁'],
+        ] : [
+          ['/contenido', 'Contenido', '📸'],
         ]; %>
         <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
           <a href="<%= item[0] %>" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm <%= activo ? 'is-active' : 'hover:bg-white/5 hover:text-white' %>">
@@ -146,7 +149,7 @@
         </span>
       </header>
 
-      <main class="flex-1 px-3 py-4 sm:px-8 sm:py-8 pb-24 md:pb-8 max-w-6xl w-full mx-auto">
+      <main class="flex-1 px-3 py-4 sm:px-8 sm:py-8 <%= nav.length > 1 ? 'pb-24' : 'pb-8' %> md:pb-8 max-w-6xl w-full mx-auto">
         <div class="page-enter">
           <%- body %>
         </div>
@@ -156,7 +159,9 @@
   </div>
 
   <!-- Barra de navegación inferior (mobile) -->
-  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 grid grid-cols-6 pb-[env(safe-area-inset-bottom)]">
+  <% if (nav.length > 1) { %>
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 grid pb-[env(safe-area-inset-bottom)]"
+       style="grid-template-columns: repeat(<%= nav.length %>, minmax(0, 1fr));">
     <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
       <a href="<%= item[0] %>" class="flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] <%= activo ? 'text-brand-600' : 'text-slate-400' %>">
         <span class="text-lg leading-none"><%= item[2] %></span>
@@ -164,6 +169,7 @@
       </a>
     <% }); %>
   </nav>
+  <% } %>
 
   <!-- Toast (flash) -->
   <% if (typeof flash !== 'undefined' && flash) { %>

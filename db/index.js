@@ -64,9 +64,13 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   }
 
   const colsClientes = raw.all('PRAGMA table_info(clientes)').map((c) => c.name);
-  if (!colsClientes.includes('logo')) {
-    raw.exec('ALTER TABLE clientes ADD COLUMN logo TEXT');
-  }
+  if (!colsClientes.includes('logo')) raw.exec('ALTER TABLE clientes ADD COLUMN logo TEXT');
+  if (!colsClientes.includes('redes')) raw.exec('ALTER TABLE clientes ADD COLUMN redes INTEGER NOT NULL DEFAULT 0');
+  if (!colsClientes.includes('redes_plan')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_plan TEXT');
+  if (!colsClientes.includes('redes_sheet_url')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_sheet_url TEXT');
+
+  const colsUsers = raw.all('PRAGMA table_info(users)').map((c) => c.name);
+  if (!colsUsers.includes('rol')) raw.exec("ALTER TABLE users ADD COLUMN rol TEXT NOT NULL DEFAULT 'admin'");
 })();
 
 // --- Adaptador con la interfaz de better-sqlite3 que usa el resto del código ---

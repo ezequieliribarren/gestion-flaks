@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   nombre        TEXT NOT NULL,
   usuario       TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  rol           TEXT NOT NULL DEFAULT 'admin',    -- admin (acceso total) | contenido (solo el módulo Contenido)
   creado_en     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -16,8 +17,40 @@ CREATE TABLE IF NOT EXISTS clientes (
   logo       TEXT,                                -- ruta relativa dentro de storage/ (uploads/logos/...)
   estado     TEXT NOT NULL DEFAULT 'potencial',   -- activo | potencial | inactivo (se valida en la app)
   notas      TEXT NOT NULL DEFAULT '',
+  redes           INTEGER NOT NULL DEFAULT 0,     -- 1 = tiene redes sociales / contenido como servicio
+  redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
+  redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
   creado_por TEXT
+);
+
+-- Tareas de contenido (redes): historias, reels, posteos, etc. por cliente.
+CREATE TABLE IF NOT EXISTS tareas_contenido (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id     INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  tipo           TEXT NOT NULL DEFAULT 'historias',   -- historias | reels | posteos | carrusel | otro
+  titulo         TEXT NOT NULL,
+  descripcion    TEXT NOT NULL DEFAULT '',
+  estado         TEXT NOT NULL DEFAULT 'pendiente',   -- pendiente | en_progreso | completada
+  fecha_objetivo TEXT,
+  creado_por     TEXT,
+  creado_en      TEXT NOT NULL DEFAULT (datetime('now')),
+  ultima_modificacion_por TEXT,
+  ultima_modificacion_en  TEXT
+);
+
+-- Links (productos de contenido) de una tarea de contenido, con control de "ya usado".
+CREATE TABLE IF NOT EXISTS contenido_links (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  tarea_id     INTEGER NOT NULL REFERENCES tareas_contenido(id) ON DELETE CASCADE,
+  cliente_id   INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  url          TEXT NOT NULL,
+  url_norm     TEXT NOT NULL,                     -- versión normalizada para detectar repetidos
+  realizado    INTEGER NOT NULL DEFAULT 0,
+  realizado_en TEXT,                              -- fecha en que se marcó como usado/realizado
+  nota         TEXT NOT NULL DEFAULT '',
+  creado_por   TEXT,
+  creado_en    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS tareas (
@@ -114,3 +147,6 @@ CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
 CREATE INDEX IF NOT EXISTS idx_recurrentes_cliente ON trabajos_recurrentes(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_unicos_cliente ON trabajos_unicos(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entidad ON audit_log(entidad, entidad_id);
+CREATE INDEX IF NOT EXISTS idx_tareas_contenido_cliente ON tareas_contenido(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_contenido_links_tarea ON contenido_links(tarea_id);
+CREATE INDEX IF NOT EXISTS idx_contenido_links_norm ON contenido_links(url_norm);

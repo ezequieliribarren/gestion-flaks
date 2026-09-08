@@ -11,7 +11,7 @@ const expressLayouts = require('express-ejs-layouts');
 const db = require('./db');
 const { seedUsers } = require('./db/seed-users');
 const { importarDatosIniciales } = require('./db/importar');
-const { requireAuth } = require('./middleware/auth');
+const { requireAuth, soloAdmin } = require('./middleware/auth');
 const fmt = require('./lib/format');
 
 // Al arrancar, crea/actualiza a German y Ezequiel desde las variables de entorno.
@@ -72,8 +72,10 @@ app.use(
 );
 
 // Helpers disponibles en todas las vistas.
+const { esAdmin } = require('./middleware/auth');
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
+  res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;
   res.locals.fmt = fmt;
   res.locals.flash = req.session.flash || null;
@@ -83,14 +85,16 @@ app.use((req, res, next) => {
 
 // --- Rutas ---
 app.use('/', require('./routes/auth'));
-app.use('/tareas', requireAuth, require('./routes/tareas'));
-app.use('/clientes', requireAuth, require('./routes/clientes'));
-app.use('/facturacion', requireAuth, require('./routes/facturacion'));
-app.use('/gastos', requireAuth, require('./routes/gastos'));
-app.use('/caja', requireAuth, require('./routes/caja'));
-app.use('/documentos', requireAuth, require('./routes/documentos'));
+app.use('/contenido', requireAuth, require('./routes/contenido'));
+app.use('/tareas', requireAuth, soloAdmin, require('./routes/tareas'));
+app.use('/clientes', requireAuth, soloAdmin, require('./routes/clientes'));
+app.use('/facturacion', requireAuth, soloAdmin, require('./routes/facturacion'));
+app.use('/gastos', requireAuth, soloAdmin, require('./routes/gastos'));
+app.use('/caja', requireAuth, soloAdmin, require('./routes/caja'));
+app.use('/documentos', requireAuth, soloAdmin, require('./routes/documentos'));
 
-app.get('/', requireAuth, (req, res) => res.redirect('/tareas'));
+app.get('/', requireAuth, (req, res) =>
+  res.redirect(req.session.user.rol === 'contenido' ? '/contenido' : '/tareas'));
 
 // 404
 app.use((req, res) => {

@@ -6,8 +6,12 @@ const db = require('../db');
 
 const router = express.Router();
 
+function inicio(user) {
+  return user && user.rol === 'contenido' ? '/contenido' : '/tareas';
+}
+
 router.get('/login', (req, res) => {
-  if (req.session.user) return res.redirect('/tareas');
+  if (req.session.user) return res.redirect(inicio(req.session.user));
   res.render('login', { layout: false, error: null });
 });
 
@@ -20,8 +24,8 @@ router.post('/login', (req, res) => {
     return res.status(401).render('login', { layout: false, error: 'Usuario o contraseña incorrectos.' });
   }
 
-  req.session.user = { id: user.id, nombre: user.nombre, usuario: user.usuario };
-  const dest = req.session.returnTo || '/tareas';
+  req.session.user = { id: user.id, nombre: user.nombre, usuario: user.usuario, rol: user.rol || 'admin' };
+  const dest = (user.rol === 'contenido') ? '/contenido' : (req.session.returnTo || '/tareas');
   delete req.session.returnTo;
   res.redirect(dest);
 });

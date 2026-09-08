@@ -1,0 +1,104 @@
+<%
+  function etTipo(t){ return { historias:'Historias', reels:'Reels', posteos:'Posteos', carrusel:'Carrusel', otro:'Otro' }[t] || t; }
+  function badgeEstado(e){ return { pendiente:'bg-slate-100 text-slate-600', en_progreso:'bg-blue-100 text-blue-700', completada:'bg-green-100 text-green-700' }[e] || 'bg-slate-100'; }
+  function etEstado(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
+%>
+
+<a href="/contenido" class="text-sm text-brand-600 hover:underline">&larr; Volver a Contenido</a>
+
+<div class="flex items-center gap-3 mt-2 mb-4">
+  <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 44 }) %>
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800"><%= cliente.nombre %></h1>
+    <div class="text-sm text-slate-500"><%= cliente.redes_plan || 'Sin plan cargado' %></div>
+  </div>
+</div>
+
+<!-- Plan y planificación -->
+<div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <div class="text-xs text-slate-500 uppercase tracking-wide">Planificación de contenido</div>
+      <% if (cliente.redes_sheet_url) { %>
+        <a href="<%= cliente.redes_sheet_url %>" target="_blank" rel="noopener"
+           class="btn inline-flex items-center gap-2 mt-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg px-4 py-2">
+          📄 Abrir Google Sheet
+        </a>
+      <% } else { %>
+        <div class="text-sm text-slate-400 mt-1">Todavía no se cargó el link del Google Sheet.</div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (esAdmin) { %>
+    <details class="mt-4 border-t border-slate-100 pt-3">
+      <summary class="text-sm text-brand-600 cursor-pointer">Editar plan y link (admin)</summary>
+      <form method="POST" action="/contenido/<%= cliente.id %>/config" class="mt-3 space-y-3">
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Plan</label>
+            <input name="redes_plan" value="<%= cliente.redes_plan || '' %>" placeholder="Ej: Plan 1, Plan 2, A medida"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Link del Google Sheet</label>
+            <input name="redes_sheet_url" type="url" value="<%= cliente.redes_sheet_url || '' %>" placeholder="https://docs.google.com/…"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
+          <button name="_accion" value="quitar" onclick="return confirm('¿Quitar este cliente del módulo de contenido? No borra sus tareas de contenido.')"
+                  class="text-sm text-red-600 hover:underline">Quitar de Contenido</button>
+        </div>
+      </form>
+    </details>
+  <% } %>
+</div>
+
+<!-- Nueva tarea de contenido -->
+<div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+  <h2 class="font-semibold text-slate-800 mb-3">Nueva tarea de contenido</h2>
+  <form method="POST" action="/contenido/<%= cliente.id %>/tareas" class="grid sm:grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Título</label>
+      <input name="titulo" required placeholder="Ej: Historias semana 37" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Tipo</label>
+      <select name="tipo" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <% TIPOS.forEach(function(t){ %><option value="<%= t %>"><%= etTipo(t) %></option><% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs text-slate-500 mb-1">Fecha (opcional)</label>
+      <input type="date" name="fecha_objetivo" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+    </div>
+    <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Crear</button>
+  </form>
+</div>
+
+<!-- Lista de tareas de contenido -->
+<% if (!tareas.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">Todavía no hay tareas de contenido.</div>
+<% } %>
+<div class="space-y-2">
+  <% tareas.forEach(function(t){ %>
+    <a href="/contenido/<%= cliente.id %>/tareas/<%= t.id %>" class="lift block bg-white rounded-xl shadow-card hover:shadow-card-hover p-4 <%= t.estado === 'completada' ? 'opacity-70' : '' %>">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-semibold text-slate-800"><%= t.titulo %></span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-brand-50 text-brand-700"><%= etTipo(t.tipo) %></span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full <%= badgeEstado(t.estado) %>"><%= etEstado(t.estado) %></span>
+          </div>
+          <div class="text-xs text-slate-400 mt-1">
+            <%= t.links_hechos %>/<%= t.links_total %> links realizados
+            <% if (t.fecha_objetivo) { %> · <%= fmt.formatFecha(t.fecha_objetivo) %><% } %>
+          </div>
+        </div>
+        <span class="text-slate-300 text-lg shrink-0">›</span>
+      </div>
+    </a>
+  <% }); %>
+</div>

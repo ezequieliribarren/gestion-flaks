@@ -20,11 +20,14 @@
   <a href="/tareas/nueva" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-sm">+ Nueva tarea</a>
 </div>
 
-<div class="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-card w-fit">
-  <% [['hoy','Hoy'],['mes','Este mes'],['todas','Todas']].forEach(function(v){ %>
-    <a href="/tareas?<%= qs({ vista: v[0] }) %>"
-       class="btn px-4 py-1.5 text-sm rounded-lg <%= vista === v[0] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
-  <% }); %>
+<div class="flex flex-wrap items-center gap-2 mb-4">
+  <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card w-fit">
+    <% [['hoy','Hoy'],['mes','Este mes'],['todas','Todas']].forEach(function(v){ %>
+      <a href="/tareas?<%= qs({ vista: v[0] }) %>"
+         class="btn px-4 py-1.5 text-sm rounded-lg <%= vista === v[0] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
+    <% }); %>
+  </div>
+  <a href="/contenido" class="text-sm text-brand-600 hover:underline inline-flex items-center gap-1">📸 Contenido (redes) →</a>
 </div>
 
 <form method="GET" action="/tareas" class="bg-white rounded-xl shadow-card p-4 mb-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:items-end text-sm">

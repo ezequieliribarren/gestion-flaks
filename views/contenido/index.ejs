@@ -1,0 +1,57 @@
+<div class="flex items-center justify-between mb-4 gap-3">
+  <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Contenido</h1>
+</div>
+<p class="text-sm text-slate-500 mb-4">Clientes con redes sociales. Cada uno tiene su plan, su planificación en Google Sheets y sus tareas de contenido.</p>
+
+<form method="GET" action="/contenido" id="buscador" class="relative mb-4">
+  <input type="search" name="q" value="<%= q %>" placeholder="Buscar cliente…" autocomplete="off"
+         class="w-full rounded-lg border border-slate-300 bg-white pl-10 pr-9 py-2.5 text-sm shadow-card focus:outline-none focus:ring-2 focus:ring-brand-400" />
+  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+  <% if (q) { %><a href="/contenido" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-lg">&times;</a><% } %>
+</form>
+<script>
+  (function () {
+    var f = document.getElementById('buscador'); if (!f) return;
+    var t; f.querySelector('input[name="q"]').addEventListener('input', function () {
+      clearTimeout(t); t = setTimeout(function () { f.submit(); }, 400);
+    });
+  })();
+</script>
+
+<% if (!clientes.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">
+    <%= q ? 'Ningún cliente de contenido coincide con «' + q + '».' : 'Todavía no hay clientes en el módulo de contenido.' %>
+  </div>
+<% } %>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <% clientes.forEach(function(c){ %>
+    <a href="/contenido/<%= c.id %>" class="lift block bg-white rounded-xl shadow-card hover:shadow-card-hover p-4">
+      <div class="flex items-center gap-2.5 mb-2">
+        <%- include('../partials/cliente-avatar', { id: c.id, nombre: c.nombre, logo: c.logo, size: 36 }) %>
+        <div class="min-w-0">
+          <div class="font-semibold text-slate-800 truncate"><%= c.nombre %></div>
+          <div class="text-xs text-slate-400"><%= c.redes_plan || 'Sin plan cargado' %></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-xs text-slate-500">
+        <span><%= c.tareas_abiertas %> tarea<%= c.tareas_abiertas === 1 ? '' : 's' %> abierta<%= c.tareas_abiertas === 1 ? '' : 's' %></span>
+        <% if (c.redes_sheet_url) { %><span class="text-green-600">✓ planificación</span><% } %>
+      </div>
+    </a>
+  <% }); %>
+</div>
+
+<% if (esAdmin && disponibles.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mt-6">
+    <h2 class="font-semibold text-slate-800 mb-2">Agregar un cliente a Contenido</h2>
+    <form method="POST" action="/contenido/agregar" class="flex flex-wrap gap-2 items-end">
+      <select name="cliente_id" required class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <option value="">Elegí un cliente…</option>
+        <% disponibles.forEach(function(d){ %><option value="<%= d.id %>"><%= d.nombre %></option><% }); %>
+      </select>
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar</button>
+    </form>
+    <p class="text-xs text-slate-400 mt-2">El cliente tiene que existir en <a href="/clientes" class="text-brand-600 hover:underline">Clientes</a>. Al agregarlo acá se marca que hace redes.</p>
+  </div>
+<% } %>
