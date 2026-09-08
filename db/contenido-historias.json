@@ -1,7 +1,452 @@
 {
-  "_generado": "2026-09-08T18:53:11.298Z",
+  "_generado": "2026-09-08T19:28:54.861Z",
   "cliente": "SISTEMA CONTINUO",
   "subempresas": [
+    {
+      "empresa": "Artanium",
+      "links": [
+        {
+          "url": "https://artanium.com.ar/producto/tinta-para-sublimacion-100-ml/",
+          "nota": "Tinta para SublimaciÃ³n â 100 ml.",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/papel/sublimacion-papel/a4/papel-para-sublimar-artanium-fastdry-a4",
+          "nota": "Papel Para Sublimar Artanium Fast Dry - A4 - Paquete x 100 hojas",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/papel/sublimacion-papel/a4/papel-para-sublimar-artanium-instant-dry-a4-paquete-x-100-hojas",
+          "nota": "Papel para Sublimar Artanium INSTANT DRY - A4 - Paquete x 100 hojas",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/papel/autoadhesivos/vinilo-adhesivo-para-inkjet-blanco-brillante-a4-100gr-20-hojas",
+          "nota": "Vinilo Adhesivo Blanco Brillante - A4 100gr - 20 Hojas",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/papel/autoadhesivos/vinilo-adhesivo-para-inkjet-blanco-matte-a4-90gr-20-hojas",
+          "nota": "Vinilo Adhesivo Blanco Matte - A4 90gr - 20 Hojas",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/papel/autoadhesivos/papel-autoadhesivo-plata-perlado-a4-140gr-20-hojas",
+          "nota": "Vinilo Adhesivo Plata Perlado - A4 135gr - 20 Hojas",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-impresoras-rollo-100-mts/",
+          "nota": "Papeles para sublimaciÃ³n para impresoras â Rollo 100 mts.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/tinta-para-dtf-1-lt/",
+          "nota": "Tinta para DTF â 1 lt.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/tinta-para-dtf-uv-500-ml/",
+          "nota": "Tinta para DTF UV â 500 ml.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/tinta-fotografica-100-ml-1-lt/",
+          "nota": "Tinta FotogrÃ¡fica â 100 ml. / 1 lt",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-mate-simple-faz/",
+          "nota": "Papel FotogrÃ¡fico Mate Simple Faz",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/tinta-para-sublimacion-1-lt/",
+          "nota": "Tinta para SublimaciÃ³n â 1 lt.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-mate-doble-faz/",
+          "nota": "Papel FotogrÃ¡fico Mate Doble Faz",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-glossy-simple-faz/",
+          "nota": "Papel FotogrÃ¡fico Glossy Simple Faz",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-resinado-glossy/",
+          "nota": "Papel FotogrÃ¡fico Resinado Glossy",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-resinado-luster/",
+          "nota": "Papel FotogrÃ¡fico Resinado Luster",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-resinado-satin/",
+          "nota": "Papel FotogrÃ¡fico Resinado SatÃ­n",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-impresoras-a4-instant-dry/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-impresoras-rollo-instant-dry-50-mts/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/tinta-pigmentada-100-ml-250-ml-1-lt/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-autoadhesivo-mate/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papel-fotografico-autoadhesivo-glossy/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/film-para-dtf-rollo-50-mts/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/film-para-dtf-uv-rollo-100-mts/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/polvo-para-dtf-blanco-1kg/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/polvo-para-dtf-negro-1kg/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/limpiador-para-tintas-uv-1-lt/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-impresoras-a4-fast-dry/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-plotter-rollo-50-gr/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://artanium.com.ar/producto/papeles-para-sublimacion-para-plotter-rollo-70-gr/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        }
+      ]
+    },
+    {
+      "empresa": "Senko",
+      "links": [
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1301-para-sublimacion/",
+          "nota": "Plotter SENKO 1301 para SublimaciÃ³n",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1802-60/",
+          "nota": "Plotter SENKO 1802-60",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1840-extreme/",
+          "nota": "Plotter SENKO 1840 Extreme",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-automatica-100x120cm-senko-astm-48-220v/",
+          "nota": "SENKO ASTM-48 380V",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://senko.com.ar/producto/calandra-con-mesa-senko-cm-120/",
+          "nota": "Calandra con mesa SENKO CM-120",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-sublimadora-plana-80x100-senko-blue/",
+          "nota": "Estampadora Sublimadora Plana 80Ã100 SENKO Blue",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1834-extreme/",
+          "nota": "Plotter SENKO 1834 Extreme",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://senko.com.ar/producto/impresora-de-escritorio-a3-1c60-dtf-senko/",
+          "nota": "Impresora de escritorio A3-1C60 DTF Senko",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-uv-3c60/",
+          "nota": "Plotter SENKO DTF UV 3C60",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-textil-a360/",
+          "nota": "Plotter SENKO DTF TEXTIL A360",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://senko.com.ar/producto/horno-de-escritorio-a3-senko-sk-a3des/",
+          "nota": "Horno de escritorio A3 Senko SK-A3DES",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-38x38-2en1/",
+          "nota": "Estampadora 38Ã38 2en1",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-sublimacion-textil-plana-38x38-con-piston-senko-uph15/",
+          "nota": "Estampadora Sublimacion Textil Plana 38Ã38 con PistÃ³n Senko UPH15",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-plana-40-x-60-doble-bandeja-neumatica/",
+          "nota": "Estampadora Plana 40Ã60 Doble Bandeja Neumatica",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-sublimadora-textil-plancha-plana-40x60-con-piston-uhp24/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/estampadora-sublimadora-plana-60x80-senko-blue/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/calandra-de-cintas-senko-ct-500/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/calandra-con-mesa-senko-cm-160/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-para-sublimacion-senko-1880/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1802-32c/",
+          "nota": "",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-uv-2c60/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-uv-70-3c32/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-textil-e6502/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-dtf-textil-e6504/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://senko.com.ar/producto/plotter-senko-1802-60-3/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://senko.com.ar/producto/calandra-con-mesa-senko-cm-4217f/",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        }
+      ]
+    },
+    {
+      "empresa": "Sistema Continuo GF",
+      "links": [
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/gf-polvo-poliamida-negra",
+          "nota": "Polvo DTF Negra x 1kg",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/limpiador-para-tintas-uv-x-1000cc-50-hisopos",
+          "nota": "Limpiador para tintas UV x 1000cc + 50 hisopos",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/tintas/fotograficas/gf-tinta-ecosolvente",
+          "nota": "Tinta Ecosolvente - Artanium - AR20 x 1000cc",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/insumos/gf-protector-de-sublimacion-para-calandra-30-gr",
+          "nota": "Protector de SublimaciÃ³n Para Calandra 30 Gr. X1000 M 120 cm",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/insumos/gf-protector-de-sublimacion-para-calandra-30-gr-3",
+          "nota": "Protector de SublimaciÃ³n Para Calandra 30 Gr. X500 M 40 cm",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/insumos/gf-protector-de-sublimacion-para-calandra-30-gr-2",
+          "nota": "Protector de SublimaciÃ³n Para Calandra 30 Gr. X1000 M 160 cm",
+          "realizado_en": "2026-07-13"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/rollos/gf-rollo-para-sublimacion-nacional-65-gr",
+          "nota": "Rollo para SublimaciÃ³n - Nacional 65 Gr.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/rollos/gf-rollo-para-sublimacion-nacional-80-gr-3",
+          "nota": "Rollo para SublimaciÃ³n - Nacional 80 Gr.",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/gf-plotter-epson-surecolor-f570-24",
+          "nota": "Plotter Epson SureColor F570 24\"",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/gf-film-dtf-textil-uv",
+          "nota": "Film DTF UV - 30cm x 100 mt",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/gf-film-dtf-textil-uv-2",
+          "nota": "Film DTF UV - 60cm x 100 mt",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/insumos/gf-liquido-limpia-cabezal-importado-para-sublimacion-x1000cc",
+          "nota": "LÃ­quido Limpia cabezal Importado para SublimaciÃ³n x1000cc",
+          "realizado_en": "2026-07-20"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/rollos/gf-rollo-para-sublimacion-nacional-80-gr-5",
+          "nota": "Rollo para SublimaciÃ³n - Nacional 80 Gr.",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/calandras/gf-calandra-senko-sk-cm-120-mts",
+          "nota": "Calandra Senko SK-CM 1,20 Mts.",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/plotter-70-3c60-dtf-uv-senko",
+          "nota": "Plotter 70-3C60 DTF UV Senko",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/rollos/gf-rollo-para-sublimacion-nacional-80-gr-4",
+          "nota": "Rollo para SublimaciÃ³n - Nacional 80 Gr.",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/estampadoras-sublimacion-gran-formato/gf-estampadora-senko-astm-48-120-mts-doble-bandeja",
+          "nota": "Estampadora Senko ASTM-48 1,20 Mts. Doble Bandeja",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/plotter-70-3c32-dtf-uv-senko",
+          "nota": "Plotter 70-3C32 DTF UV Senko",
+          "realizado_en": "2026-07-27"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/limpiador-para-tintas-dtf-blanca-textil-1000cc-50-hisopos",
+          "nota": "Limpiador para tintas DTF BLANCA Textil x 1000cc + 50 Hisopos",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/calandras/gf-calandra-senko-cm-4219f-170-mts",
+          "nota": "calandra cm-4219f",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/estampadoras-sublimacion-gran-formato/gf-estampadora-senko-mag-40-con-piston",
+          "nota": "Estampadora Senko MAG-40 - 60x100 con Piston",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/estampadoras-sublimacion-gran-formato/gf-estampadora-de-cintas-senko-lzp-40-dh",
+          "nota": "Estampadora De Cintas Senko LZP-40-DH",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/calandras/gf-calandra-senko-ct900-cintas-y-elasticos",
+          "nota": "Calandra Senko CT900 Cintas y ElÃ¡sticos",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/gf-plotter-1802-senko-3",
+          "nota": "Plotter 1802 Senko",
+          "realizado_en": "2026-08-03"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/calandras/gf-calandra-senko-cr2742f-250-mts",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/gf-plotter-a360-dtf-senko",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/estampadoras-sublimacion-gran-formato/gf-estampadora-senko-stm-55",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/rollos/gf-rollo-para-sublimacion-importado-80-gr-2",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/calandras/gf-calandra-senko-cm3242f-325-mts",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        },
+        {
+          "url": "https://sistemacontinuo.com.ar/gran-formato/plotters/gf-plotter-2c60-dtf-uv-senko",
+          "nota": "",
+          "realizado_en": "2026-08-31"
+        }
+      ]
+    },
     {
       "empresa": "Sistema Continuo",
       "links": [

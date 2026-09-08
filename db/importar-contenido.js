@@ -14,7 +14,7 @@ const fs = require('fs');
 const db = require('./index');
 const { normalizarUrl } = require('../lib/contenido');
 
-const MARCA = 'import_contenido_historias_v1';
+const MARCA = 'import_contenido_historias_v2';
 const JSON_PATH = path.join(__dirname, 'contenido-historias.json');
 
 function importarContenidoHistorico(log = console.log) {
