@@ -11,6 +11,7 @@ const expressLayouts = require('express-ejs-layouts');
 const db = require('./db');
 const { seedUsers } = require('./db/seed-users');
 const { importarDatosIniciales } = require('./db/importar');
+const { importarContenidoHistorico } = require('./db/importar-contenido');
 const { requireAuth, soloAdmin } = require('./middleware/auth');
 const fmt = require('./lib/format');
 
@@ -33,6 +34,13 @@ try {
   importarDatosIniciales();
 } catch (e) {
   console.error('Error importando datos iniciales:', e);
+}
+
+// Importa (una sola vez) el histórico de links de historias de SISTEMA CONTINUO.
+try {
+  importarContenidoHistorico();
+} catch (e) {
+  console.error('Error importando histórico de contenido:', e);
 }
 
 const app = express();

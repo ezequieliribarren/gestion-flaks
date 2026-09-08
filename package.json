@@ -8,7 +8,9 @@
     "start": "node server.js",
     "seed": "node db/seed.js",
     "import": "node db/importar.js",
-    "generar-datos": "node scripts/generar-datos-iniciales.js"
+    "import-contenido": "node db/importar-contenido.js",
+    "generar-datos": "node scripts/generar-datos-iniciales.js",
+    "generar-contenido": "node scripts/generar-contenido-historias.js"
   },
   "engines": {
     "node": ">=18"

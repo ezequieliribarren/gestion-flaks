@@ -150,6 +150,17 @@ Los trabajos sin reparto German/Ezequiel en la planilla se importan 50/50. Los c
 como "mensuales" quedan con una nota para cargarles el trabajo recurrente con su monto. Los
 egresos de tipo honorarios/retiros no se importan como gasto (falsearían la ganancia de la Caja).
 
+### Histórico de historias (SISTEMA CONTINUO)
+
+`db/contenido-historias.json` tiene los links de historias ya usados de SISTEMA CONTINUO, sacados
+del sheet de la CM (`anterior/HISTORIAS JULI - *.csv`, columnas A = link, B = producto). Al arrancar,
+la app los importa **una sola vez**: marca al cliente como "redes", crea una tarea de contenido
+"histórico importado" y carga los 54 links como **realizados** con su fecha aproximada (por semana)
+y la sub-empresa. Sirven de "memoria": si alguien pega uno de esos links, avisa que ya se usó.
+
+- `npm run generar-contenido` → regenera el JSON desde los CSV de `anterior/` (dev, requiere `xlsx`).
+- `npm run import-contenido` → importa si todavía no se hizo.
+
 ### Persistencia — IMPORTANTE
 
 La base (`flaks.sqlite`) y los documentos subidos **no** están en git. Si el deploy por Git de
