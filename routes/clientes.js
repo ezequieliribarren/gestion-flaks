@@ -152,12 +152,19 @@ router.get('/:id', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'El cliente no existe.' });
 
-  const recurrentes = db.prepare('SELECT * FROM trabajos_recurrentes WHERE cliente_id = ? ORDER BY activo DESC, nombre').all(cliente.id);
+  const d = new Date();
+  const mesPrefijo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+  const recurrentes = db.prepare(`
+    SELECT tr.*, pr.fecha_pago AS pago_fecha
+    FROM trabajos_recurrentes tr
+    LEFT JOIN pagos_recurrentes pr ON pr.recurrente_id = tr.id AND pr.periodo = ?
+    WHERE tr.cliente_id = ?
+    ORDER BY tr.activo DESC, tr.nombre
+  `).all(mesPrefijo, cliente.id);
   const unicos = db.prepare('SELECT * FROM trabajos_unicos WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
   const mensualTotal = recurrentes.filter((r) => r.activo).reduce((a, r) => a + r.monto_mensual, 0);
 
-  const d = new Date();
-  const mesPrefijo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   const tareasMes = db.prepare(`
     SELECT * FROM tareas
     WHERE cliente_id = ? AND fecha_cierre IS NOT NULL AND substr(fecha_cierre,1,7) = ?
@@ -171,6 +178,7 @@ router.get('/:id', (req, res) => {
     unicos,
     mensualTotal,
     tareasMes,
+    periodoActual: mesPrefijo,
     ESTADOS,
     ultima: audit.ultimaModificacion('clientes', cliente.id),
     historial: audit.historial('clientes', cliente.id),
@@ -284,6 +292,29 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó trabajo recurrente "${nombre}"`);
   req.session.flash = { tipo: 'ok', msg: 'Trabajo recurrente actualizado.' };
   res.redirect('/clientes/' + cliente.id + '#recurrentes');
+});
+
+// Registrar / borrar el pago de un trabajo recurrente para un mes (periodo 'YYYY-MM').
+router.post('/:id/recurrentes/:tid/pago', (req, res) => {
+  const t = db.prepare('SELECT * FROM trabajos_recurrentes WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!t) return res.redirect('/clientes');
+  const periodo = /^\d{4}-\d{2}$/.test(req.body.periodo) ? req.body.periodo : new Date().toISOString().slice(0, 7);
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
+
+  if (fecha) {
+    db.prepare(`
+      INSERT INTO pagos_recurrentes (recurrente_id, periodo, fecha_pago, registrado_por)
+      VALUES (@rid, @periodo, @fecha, @usuario)
+      ON CONFLICT(recurrente_id, periodo) DO UPDATE SET fecha_pago = @fecha, registrado_por = @usuario, registrado_en = datetime('now')
+    `).run({ rid: t.id, periodo, fecha, usuario: req.session.user.nombre });
+    audit.registrar(req, 'clientes', req.params.id, 'editar', `Registró pago de "${t.nombre}" (${periodo}) el ${fecha}`);
+    req.session.flash = { tipo: 'ok', msg: 'Pago registrado.' };
+  } else {
+    db.prepare('DELETE FROM pagos_recurrentes WHERE recurrente_id = ? AND periodo = ?').run(t.id, periodo);
+    audit.registrar(req, 'clientes', req.params.id, 'editar', `Marcó como pendiente el pago de "${t.nombre}" (${periodo})`);
+    req.session.flash = { tipo: 'ok', msg: 'Marcado como pendiente.' };
+  }
+  res.redirect('/clientes/' + req.params.id + '#recurrentes');
 });
 
 // --- Trabajos únicos ---

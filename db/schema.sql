@@ -80,6 +80,18 @@ CREATE TABLE IF NOT EXISTS trabajos_recurrentes (
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Pago de un trabajo recurrente en un mes puntual. Si no hay fila para el mes,
+-- ese trabajo figura "pendiente" ese mes (se "reinicia" solo el 1° de cada mes).
+CREATE TABLE IF NOT EXISTS pagos_recurrentes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  recurrente_id  INTEGER NOT NULL REFERENCES trabajos_recurrentes(id) ON DELETE CASCADE,
+  periodo        TEXT NOT NULL,                  -- 'YYYY-MM'
+  fecha_pago     TEXT NOT NULL,                  -- 'YYYY-MM-DD' (fecha en que realmente pagó)
+  registrado_por TEXT,
+  registrado_en  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (recurrente_id, periodo)
+);
+
 CREATE TABLE IF NOT EXISTS trabajos_unicos (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   cliente_id       INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
@@ -146,6 +158,7 @@ CREATE TABLE IF NOT EXISTS app_meta (
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
 CREATE INDEX IF NOT EXISTS idx_recurrentes_cliente ON trabajos_recurrentes(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_pagos_rec_periodo ON pagos_recurrentes(recurrente_id, periodo);
 CREATE INDEX IF NOT EXISTS idx_unicos_cliente ON trabajos_unicos(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entidad ON audit_log(entidad, entidad_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_contenido_cliente ON tareas_contenido(cliente_id);

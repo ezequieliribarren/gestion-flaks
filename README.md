@@ -42,6 +42,9 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 4. **Cliente (detalle)** — cobro mensual total, checklist de tareas del mes, trabajos recurrentes,
    trabajos únicos (ambos con reparto German/Ezequiel), anotaciones libres.
 5. **Facturación** — planilla por mes/año: recurrentes activos + únicos del mes, totales y subtotal por persona.
+   Cada **recurrente** muestra el **cobro**: en la ficha del cliente hay un campo "¿Pagó?" con la fecha real
+   de pago del mes (se vacía sola el 1°); si está vacío, en Facturación figura **Pendiente** (o **Vencido**
+   si ya pasó el "Día" límite de pago). Arriba se ve el total pendiente de cobro.
 6. **Gasto (carga)** — formulario: descripción, monto, tipo (recurrente/único), fecha, categoría,
    **quién lo pagó** (German/Ezequiel) y **¿Saldado? Sí/No** (obligatorio).
 7. **Gastos** — planilla por mes + **cuenta corriente**: los gastos "no saldados" (los pagó uno solo
