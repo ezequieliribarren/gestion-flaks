@@ -26,7 +26,12 @@ para organizar tareas, clientes, facturación, gastos, caja y documentación.
 ## Pantallas
 
 1. **Login** — usuario + contraseña (sin registro público).
-2. **Tareas** — vistas Hoy / Este mes / Todas, filtros por cliente, prioridad y estado, CRUD + completar.
+2. **Tareas** — vistas Hoy / Este mes / Todas + toggle **Cards / Lista**; filtros en una fila
+   (usuario, cliente, prioridad, estado). Lista minimal (título · prioridad · cliente), toda la
+   fila entra al detalle. Extras: **Interna (FLAKS)** en vez de cliente; **Partes** (checklist de
+   sub-items, con avance en la lista); **Desarrollo** (ex "descripción") + campo de **Links**;
+   **asignar varios usuarios**; **vencidas** siguen en Hoy (vencen 19 hs) con "Vencida hace X días";
+   **notificaciones** a los participantes al crear/editar/cambiar estado.
 2b. **Contenido** — módulo para los clientes de **redes sociales**. Lista sólo los clientes marcados
    con "redes". Cada uno tiene su **plan**, un link a su **Google Sheet de planificación** (lo carga
    un admin) y sus **tareas de contenido** (historias, reels, posteos…). Una tarea de contenido es
