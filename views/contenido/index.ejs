@@ -18,6 +18,22 @@
   })();
 </script>
 
+<% if (misTareas && misTareas.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+    <h2 class="font-semibold text-slate-800 mb-2">Tus tareas de contenido</h2>
+    <ul class="divide-y divide-slate-100">
+      <% misTareas.forEach(function(t){ %>
+        <li>
+          <a href="/contenido/<%= t.cliente_id %>/tareas/<%= t.id %>" class="flex items-center justify-between gap-3 py-2 hover:text-brand-600 text-sm">
+            <span><strong><%= t.titulo %></strong> <span class="text-slate-400">· <%= t.cliente %></span></span>
+            <span class="text-xs text-slate-400 shrink-0"><% if (t.fecha_objetivo) { %><%= fmt.formatFecha(t.fecha_objetivo) %><% } %></span>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
 <% if (!clientes.length) { %>
   <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">
     <%= q ? 'Ningún cliente de contenido coincide con «' + q + '».' : 'Todavía no hay clientes en el módulo de contenido.' %>

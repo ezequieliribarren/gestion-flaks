@@ -5,6 +5,7 @@ const db = require('../db');
 const audit = require('../lib/audit');
 const { esAdmin } = require('../middleware/auth');
 const { TIPOS, ESTADOS_TAREA, normalizarUrl, usoPrevio } = require('../lib/contenido');
+const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
 
 const router = express.Router();
 
@@ -46,7 +47,17 @@ router.get('/', (req, res) => {
     disponibles = db.prepare("SELECT id, nombre FROM clientes WHERE redes = 0 ORDER BY nombre COLLATE NOCASE").all();
   }
 
-  res.render('contenido/index', { titulo: 'Contenido', clientes, disponibles, q });
+  // Tareas de contenido asignadas al usuario que todavía no están completas.
+  const misTareas = db.prepare(`
+    SELECT tc.id, tc.titulo, tc.tipo, tc.estado, tc.fecha_objetivo, c.id AS cliente_id, c.nombre AS cliente
+    FROM tareas_contenido tc
+    JOIN clientes c ON c.id = tc.cliente_id
+    WHERE tc.estado <> 'completada'
+      AND EXISTS (SELECT 1 FROM asignaciones a WHERE a.tipo = 'contenido' AND a.ref_id = tc.id AND a.user_id = ?)
+    ORDER BY (tc.fecha_objetivo IS NULL), tc.fecha_objetivo
+  `).all(req.session.user.id);
+
+  res.render('contenido/index', { titulo: 'Contenido', clientes, disponibles, q, misTareas });
 });
 
 // Agregar un cliente existente al módulo de contenido (admin).
@@ -72,9 +83,9 @@ router.get('/:id', (req, res) => {
     FROM tareas_contenido tc
     WHERE tc.cliente_id = ?
     ORDER BY CASE tc.estado WHEN 'completada' THEN 1 ELSE 0 END, tc.creado_en DESC
-  `).all(cliente.id);
+  `).all(cliente.id).map((t) => ({ ...t, asignados: asignadosDe('contenido', t.id) }));
 
-  res.render('contenido/cliente', { titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, hoyISO: hoyISO() });
+  res.render('contenido/cliente', { titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, users: usuarios(), hoyISO: hoyISO() });
 });
 
 // Configurar plan / sheet / quitar (admin).
@@ -111,9 +122,17 @@ router.post('/:id/tareas', (req, res) => {
     INSERT INTO tareas_contenido (cliente_id, tipo, titulo, fecha_objetivo, creado_por, ultima_modificacion_por, ultima_modificacion_en)
     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
   `).run(cliente.id, tipo, titulo, fecha, req.session.user.nombre, req.session.user.nombre);
-  audit.registrar(req, 'contenido', info.lastInsertRowid, 'crear', `Creó tarea de contenido "${titulo}" (${tipo}) para ${cliente.nombre}`);
+  const tid = info.lastInsertRowid;
+  let asig = req.body.asignados || [];
+  if (!Array.isArray(asig)) asig = [asig];
+  setAsignados('contenido', tid, asig);
+  audit.registrar(req, 'contenido', tid, 'crear', `Creó tarea de contenido "${titulo}" (${tipo}) para ${cliente.nombre}`);
+  notificarParticipantes('contenido', tid, req.session.user.nombre, req.session.user, {
+    texto: `${req.session.user.nombre} te asignó "${titulo}" (contenido de ${cliente.nombre})`,
+    url: '/contenido/' + cliente.id + '/tareas/' + tid,
+  });
   req.session.flash = { tipo: 'ok', msg: 'Tarea de contenido creada.' };
-  res.redirect('/contenido/' + cliente.id + '/tareas/' + info.lastInsertRowid);
+  res.redirect('/contenido/' + cliente.id + '/tareas/' + tid);
 });
 
 router.get('/:id/tareas/:tid', (req, res) => {
@@ -138,6 +157,9 @@ router.get('/:id/tareas/:tid', (req, res) => {
     empresas,
     TIPOS,
     ESTADOS_TAREA,
+    users: usuarios(),
+    asignados: asignadosDe('contenido', tarea.id),
+    asignadosSel: asignadosIds('contenido', tarea.id),
     historial: audit.historial('contenido', tarea.id),
   });
 });
@@ -152,8 +174,15 @@ router.post('/:id/tareas/:tid', (req, res) => {
   const fecha = req.body.fecha_objetivo ? String(req.body.fecha_objetivo).slice(0, 10) : null;
   db.prepare('UPDATE tareas_contenido SET titulo=?, tipo=?, estado=?, descripcion=?, fecha_objetivo=? WHERE id=?')
     .run(titulo, tipo, estado, descripcion, fecha, tarea.id);
+  let asig = req.body.asignados || [];
+  if (!Array.isArray(asig)) asig = [asig];
+  setAsignados('contenido', tarea.id, asig);
   tocarTarea(req, tarea.id);
   audit.registrar(req, 'contenido', tarea.id, 'editar', `Editó la tarea de contenido "${titulo}"`);
+  notificarParticipantes('contenido', tarea.id, tarea.creado_por, req.session.user, {
+    texto: `${req.session.user.nombre} modificó "${titulo}" (contenido)`,
+    url: '/contenido/' + req.params.id + '/tareas/' + tarea.id,
+  });
   req.session.flash = { tipo: 'ok', msg: 'Tarea actualizada.' };
   res.redirect('/contenido/' + req.params.id + '/tareas/' + tarea.id);
 });
@@ -161,6 +190,7 @@ router.post('/:id/tareas/:tid', (req, res) => {
 router.post('/:id/tareas/:tid/eliminar', (req, res) => {
   const tarea = db.prepare('SELECT * FROM tareas_contenido WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
   if (!tarea) return res.redirect('/contenido/' + req.params.id);
+  db.prepare("DELETE FROM asignaciones WHERE tipo = 'contenido' AND ref_id = ?").run(tarea.id);
   db.prepare('DELETE FROM tareas_contenido WHERE id = ?').run(tarea.id);
   audit.registrar(req, 'contenido', tarea.id, 'eliminar', `Eliminó la tarea de contenido "${tarea.titulo}"`);
   req.session.flash = { tipo: 'ok', msg: 'Tarea de contenido eliminada.' };
