@@ -1,0 +1,28 @@
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Notificaciones</h1>
+  <% if (notifs.length) { %>
+    <form method="POST" action="/notificaciones/marcar-todas">
+      <button class="text-sm text-brand-600 hover:underline">Marcar todas como leídas</button>
+    </form>
+  <% } %>
+</div>
+
+<% if (!notifs.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">No tenés notificaciones.</div>
+<% } %>
+
+<div class="bg-white rounded-xl shadow-card divide-y divide-slate-100 overflow-hidden">
+  <% notifs.forEach(function(n){ %>
+    <a href="/notificaciones/<%= n.id %>/ir" class="block px-4 py-3 hover:bg-slate-50 <%= n.leida ? '' : 'bg-brand-50/40' %>">
+      <div class="flex items-start gap-3">
+        <span class="mt-1 w-2 h-2 rounded-full shrink-0 <%= n.leida ? 'bg-transparent' : 'bg-brand-500' %>"></span>
+        <div class="min-w-0">
+          <div class="text-sm text-slate-700"><%= n.texto %></div>
+          <div class="text-xs text-slate-400 mt-0.5">
+            <%= fmt.formatFechaHora(n.creada_en) %><% if (n.de_quien) { %> · <%= n.de_quien %><% } %>
+          </div>
+        </div>
+      </div>
+    </a>
+  <% }); %>
+</div>

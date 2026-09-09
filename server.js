@@ -81,18 +81,21 @@ app.use(
 
 // Helpers disponibles en todas las vistas.
 const { esAdmin } = require('./middleware/auth');
+const { contarNoLeidas } = require('./lib/participacion');
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;
   res.locals.fmt = fmt;
   res.locals.flash = req.session.flash || null;
+  res.locals.notifCount = req.session.user ? contarNoLeidas(req.session.user.id) : 0;
   delete req.session.flash;
   next();
 });
 
 // --- Rutas ---
 app.use('/', require('./routes/auth'));
+app.use('/notificaciones', requireAuth, require('./routes/notificaciones'));
 app.use('/contenido', requireAuth, require('./routes/contenido'));
 app.use('/tareas', requireAuth, soloAdmin, require('./routes/tareas'));
 app.use('/clientes', requireAuth, soloAdmin, require('./routes/clientes'));

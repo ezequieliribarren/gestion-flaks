@@ -144,12 +144,20 @@
           <span class="brand-mark w-7 h-7 rounded-lg flex items-center justify-center text-sm">F</span> Flaks
         </span>
         <span class="text-xs text-slate-300 flex items-center gap-3">
+          <a href="/notificaciones" class="relative text-lg leading-none" aria-label="Notificaciones">🔔<% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %></a>
           <%= currentUser ? currentUser.nombre : '' %>
           <form method="POST" action="/logout"><button class="text-brand-300">Salir</button></form>
         </span>
       </header>
 
-      <main class="flex-1 px-3 py-4 sm:px-8 sm:py-8 <%= nav.length > 1 ? 'pb-24' : 'pb-8' %> md:pb-8 max-w-6xl w-full mx-auto">
+      <!-- Barra superior (desktop) -->
+      <div class="hidden md:flex items-center justify-end gap-4 px-8 pt-5">
+        <a href="/notificaciones" class="relative text-slate-500 hover:text-slate-800 text-xl leading-none" aria-label="Notificaciones">
+          🔔<% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %>
+        </a>
+      </div>
+
+      <main class="flex-1 px-3 py-4 sm:px-8 sm:pt-4 sm:pb-8 <%= nav.length > 1 ? 'pb-24' : 'pb-8' %> md:pb-8 max-w-6xl w-full mx-auto">
         <div class="page-enter">
           <%- body %>
         </div>

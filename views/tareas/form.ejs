@@ -4,38 +4,59 @@
 
   <form method="POST" action="/tareas" class="bg-white rounded-xl shadow-card p-6 space-y-4">
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Título *</label>
       <input name="nombre" required value="<%= tarea.nombre || '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
     </div>
-    <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-      <textarea name="descripcion" rows="3" class="w-full rounded-md border border-slate-300 px-3 py-2"><%= tarea.descripcion || '' %></textarea>
-    </div>
+
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Prioridad</label>
         <select name="prioridad" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= tarea.prioridad === p ? 'selected' : '' %>><%= p %></option><% }); %>
+          <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= (tarea.prioridad||'media') === p ? 'selected' : '' %>><%= p %></option><% }); %>
         </select>
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Estado</label>
         <select name="estado" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= tarea.estado === e ? 'selected' : '' %>><%= e %></option><% }); %>
+          <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= (tarea.estado||'pendiente') === e ? 'selected' : '' %>><%= e %></option><% }); %>
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de cierre / vencimiento</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Vence (19 hs)</label>
         <input type="date" name="fecha_cierre" value="<%= tarea.fecha_cierre ? String(tarea.fecha_cierre).slice(0,10) : '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
         <select name="cliente_id" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <option value="">Sin cliente</option>
+          <option value="interna" <%= tarea.interna ? 'selected' : '' %>>🏢 Interna (FLAKS)</option>
+          <option value="sin" <%= (!tarea.interna && !tarea.cliente_id) ? 'selected' : '' %>>Sin cliente</option>
           <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(tarea.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
         </select>
       </div>
     </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Asignar a</label>
+      <div class="flex flex-wrap gap-2">
+        <% users.forEach(function(u){ %>
+          <label class="flex items-center gap-1.5 text-sm rounded-lg border border-slate-300 px-3 py-1.5 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+            <input type="checkbox" name="asignados" value="<%= u.id %>" <%= (asignadosSel || []).map(String).indexOf(String(u.id)) >= 0 ? 'checked' : '' %> class="w-4 h-4" />
+            <%= u.nombre %>
+          </label>
+        <% }); %>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Desarrollo</label>
+      <textarea name="descripcion" rows="4" class="w-full rounded-md border border-slate-300 px-3 py-2" placeholder="Notas, contexto, avances…"><%= tarea.descripcion || '' %></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Links</label>
+      <textarea name="links" rows="2" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-mono" placeholder="Un link por línea"><%= tarea.links || '' %></textarea>
+    </div>
+
     <div class="flex gap-2">
       <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-md px-4 py-2 text-sm">Crear tarea</button>
       <a href="/tareas" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>

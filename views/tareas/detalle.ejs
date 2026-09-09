@@ -1,54 +1,147 @@
-<div class="max-w-xl mx-auto">
+<%
+  function badgePrioridad(p){ return { alta:'bg-red-100 text-red-700', media:'bg-amber-100 text-amber-700', baja:'bg-slate-100 text-slate-600' }[p] || 'bg-slate-100'; }
+  function iniciales(n){ return String(n||'?').trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+  var linksArr = String(tarea.links || '').split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);
+  var partesHechas = partes.filter(function(p){ return p.hecho; }).length;
+%>
+
+<div class="max-w-2xl mx-auto">
   <a href="/tareas" class="text-sm text-brand-600 hover:underline">&larr; Volver a tareas</a>
-  <h1 class="text-2xl font-bold text-slate-800 mt-2 mb-1">Editar tarea</h1>
-  <p class="text-xs text-slate-400 mb-4">
-    Creada el <%= fmt.formatFecha(tarea.fecha_creacion) %>
-    <% if (tarea.creado_por) { %> por <%= tarea.creado_por %><% } %>
-    <% if (tarea.ultima_modificacion_por) { %> · Última modificación por <%= tarea.ultima_modificacion_por %> el <%= fmt.formatFechaHora(tarea.ultima_modificacion_en) %><% } %>
+
+  <div class="flex items-start justify-between gap-3 mt-2 mb-1">
+    <h1 class="text-2xl font-bold text-slate-800"><%= tarea.nombre %></h1>
+    <div class="flex flex-wrap gap-1.5 justify-end shrink-0">
+      <span class="text-[11px] px-2 py-0.5 rounded-full <%= badgePrioridad(tarea.prioridad) %>"><%= tarea.prioridad %></span>
+      <% if (tarea.interna) { %><span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-white">FLAKS · interna</span>
+      <% } else if (tarea.cliente_nombre) { %>
+        <a href="/clientes/<%= tarea.cliente_id %>" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 inline-flex items-center gap-1.5"><%- include('../partials/cliente-avatar', { id: tarea.cliente_id, nombre: tarea.cliente_nombre, logo: tarea.cliente_logo, size: 14 }) %><%= tarea.cliente_nombre %></a>
+      <% } %>
+      <% if (tarea.texto_vencida) { %><span class="text-[11px] px-2 py-0.5 rounded-full <%= tarea.vencida ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-700' %>"><%= tarea.texto_vencida %></span><% } %>
+    </div>
+  </div>
+  <p class="text-xs text-slate-400 mb-1">
+    Creada el <%= fmt.formatFecha(tarea.fecha_creacion) %><% if (tarea.creado_por) { %> por <%= tarea.creado_por %><% } %>
+    <% if (tarea.ultima_modificacion_por) { %> · última modif. por <%= tarea.ultima_modificacion_por %> el <%= fmt.formatFechaHora(tarea.ultima_modificacion_en) %><% } %>
   </p>
+  <% if (asignados.length) { %>
+    <div class="flex items-center gap-1.5 mb-4">
+      <span class="text-xs text-slate-400">Asignada a:</span>
+      <% asignados.forEach(function(a){ %><span class="text-xs bg-brand-100 text-brand-700 rounded-full px-2 py-0.5"><%= a.nombre %></span><% }); %>
+    </div>
+  <% } %>
 
-  <form method="POST" action="/tareas/<%= tarea.id %>" class="bg-white rounded-xl shadow-card p-6 space-y-4">
-    <input type="hidden" name="volver_a" value="/tareas" />
-    <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
-      <input name="nombre" required value="<%= tarea.nombre %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
-    </div>
-    <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-      <textarea name="descripcion" rows="3" class="w-full rounded-md border border-slate-300 px-3 py-2"><%= tarea.descripcion %></textarea>
-    </div>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Prioridad</label>
-        <select name="prioridad" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= tarea.prioridad === p ? 'selected' : '' %>><%= p %></option><% }); %>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Estado</label>
-        <select name="estado" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= tarea.estado === e ? 'selected' : '' %>><%= e %></option><% }); %>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de cierre / vencimiento</label>
-        <input type="date" name="fecha_cierre" value="<%= tarea.fecha_cierre ? String(tarea.fecha_cierre).slice(0,10) : '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
-        <select name="cliente_id" class="w-full rounded-md border border-slate-300 px-3 py-2">
-          <option value="">Sin cliente</option>
-          <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(tarea.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
-        </select>
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-md px-4 py-2 text-sm">Guardar cambios</button>
-      <a href="/tareas" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>
-    </div>
-  </form>
+  <!-- Estado rápido -->
+  <div class="flex gap-2 mb-4">
+    <% ['pendiente','en_progreso','completada'].forEach(function(e){ %>
+      <form method="POST" action="/tareas/<%= tarea.id %>/estado">
+        <input type="hidden" name="estado" value="<%= e %>" />
+        <button class="btn text-xs rounded-lg px-3 py-1.5 <%= tarea.estado === e ? 'bg-brand-600 text-white' : 'bg-white shadow-card text-slate-600 hover:bg-slate-50' %>">
+          <%= { pendiente:'Pendiente', en_progreso:'En progreso', completada:'✓ Completada' }[e] %>
+        </button>
+      </form>
+    <% }); %>
+  </div>
 
-  <div class="bg-white rounded-xl shadow-card p-6 mt-4">
+  <!-- Partes -->
+  <div id="partes" class="bg-white rounded-xl shadow-card p-5 mb-4">
+    <h2 class="font-semibold text-slate-800 mb-1">Partes <% if (partes.length) { %><span class="text-sm text-slate-400">(<%= partesHechas %>/<%= partes.length %>)</span><% } %></h2>
+    <p class="text-xs text-slate-400 mb-3">Dividí la tarea en sub-items. Se ve el avance acá y en la lista.</p>
+    <% if (partes.length) { %>
+      <ul class="space-y-1.5 mb-3">
+        <% partes.forEach(function(p){ %>
+          <li class="flex items-center gap-2.5">
+            <form method="POST" action="/tareas/<%= tarea.id %>/partes/<%= p.id %>">
+              <button class="w-5 h-5 rounded border <%= p.hecho ? 'bg-green-600 border-green-600 text-white' : 'border-slate-300' %> flex items-center justify-center text-xs"><%= p.hecho ? '✓' : '' %></button>
+            </form>
+            <span class="text-sm flex-1 <%= p.hecho ? 'line-through text-slate-400' : 'text-slate-700' %>"><%= p.texto %></span>
+            <form method="POST" action="/tareas/<%= tarea.id %>/partes/<%= p.id %>" onsubmit="return confirm('¿Borrar esta parte?')">
+              <input type="hidden" name="_accion" value="eliminar" />
+              <button class="text-xs text-slate-300 hover:text-red-500">✕</button>
+            </form>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+    <form method="POST" action="/tareas/<%= tarea.id %>/partes" class="flex gap-2">
+      <input name="texto" required placeholder="Agregar parte (podés pegar varias, una por línea)" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-2">+</button>
+    </form>
+  </div>
+
+  <!-- Links -->
+  <% if (linksArr.length) { %>
+    <div class="bg-white rounded-xl shadow-card p-5 mb-4">
+      <h2 class="font-semibold text-slate-800 mb-2">Links</h2>
+      <ul class="space-y-1 text-sm">
+        <% linksArr.forEach(function(l){ %>
+          <li><a href="<%= /^https?:/i.test(l) ? l : 'https://' + l %>" target="_blank" rel="noopener" class="text-brand-600 hover:underline break-all">🔗 <%= l %></a></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <!-- Editar -->
+  <details class="bg-white rounded-xl shadow-card p-5 mb-4" <%= linksArr.length || partes.length ? '' : 'open' %>>
+    <summary class="font-semibold text-slate-800 cursor-pointer">Editar tarea</summary>
+    <form method="POST" action="/tareas/<%= tarea.id %>" class="mt-4 space-y-4">
+      <input type="hidden" name="volver_a" value="/tareas" />
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Título *</label>
+        <input name="nombre" required value="<%= tarea.nombre %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Prioridad</label>
+          <select name="prioridad" class="w-full rounded-md border border-slate-300 px-3 py-2">
+            <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= tarea.prioridad === p ? 'selected' : '' %>><%= p %></option><% }); %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Estado</label>
+          <select name="estado" class="w-full rounded-md border border-slate-300 px-3 py-2">
+            <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= tarea.estado === e ? 'selected' : '' %>><%= e %></option><% }); %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Vence (19 hs)</label>
+          <input type="date" name="fecha_cierre" value="<%= tarea.fecha_cierre ? String(tarea.fecha_cierre).slice(0,10) : '' %>" class="w-full rounded-md border border-slate-300 px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+          <select name="cliente_id" class="w-full rounded-md border border-slate-300 px-3 py-2">
+            <option value="interna" <%= tarea.interna ? 'selected' : '' %>>🏢 Interna (FLAKS)</option>
+            <option value="sin" <%= (!tarea.interna && !tarea.cliente_id) ? 'selected' : '' %>>Sin cliente</option>
+            <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(tarea.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Asignar a</label>
+        <div class="flex flex-wrap gap-2">
+          <% users.forEach(function(u){ %>
+            <label class="flex items-center gap-1.5 text-sm rounded-lg border border-slate-300 px-3 py-1.5 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+              <input type="checkbox" name="asignados" value="<%= u.id %>" <%= (asignadosSel || []).map(String).indexOf(String(u.id)) >= 0 ? 'checked' : '' %> class="w-4 h-4" />
+              <%= u.nombre %>
+            </label>
+          <% }); %>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Desarrollo</label>
+        <textarea name="descripcion" rows="4" class="w-full rounded-md border border-slate-300 px-3 py-2"><%= tarea.descripcion %></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Links</label>
+        <textarea name="links" rows="2" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-mono" placeholder="Un link por línea"><%= tarea.links %></textarea>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-md px-4 py-2 text-sm">Guardar cambios</button>
+        <a href="/tareas" class="text-slate-500 hover:underline text-sm self-center">Cancelar</a>
+      </div>
+    </form>
+  </details>
+
+  <div class="bg-white rounded-xl shadow-card p-5">
     <h2 class="text-sm font-semibold text-slate-700">Auditoría</h2>
     <%- include('../partials/historial', { historial: historial }) %>
     <form method="POST" action="/tareas/<%= tarea.id %>/eliminar" onsubmit="return confirm('¿Eliminar esta tarea?')" class="mt-4">

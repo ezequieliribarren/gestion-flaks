@@ -57,15 +57,48 @@ CREATE TABLE IF NOT EXISTS contenido_links (
 CREATE TABLE IF NOT EXISTS tareas (
   id                    INTEGER PRIMARY KEY AUTOINCREMENT,
   nombre                TEXT NOT NULL,
-  descripcion           TEXT NOT NULL DEFAULT '',
+  descripcion           TEXT NOT NULL DEFAULT '',   -- "Desarrollo" en la interfaz
+  links                 TEXT NOT NULL DEFAULT '',   -- links de la tarea (uno por línea)
   fecha_creacion        TEXT NOT NULL DEFAULT (datetime('now')),
   prioridad             TEXT NOT NULL DEFAULT 'media' CHECK (prioridad IN ('baja','media','alta')),
   fecha_cierre          TEXT,
   cliente_id            INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+  interna               INTEGER NOT NULL DEFAULT 0, -- 1 = tarea interna de FLAKS (sin cliente)
   estado                TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','en_progreso','completada')),
   creado_por            TEXT,
   ultima_modificacion_por TEXT,
   ultima_modificacion_en  TEXT
+);
+
+-- Partes / sub-items de una tarea (checklist que se ve en el desarrollo).
+CREATE TABLE IF NOT EXISTS tarea_partes (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  tarea_id  INTEGER NOT NULL REFERENCES tareas(id) ON DELETE CASCADE,
+  texto     TEXT NOT NULL,
+  hecho     INTEGER NOT NULL DEFAULT 0,
+  orden     INTEGER NOT NULL DEFAULT 0,
+  creado_en TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Asignación de usuarios a tareas / tareas de contenido (varios por ítem).
+CREATE TABLE IF NOT EXISTS asignaciones (
+  tipo    TEXT NOT NULL,                            -- 'tarea' | 'contenido'
+  ref_id  INTEGER NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (tipo, ref_id, user_id)
+);
+
+-- Notificaciones por usuario (cambios en tareas donde participa, etc.).
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tipo       TEXT NOT NULL DEFAULT 'tarea',
+  ref_id     INTEGER,
+  texto      TEXT NOT NULL,
+  url        TEXT,
+  de_quien   TEXT,
+  leida      INTEGER NOT NULL DEFAULT 0,
+  creada_en  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS trabajos_recurrentes (
@@ -157,6 +190,10 @@ CREATE TABLE IF NOT EXISTS app_meta (
 
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
+CREATE INDEX IF NOT EXISTS idx_tarea_partes ON tarea_partes(tarea_id);
+CREATE INDEX IF NOT EXISTS idx_asignaciones ON asignaciones(tipo, ref_id);
+CREATE INDEX IF NOT EXISTS idx_asignaciones_user ON asignaciones(user_id);
+CREATE INDEX IF NOT EXISTS idx_notif_user ON notificaciones(user_id, leida);
 CREATE INDEX IF NOT EXISTS idx_recurrentes_cliente ON trabajos_recurrentes(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_pagos_rec_periodo ON pagos_recurrentes(recurrente_id, periodo);
 CREATE INDEX IF NOT EXISTS idx_unicos_cliente ON trabajos_unicos(cliente_id);
