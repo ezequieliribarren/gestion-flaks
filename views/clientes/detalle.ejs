@@ -1,5 +1,16 @@
 <%
   function etiquetaEstadoT(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
+  // Select "Pasar a otro cliente" (auto-submit)
+  function pasarSelect(recurso, tid){
+    var opts = clientesLista
+      .filter(function(c){ return c.id !== cliente.id; })
+      .map(function(c){ return '<option value="' + c.id + '">' + c.nombre + '</option>'; })
+      .join('');
+    return '<form method="POST" action="/clientes/' + cliente.id + '/' + recurso + '/' + tid + '/pasar">'
+      + '<select name="cliente_destino" onchange="if(this.value)this.form.submit()" '
+      + 'class="rounded border border-slate-200 px-2 py-1 text-xs max-w-[130px] text-slate-500">'
+      + '<option value="">Pasar a…</option>' + opts + '</select></form>';
+  }
   function estadoCliente(e){
     return {
       activo:    ['Activo', 'bg-green-100 text-green-700'],
@@ -79,7 +90,7 @@
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto/mes</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2 text-center">Día</th><th class="py-2 px-2 text-center">Activo</th><th></th><th class="py-2 px-2">¿Pagó? (<%= fmt.nombreMes(Number(periodoActual.slice(5,7))).slice(0,3) %>)</th></tr>
+        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto/mes</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2 text-center">Día</th><th class="py-2 px-2 text-center">Activo</th><th></th><th class="py-2 px-2">¿Pagó? (<%= fmt.nombreMes(Number(periodoActual.slice(5,7))).slice(0,3) %>)</th><th class="py-2 px-2">Pasar</th></tr>
       </thead>
       <tbody>
         <% recurrentes.forEach(function(r){ %>
@@ -103,6 +114,7 @@
                        class="rounded border <%= r.pago_fecha ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs" />
               </form>
             </td>
+            <td class="py-2 px-2"><%- pasarSelect('recurrentes', r.id) %></td>
           </tr>
         <% }); %>
       </tbody>
@@ -127,7 +139,7 @@
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Fecha</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th></tr>
+        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Fecha</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th><th class="py-2 px-2">Pasar</th></tr>
       </thead>
       <tbody>
         <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
@@ -151,6 +163,7 @@
                 <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
               </td>
             </form>
+            <td class="py-2 px-2"><%- pasarSelect('unicos', u.id) %></td>
           </tr>
         <% }); %>
       </tbody>

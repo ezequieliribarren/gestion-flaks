@@ -171,6 +171,8 @@ router.get('/:id', (req, res) => {
     ORDER BY estado, fecha_cierre
   `).all(cliente.id, mesPrefijo);
 
+  const clientesLista = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre COLLATE NOCASE').all();
+
   res.render('clientes/detalle', {
     titulo: cliente.nombre,
     cliente,
@@ -179,11 +181,33 @@ router.get('/:id', (req, res) => {
     mensualTotal,
     tareasMes,
     periodoActual: mesPrefijo,
+    clientesLista,
     ESTADOS,
     ultima: audit.ultimaModificacion('clientes', cliente.id),
     historial: audit.historial('clientes', cliente.id),
   });
 });
+
+// Pasar un ingreso (trabajo único o recurrente) a otro cliente.
+function pasarIngreso(tabla, etiqueta) {
+  return (req, res) => {
+    const t = db.prepare(`SELECT * FROM ${tabla} WHERE id = ? AND cliente_id = ?`).get(req.params.tid, req.params.id);
+    const destino = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.body.cliente_destino);
+    if (!t || !destino || destino.id === Number(req.params.id)) {
+      req.session.flash = { tipo: 'error', msg: 'Elegí un cliente distinto para pasar el ingreso.' };
+      return res.redirect('/clientes/' + req.params.id);
+    }
+    const origen = db.prepare('SELECT nombre FROM clientes WHERE id = ?').get(req.params.id);
+    db.prepare(`UPDATE ${tabla} SET cliente_id = ? WHERE id = ?`).run(destino.id, t.id);
+    audit.registrar(req, 'clientes', req.params.id, 'editar', `Pasó ${etiqueta} "${t.nombre}" a ${destino.nombre}`);
+    audit.registrar(req, 'clientes', destino.id, 'editar', `Recibió ${etiqueta} "${t.nombre}" desde ${origen ? origen.nombre : 'otro cliente'}`);
+    req.session.flash = { tipo: 'ok', msg: `"${t.nombre}" pasó a ${destino.nombre}.` };
+    res.redirect('/clientes/' + destino.id + '#' + (tabla === 'trabajos_unicos' ? 'unicos' : 'recurrentes'));
+  };
+}
+
+router.post('/:id/unicos/:tid/pasar', pasarIngreso('trabajos_unicos', 'el trabajo único'));
+router.post('/:id/recurrentes/:tid/pasar', pasarIngreso('trabajos_recurrentes', 'el trabajo recurrente'));
 
 router.post('/:id', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
