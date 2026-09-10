@@ -19,8 +19,10 @@ function conVencimiento(t) {
 function listarTareas(req, res, flaks) {
   const key = flaks ? 'tareasVistaFlaks' : 'tareasVista';
   const sess = req.session[key] || {};
-  const vista = ['hoy', 'mes', 'todas'].includes(req.query.vista) ? req.query.vista
-    : (['hoy', 'mes', 'todas'].includes(sess.vista) ? sess.vista : 'hoy');
+  // FLAKS: la mayoría de las tareas internas no tienen fecha → sólo "Todas".
+  const vista = flaks ? 'todas'
+    : (['hoy', 'mes', 'todas'].includes(req.query.vista) ? req.query.vista
+      : (['hoy', 'mes', 'todas'].includes(sess.vista) ? sess.vista : 'hoy'));
   const modo = req.query.modo === 'lista' ? 'lista'
     : (req.query.modo === 'cards' ? 'cards' : (sess.modo === 'lista' ? 'lista' : 'cards'));
   req.session[key] = { vista, modo };
