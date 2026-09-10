@@ -1,0 +1,83 @@
+<%
+  function _bR(r){
+    return {
+      ofrecido:'bg-blue-100 text-blue-700', esperando:'bg-amber-100 text-amber-700',
+      presupuestado:'bg-indigo-100 text-indigo-700', interesado:'bg-green-100 text-green-700',
+      rechazado:'bg-slate-200 text-slate-500', cerrado:'bg-emerald-600 text-white',
+    }[r] || 'bg-slate-100 text-slate-600';
+  }
+%>
+
+<!-- Ofrecimientos (desplegable) -->
+<details class="mb-2">
+  <summary class="text-xs text-brand-600 cursor-pointer">Ofrecimientos / contactos (<%= c.acciones.length %>)</summary>
+  <div class="mt-2 space-y-1.5">
+    <% c.acciones.forEach(function(a){ %>
+      <div class="text-xs flex items-start gap-2">
+        <span class="text-slate-400 shrink-0 w-14"><%= fmt.formatFecha(a.fecha) %></span>
+        <div class="flex-1 min-w-0">
+          <span class="font-medium text-slate-700"><%= etiquetaServicio(a.servicio) %></span><% if (a.monto > 0) { %> <span class="text-slate-500"><%= fmt.formatARS(a.monto) %></span><% } %>
+          <% if (a.detalle) { %><span class="text-slate-500"> — <%= a.detalle %></span><% } %>
+          <div class="mt-0.5 flex items-center gap-1.5">
+            <form method="POST" action="/marketing/acciones/<%= a.id %>" style="display:contents">
+              <select name="resultado" onchange="this.form.submit()" class="text-[10px] rounded-full px-1.5 py-0.5 border-0 <%= _bR(a.resultado) %>">
+                <% RESULTADOS.forEach(function(r){ %><option value="<%= r %>" <%= a.resultado === r ? 'selected' : '' %>><%= r %></option><% }); %>
+              </select>
+            </form>
+            <form method="POST" action="/marketing/acciones/<%= a.id %>" onsubmit="return confirm('¿Borrar?')" style="display:contents">
+              <input type="hidden" name="_accion" value="eliminar" /><button class="text-[10px] text-slate-300 hover:text-red-500">borrar</button>
+            </form>
+            <span class="text-slate-300 text-[10px]"><%= a.registrado_por %></span>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+    <% if (!c.acciones.length) { %><p class="text-xs text-slate-400">Todavía no se le ofreció nada.</p><% } %>
+
+    <form method="POST" action="/marketing/<%= c.id %>/accion" class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 mt-2">
+      <select name="servicio" class="rounded-lg border border-slate-300 px-2 py-1.5 text-xs">
+        <% SERVICIOS.forEach(function(s){ %><option value="<%= s %>"><%= etiquetaServicio(s) %></option><% }); %>
+      </select>
+      <input type="date" name="fecha" value="<%= hoyISO %>" class="rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />
+      <input name="monto" type="number" step="0.01" placeholder="Monto (opc.)" class="rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />
+      <select name="resultado" class="rounded-lg border border-slate-300 px-2 py-1.5 text-xs">
+        <% RESULTADOS.forEach(function(r){ %><option value="<%= r %>"><%= r %></option><% }); %>
+      </select>
+      <input name="detalle" placeholder="Nota" class="col-span-2 rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />
+      <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-lg px-3 py-1.5 text-xs col-span-2">Registrar ofrecimiento</button>
+    </form>
+  </div>
+</details>
+
+<!-- Recordatorios de re-marketing -->
+<details class="mb-2">
+  <summary class="text-xs text-brand-600 cursor-pointer">Fechas de re-marketing (<%= c.recordatorios.length %>/<%= MAX_RECORDATORIOS %>)</summary>
+  <div class="mt-2 space-y-1">
+    <% c.recordatorios.forEach(function(r){ %>
+      <div class="text-xs flex items-center gap-2">
+        <span class="<%= r.notificado ? 'text-slate-400' : 'text-indigo-600 font-medium' %>">📅 <%= fmt.formatFecha(r.fecha) %></span>
+        <% if (r.nota) { %><span class="text-slate-500 truncate">— <%= r.nota %></span><% } %>
+        <% if (r.notificado) { %><span class="text-[10px] text-slate-400">(avisado)</span><% } %>
+        <form method="POST" action="/marketing/recordatorios/<%= r.id %>/eliminar" style="display:contents"><button class="text-[10px] text-slate-300 hover:text-red-500 ml-auto">✕</button></form>
+      </div>
+    <% }); %>
+    <% if (c.recordatorios.length < MAX_RECORDATORIOS) { %>
+      <form method="POST" action="/marketing/<%= c.id %>/recordatorio" class="flex gap-1.5 pt-1">
+        <input type="date" name="fecha" required class="rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />
+        <input name="nota" placeholder="nota" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />
+        <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-2.5 py-1.5 text-xs">+</button>
+      </form>
+      <p class="text-[10px] text-slate-400">El día de la fecha llega una notificación a los admin.</p>
+    <% } %>
+  </div>
+</details>
+
+<!-- Aceptó / descartar -->
+<div class="flex items-center gap-3 pt-1 text-xs">
+  <form method="POST" action="/marketing/<%= c.id %>/convertir" onsubmit="return confirm('¿El cliente aceptó? Pasa a cliente activo y vas a cargarle el trabajo.')">
+    <button class="btn bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-3 py-1.5 font-medium">✓ Aceptó → cliente</button>
+  </form>
+  <form method="POST" action="/marketing/<%= c.id %>/excluir" onsubmit="return confirm('¿Sacar de Marketing? No se le ofrece más nada (queda en Descartados).')">
+    <button class="text-slate-400 hover:text-red-600">No — descartar</button>
+  </form>
+</div>

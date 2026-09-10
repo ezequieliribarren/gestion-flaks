@@ -73,6 +73,12 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   if (!colsClientes.includes('contacto_telefono')) raw.exec("ALTER TABLE clientes ADD COLUMN contacto_telefono TEXT NOT NULL DEFAULT ''");
   if (!colsClientes.includes('contacto_email')) raw.exec("ALTER TABLE clientes ADD COLUMN contacto_email TEXT NOT NULL DEFAULT ''");
 
+  const tMkt = raw.all("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_acciones'").length;
+  if (tMkt) {
+    const colsMkt = raw.all('PRAGMA table_info(marketing_acciones)').map((c) => c.name);
+    if (!colsMkt.includes('monto')) raw.exec('ALTER TABLE marketing_acciones ADD COLUMN monto REAL NOT NULL DEFAULT 0');
+  }
+
   const colsUsers = raw.all('PRAGMA table_info(users)').map((c) => c.name);
   if (!colsUsers.includes('rol')) raw.exec("ALTER TABLE users ADD COLUMN rol TEXT NOT NULL DEFAULT 'admin'");
 

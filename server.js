@@ -79,10 +79,16 @@ app.use(
   })
 );
 
+// Revisión de recordatorios de re-marketing: al arrancar y cada 15 min.
+const { revisar: revisarRemarketing, revisarThrottled } = require('./lib/remarketing');
+try { revisarRemarketing(); } catch (e) { console.error('remarketing inicial:', e.message); }
+setInterval(() => { try { revisarRemarketing(); } catch (e) { /* noop */ } }, 15 * 60 * 1000).unref();
+
 // Helpers disponibles en todas las vistas.
 const { esAdmin } = require('./middleware/auth');
 const { contarNoLeidas } = require('./lib/participacion');
 app.use((req, res, next) => {
+  revisarThrottled();
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;

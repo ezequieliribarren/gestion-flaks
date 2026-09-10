@@ -198,12 +198,26 @@ CREATE TABLE IF NOT EXISTS marketing_acciones (
   cliente_id     INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
   servicio       TEXT NOT NULL DEFAULT 'otro',      -- redes | google | meta | web | otro
   detalle        TEXT NOT NULL DEFAULT '',
+  monto          REAL NOT NULL DEFAULT 0,           -- monto del presupuesto (si aplica)
   fecha          TEXT NOT NULL,                     -- fecha en que se ofreció / contactó
-  resultado      TEXT NOT NULL DEFAULT 'ofrecido',  -- ofrecido | esperando | interesado | rechazado | cerrado
+  resultado      TEXT NOT NULL DEFAULT 'ofrecido',  -- ofrecido | esperando | presupuestado | interesado | rechazado | cerrado
   registrado_por TEXT,
   creado_en      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_mkt_acciones_cli ON marketing_acciones(cliente_id);
+
+-- Recordatorios de re-marketing: hasta 3 fechas futuras por cliente. Al llegar la
+-- fecha se genera una notificación para los admin.
+CREATE TABLE IF NOT EXISTS remarketing_recordatorios (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  fecha      TEXT NOT NULL,                         -- 'YYYY-MM-DD'
+  nota       TEXT NOT NULL DEFAULT '',
+  notificado INTEGER NOT NULL DEFAULT 0,
+  creado_por TEXT,
+  creado_en  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_remk_pendientes ON remarketing_recordatorios(notificado, fecha);
 
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
