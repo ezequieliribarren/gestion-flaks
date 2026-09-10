@@ -62,6 +62,15 @@
 <% } %>
 
 <%
+  function estadoControl(t){ %><div class="flex rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm text-[10px] font-medium shrink-0">
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="pendiente" />
+        <button title="Pendiente" class="px-2 py-1 <%= t.estado === 'pendiente' ? 'bg-slate-200 text-slate-700' : 'text-slate-400 hover:bg-slate-50' %>">Pend</button></form>
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="en_progreso" />
+        <button title="En progreso" class="px-2 py-1 border-l border-slate-200 <%= t.estado === 'en_progreso' ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:bg-slate-50' %>">Prog</button></form>
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="completada" />
+        <button title="Completada" class="px-2 py-1 border-l border-slate-200 <%= t.estado === 'completada' ? 'bg-green-100 text-green-700' : 'text-slate-400 hover:bg-slate-50' %>">✓</button></form>
+    </div><% }
+
   function fila(t){ %>
     <div class="flex items-center gap-2 flex-wrap">
       <span class="font-semibold text-slate-800 <%= t.estado === 'completada' ? 'line-through text-slate-400' : '' %>"><%= t.nombre %></span>
@@ -90,17 +99,19 @@
 <% if (modo === 'lista') { %>
   <div class="bg-white rounded-xl shadow-card divide-y divide-slate-100 overflow-hidden">
     <% tareas.forEach(function(t){ %>
-      <a href="/tareas/<%= t.id %>" class="block px-4 py-3 hover:bg-slate-50 <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'border-l-2 border-red-400' : '' %>">
-        <%- fila(t) %>
-      </a>
+      <div class="relative <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'border-l-2 border-red-400' : '' %>">
+        <a href="/tareas/<%= t.id %>" class="block px-4 py-3 pr-32 hover:bg-slate-50"><%- fila(t) %></a>
+        <div class="absolute top-1/2 -translate-y-1/2 right-3"><%- estadoControl(t) %></div>
+      </div>
     <% }); %>
   </div>
 <% } else { %>
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
     <% tareas.forEach(function(t){ %>
-      <a href="/tareas/<%= t.id %>" class="lift block bg-white rounded-xl shadow-card hover:shadow-card-hover p-4 <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'ring-1 ring-red-200' : '' %>">
-        <%- fila(t) %>
-      </a>
+      <div class="lift relative bg-white rounded-xl shadow-card hover:shadow-card-hover <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'ring-1 ring-red-200' : '' %>">
+        <a href="/tareas/<%= t.id %>" class="block p-4 pr-28"><%- fila(t) %></a>
+        <div class="absolute top-3 right-3"><%- estadoControl(t) %></div>
+      </div>
     <% }); %>
   </div>
 <% } %>
