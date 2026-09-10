@@ -33,12 +33,16 @@ function diasDesde(fecha) {
 
 router.get('/', (req, res) => {
   const filas = db.prepare(`
-    SELECT c.id, c.nombre, c.logo, c.estado, c.redes,
+    SELECT c.id, c.nombre, c.logo, c.estado, c.redes, c.marketing_excluido,
       (SELECT COUNT(*) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS rec_activos,
       (SELECT MAX(fecha) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'realizado') AS ultimo_unico
     FROM clientes c
     ORDER BY c.nombre COLLATE NOCASE
   `).all();
+
+  const excluidos = filas
+    .filter((c) => c.marketing_excluido)
+    .map((c) => ({ ...c, acciones: accionesDe(c.id) }));
 
   const items = new Map();
 
@@ -76,6 +80,7 @@ router.get('/', (req, res) => {
   }
 
   for (const c of filas) {
+    if (c.marketing_excluido) continue;
     const tieneServicio = c.rec_activos > 0;
     const dsc = c.ultimo_unico ? diasDesde(c.ultimo_unico) : null;
     const esLead = !tieneServicio && (c.estado === 'inactivo' || c.estado === 'potencial' || dsc === null || dsc > 60);
@@ -87,7 +92,7 @@ router.get('/', (req, res) => {
   for (const cid of conAcciones) {
     if (items.has(cid)) continue;
     const c = filas.find((x) => x.id === cid);
-    if (c) items.set(cid, armar(c, false));
+    if (c && !c.marketing_excluido) items.set(cid, armar(c, false));
   }
 
   const leads = [...items.values()].sort((a, b) => {
@@ -97,7 +102,18 @@ router.get('/', (req, res) => {
     return dbb - da;
   });
 
-  res.render('marketing/index', { titulo: 'Marketing', leads, SERVICIOS, RESULTADOS, etiquetaServicio, hoyISO: hoyISO() });
+  res.render('marketing/index', { titulo: 'Marketing', leads, excluidos, SERVICIOS, RESULTADOS, etiquetaServicio, hoyISO: hoyISO() });
+});
+
+// Sacar / volver a incluir un cliente en Marketing.
+router.post('/:cid/excluir', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.cid);
+  if (!cliente) return res.redirect('/marketing');
+  const incluir = req.body._accion === 'incluir';
+  db.prepare('UPDATE clientes SET marketing_excluido = ? WHERE id = ?').run(incluir ? 0 : 1, cliente.id);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', incluir ? 'Volvió a incluir en Marketing' : 'Sacó de Marketing (no ofrecer más)');
+  req.session.flash = { tipo: 'ok', msg: incluir ? `"${cliente.nombre}" vuelve a Marketing.` : `"${cliente.nombre}" no aparece más en Marketing.` };
+  res.redirect('/marketing');
 });
 
 // Registrar que se ofreció un servicio / se hizo un contacto.

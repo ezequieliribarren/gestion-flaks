@@ -97,6 +97,30 @@
           <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-lg px-3 py-1.5 text-xs">Registrar</button>
         </form>
       </details>
+
+      <form method="POST" action="/marketing/<%= c.id %>/excluir" onsubmit="return confirm('¿Sacar a este cliente de Marketing? No se le va a sugerir más nada.')" class="mt-2">
+        <button class="text-[11px] text-slate-400 hover:text-red-600">No ofrecer más · sacar de Marketing</button>
+      </form>
     </div>
   <% }); %>
 </div>
+
+<% if (excluidos && excluidos.length) { %>
+  <details class="bg-white rounded-xl shadow-card p-4 mt-6">
+    <summary class="text-sm font-semibold text-slate-700 cursor-pointer">Descartados de Marketing (<%= excluidos.length %>)</summary>
+    <ul class="mt-3 divide-y divide-slate-100">
+      <% excluidos.forEach(function(c){ %>
+        <li class="flex items-center justify-between gap-3 py-2">
+          <a href="/clientes/<%= c.id %>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-brand-600">
+            <%- include('../partials/cliente-avatar', { id: c.id, nombre: c.nombre, logo: c.logo, size: 24 }) %><%= c.nombre %>
+            <% if (c.acciones.length) { %><span class="text-xs text-slate-400">(<%= c.acciones.length %> contacto<%= c.acciones.length === 1 ? '' : 's' %>)</span><% } %>
+          </a>
+          <form method="POST" action="/marketing/<%= c.id %>/excluir">
+            <input type="hidden" name="_accion" value="incluir" />
+            <button class="text-xs text-brand-600 hover:underline">Volver a incluir</button>
+          </form>
+        </li>
+      <% }); %>
+    </ul>
+  </details>
+<% } %>

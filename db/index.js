@@ -68,6 +68,7 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   if (!colsClientes.includes('redes')) raw.exec('ALTER TABLE clientes ADD COLUMN redes INTEGER NOT NULL DEFAULT 0');
   if (!colsClientes.includes('redes_plan')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_plan TEXT');
   if (!colsClientes.includes('redes_sheet_url')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_sheet_url TEXT');
+  if (!colsClientes.includes('marketing_excluido')) raw.exec('ALTER TABLE clientes ADD COLUMN marketing_excluido INTEGER NOT NULL DEFAULT 0');
 
   const colsUsers = raw.all('PRAGMA table_info(users)').map((c) => c.name);
   if (!colsUsers.includes('rol')) raw.exec("ALTER TABLE users ADD COLUMN rol TEXT NOT NULL DEFAULT 'admin'");

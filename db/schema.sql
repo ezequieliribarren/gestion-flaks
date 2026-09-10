@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   redes           INTEGER NOT NULL DEFAULT 0,     -- 1 = tiene redes sociales / contenido como servicio
   redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
   redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido
+  marketing_excluido INTEGER NOT NULL DEFAULT 0,  -- 1 = no mostrar en Marketing / no sugerir ventas
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
   creado_por TEXT
 );
