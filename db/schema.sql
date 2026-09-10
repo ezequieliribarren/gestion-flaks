@@ -188,6 +188,19 @@ CREATE TABLE IF NOT EXISTS app_meta (
   valor TEXT
 );
 
+-- Acciones de marketing / re-marketing: qué se le ofreció a un cliente y cuándo.
+CREATE TABLE IF NOT EXISTS marketing_acciones (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id     INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  servicio       TEXT NOT NULL DEFAULT 'otro',      -- redes | google | meta | web | otro
+  detalle        TEXT NOT NULL DEFAULT '',
+  fecha          TEXT NOT NULL,                     -- fecha en que se ofreció / contactó
+  resultado      TEXT NOT NULL DEFAULT 'ofrecido',  -- ofrecido | esperando | interesado | rechazado | cerrado
+  registrado_por TEXT,
+  creado_en      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_mkt_acciones_cli ON marketing_acciones(cliente_id);
+
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
 CREATE INDEX IF NOT EXISTS idx_tarea_partes ON tarea_partes(tarea_id);
