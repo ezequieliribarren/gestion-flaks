@@ -1,0 +1,19 @@
+<%
+  var _p = currentPath || '';
+  var _grupos = {
+    tareas:  [['/tareas', 'Tareas'], ['/tareas/flaks', 'FLAKS']],
+    clientes:[['/clientes', 'Clientes'], ['/contenido', 'Contenido'], ['/marketing', 'Marketing']],
+    admin:   [['/facturacion', 'Facturación'], ['/gastos', 'Gastos'], ['/caja', 'Caja']],
+  };
+  var _tabs = null;
+  if (_p === '/tareas' || _p.indexOf('/tareas/flaks') === 0) _tabs = _grupos.tareas;
+  else if (_p.indexOf('/clientes') === 0 || _p.indexOf('/contenido') === 0 || _p.indexOf('/marketing') === 0) _tabs = _grupos.clientes;
+  else if (_p.indexOf('/facturacion') === 0 || _p.indexOf('/gastos') === 0 || _p.indexOf('/caja') === 0) _tabs = _grupos.admin;
+%>
+<% if (_tabs && esAdmin) { %>
+  <div class="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-card w-fit max-w-full overflow-x-auto">
+    <% _tabs.forEach(function(t){ var act = (t[0] === '/tareas') ? (_p === '/tareas') : (_p.indexOf(t[0]) === 0); %>
+      <a href="<%= t[0] %>" class="btn px-3.5 py-1.5 text-sm rounded-lg whitespace-nowrap <%= act ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= t[1] %></a>
+    <% }); %>
+  </div>
+<% } %>

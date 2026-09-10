@@ -16,38 +16,37 @@ function conVencimiento(t) {
   return { ...t, vencida: v.vencida, dias_vencida: v.dias, vence_hoy: v.venceHoy, texto_vencida: fmt.textoVencida(v) };
 }
 
-router.get('/', (req, res) => {
-  const sess = req.session.tareasVista || {};
+function listarTareas(req, res, flaks) {
+  const key = flaks ? 'tareasVistaFlaks' : 'tareasVista';
+  const sess = req.session[key] || {};
   const vista = ['hoy', 'mes', 'todas'].includes(req.query.vista) ? req.query.vista
     : (['hoy', 'mes', 'todas'].includes(sess.vista) ? sess.vista : 'hoy');
   const modo = req.query.modo === 'lista' ? 'lista'
     : (req.query.modo === 'cards' ? 'cards' : (sess.modo === 'lista' ? 'lista' : 'cards'));
-  req.session.tareasVista = { vista, modo };
+  req.session[key] = { vista, modo };
 
-  const fCliente = req.query.cliente || null; // id | 'interna' | 'sin'
+  const fCliente = flaks ? null : (req.query.cliente || null); // id | 'sin'
   const fPrioridad = PRIORIDADES.includes(req.query.prioridad) ? req.query.prioridad : null;
   const fEstado = ESTADOS.includes(req.query.estado) ? req.query.estado : null;
   const fAsignado = req.query.asignado ? Number(req.query.asignado) : null;
 
   const hoy = fmt.ahora().iso;
   const mesPrefijo = hoy.slice(0, 7);
-  const where = [];
+  const where = [flaks ? 't.interna = 1' : 't.interna = 0'];
   const params = [];
 
   if (vista === 'hoy') {
-    // vence hoy, o vencida sin completar (no importa hace cuánto)
     where.push("(substr(t.fecha_cierre,1,10) = ? OR (t.fecha_cierre IS NOT NULL AND substr(t.fecha_cierre,1,10) < ? AND t.estado <> 'completada'))");
     params.push(hoy, hoy);
   } else if (vista === 'mes') {
     where.push('t.fecha_cierre IS NOT NULL AND substr(t.fecha_cierre,1,7) = ?');
     params.push(mesPrefijo);
   }
-  if (fCliente === 'interna') where.push('t.interna = 1');
-  else if (fCliente === 'sin') where.push('t.cliente_id IS NULL AND t.interna = 0');
+  if (fCliente === 'sin') where.push('t.cliente_id IS NULL');
   else if (fCliente && !isNaN(Number(fCliente))) { where.push('t.cliente_id = ?'); params.push(Number(fCliente)); }
   if (fPrioridad) { where.push('t.prioridad = ?'); params.push(fPrioridad); }
   if (fEstado) { where.push('t.estado = ?'); params.push(fEstado); }
-  if (fAsignado) { where.push('EXISTS (SELECT 1 FROM asignaciones a WHERE a.tipo = \'tarea\' AND a.ref_id = t.id AND a.user_id = ?)'); params.push(fAsignado); }
+  if (fAsignado) { where.push("EXISTS (SELECT 1 FROM asignaciones a WHERE a.tipo = 'tarea' AND a.ref_id = t.id AND a.user_id = ?)"); params.push(fAsignado); }
 
   const sql = `
     SELECT t.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo,
@@ -55,7 +54,7 @@ router.get('/', (req, res) => {
       (SELECT COUNT(*) FROM tarea_partes WHERE tarea_id = t.id AND hecho = 1) AS partes_hechas
     FROM tareas t
     LEFT JOIN clientes c ON c.id = t.cliente_id
-    ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+    WHERE ${where.join(' AND ')}
     ORDER BY
       CASE t.estado WHEN 'completada' THEN 1 ELSE 0 END,
       (t.fecha_cierre IS NULL),
@@ -67,20 +66,22 @@ router.get('/', (req, res) => {
     asignados: asignadosDe('tarea', t.id),
   }));
 
-  const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
-
   res.render('tareas/index', {
-    titulo: 'Tareas',
+    titulo: flaks ? 'Tareas de FLAKS' : 'Tareas',
     tareas,
-    clientes,
+    clientes: db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all(),
     users: usuarios(),
     vista,
     modo,
+    flaks: !!flaks,
     filtros: { cliente: fCliente, prioridad: fPrioridad, estado: fEstado, asignado: fAsignado },
     PRIORIDADES,
     ESTADOS,
   });
-});
+}
+
+router.get('/', (req, res) => listarTareas(req, res, false));
+router.get('/flaks', (req, res) => listarTareas(req, res, true));
 
 function formData(req) {
   const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
@@ -88,7 +89,12 @@ function formData(req) {
 }
 
 router.get('/nueva', (req, res) => {
-  res.render('tareas/form', { titulo: 'Nueva tarea', tarea: {}, asignadosSel: [], ...formData(req) });
+  res.render('tareas/form', {
+    titulo: 'Nueva tarea',
+    tarea: { interna: req.query.flaks ? 1 : 0 },
+    asignadosSel: [],
+    ...formData(req),
+  });
 });
 
 router.get('/:id', (req, res) => {
@@ -117,8 +123,8 @@ function leerDatos(body) {
   const prioridad = PRIORIDADES.includes(body.prioridad) ? body.prioridad : 'media';
   const estado = ESTADOS.includes(body.estado) ? body.estado : 'pendiente';
   const fecha_cierre = body.fecha_cierre ? String(body.fecha_cierre).slice(0, 10) : null;
-  const interna = body.cliente_id === 'interna' ? 1 : 0;
-  const cliente_id = (interna || !body.cliente_id || body.cliente_id === 'sin') ? null : Number(body.cliente_id);
+  const interna = (body.interna === '1' || body.interna === 'on') ? 1 : 0;
+  const cliente_id = interna ? null : ((!body.cliente_id || body.cliente_id === 'sin') ? null : Number(body.cliente_id));
   let asignados = body.asignados || [];
   if (!Array.isArray(asignados)) asignados = [asignados];
   return { nombre, descripcion, links, prioridad, estado, fecha_cierre, interna, cliente_id, asignados };

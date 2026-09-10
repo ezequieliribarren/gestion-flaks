@@ -112,22 +112,36 @@
           <div class="text-[11px] text-slate-400 mt-0.5">Gestión interna</div>
         </div>
       </div>
-      <nav class="flex-1 py-2 space-y-1 px-3">
-        <% const nav = esAdmin ? [
-          ['/tareas', 'Tareas', '📝'],
-          ['/contenido', 'Contenido', '📸'],
-          ['/clientes', 'Clientes', '👥'],
-          ['/facturacion', 'Facturación', '💰'],
-          ['/gastos', 'Gastos', '🧾'],
-          ['/caja', 'Caja', '📊'],
-          ['/documentos', 'Documentos', '📁'],
+      <%
+        // Grupos del menú. { href|null, label, icon, hijos:[[href,label,icon]] }
+        const navGrupos = esAdmin ? [
+          { href: '/tareas', label: 'Tareas', icon: '📝', hijos: [['/tareas/flaks', 'FLAKS', '🏢']] },
+          { href: '/clientes', label: 'Clientes', icon: '👥', hijos: [['/contenido', 'Contenido', '📸'], ['/marketing', 'Marketing', '📣']] },
+          { href: null, label: 'Administración', icon: '📊', hijos: [['/facturacion', 'Facturación', '💰'], ['/gastos', 'Gastos', '🧾'], ['/caja', 'Caja', '📊']] },
+          { href: '/documentos', label: 'Documentos', icon: '📁', hijos: [] },
         ] : [
-          ['/contenido', 'Contenido', '📸'],
-        ]; %>
-        <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
-          <a href="<%= item[0] %>" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm <%= activo ? 'is-active' : 'hover:bg-white/5 hover:text-white' %>">
-            <span class="text-base leading-none"><%= item[2] %></span><span><%= item[1] %></span>
-          </a>
+          { href: '/contenido', label: 'Contenido', icon: '📸', hijos: [] },
+        ];
+        // lista plana para la barra inferior (mobile)
+        const navFlat = esAdmin
+          ? [['/tareas', 'Tareas', '📝'], ['/clientes', 'Clientes', '👥'], ['/contenido', 'Contenido', '📸'], ['/facturacion', 'Admin', '📊'], ['/documentos', 'Docs', '📁']]
+          : [['/contenido', 'Contenido', '📸']];
+        function _act(h) { return h === '/tareas' ? currentPath === '/tareas' : currentPath.indexOf(h) === 0; }
+      %>
+      <nav class="flex-1 py-2 space-y-0.5 px-3 overflow-y-auto">
+        <% navGrupos.forEach(function(g){ %>
+          <% if (g.href) { %>
+            <a href="<%= g.href %>" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm <%= _act(g.href) ? 'is-active' : 'hover:bg-white/5 hover:text-white' %>">
+              <span class="text-base leading-none"><%= g.icon %></span><span><%= g.label %></span>
+            </a>
+          <% } else { %>
+            <div class="flex items-center gap-3 px-3 pt-3 pb-1 text-[11px] uppercase tracking-wide text-slate-500"><span><%= g.icon %></span><span><%= g.label %></span></div>
+          <% } %>
+          <% g.hijos.forEach(function(h){ %>
+            <a href="<%= h[0] %>" class="nav-link flex items-center gap-3 pl-9 pr-3 py-2 rounded-xl text-sm <%= _act(h[0]) ? 'is-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+              <span class="text-sm leading-none"><%= h[2] %></span><span><%= h[1] %></span>
+            </a>
+          <% }); %>
         <% }); %>
       </nav>
       <div class="px-4 py-4 mx-3 mb-3 rounded-xl bg-white/5 text-xs">
@@ -157,7 +171,7 @@
         </a>
       </div>
 
-      <main class="flex-1 px-3 py-4 sm:px-8 sm:pt-4 sm:pb-8 <%= nav.length > 1 ? 'pb-24' : 'pb-8' %> md:pb-8 max-w-6xl w-full mx-auto">
+      <main class="flex-1 px-3 py-4 sm:px-8 sm:pt-4 sm:pb-8 <%= navFlat.length > 1 ? 'pb-24' : 'pb-8' %> md:pb-8 max-w-6xl w-full mx-auto">
         <div class="page-enter">
           <%- body %>
         </div>
@@ -167,10 +181,10 @@
   </div>
 
   <!-- Barra de navegación inferior (mobile) -->
-  <% if (nav.length > 1) { %>
+  <% if (navFlat.length > 1) { %>
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 grid pb-[env(safe-area-inset-bottom)]"
-       style="grid-template-columns: repeat(<%= nav.length %>, minmax(0, 1fr));">
-    <% nav.forEach(function(item){ const activo = currentPath.indexOf(item[0]) === 0; %>
+       style="grid-template-columns: repeat(<%= navFlat.length %>, minmax(0, 1fr));">
+    <% navFlat.forEach(function(item){ const activo = _act(item[0]) || (item[0] === '/facturacion' && (currentPath.indexOf('/gastos') === 0 || currentPath.indexOf('/caja') === 0)); %>
       <a href="<%= item[0] %>" class="flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] <%= activo ? 'text-brand-600' : 'text-slate-400' %>">
         <span class="text-lg leading-none"><%= item[2] %></span>
         <span class="leading-none"><%= item[1] %></span>

@@ -99,6 +99,7 @@ app.use('/notificaciones', requireAuth, require('./routes/notificaciones'));
 app.use('/contenido', requireAuth, require('./routes/contenido'));
 app.use('/tareas', requireAuth, soloAdmin, require('./routes/tareas'));
 app.use('/clientes', requireAuth, soloAdmin, require('./routes/clientes'));
+app.use('/marketing', requireAuth, soloAdmin, require('./routes/marketing'));
 app.use('/facturacion', requireAuth, soloAdmin, require('./routes/facturacion'));
 app.use('/gastos', requireAuth, soloAdmin, require('./routes/gastos'));
 app.use('/caja', requireAuth, soloAdmin, require('./routes/caja'));

@@ -1,0 +1,44 @@
+<%- include('../partials/subnav') %>
+
+<h1 class="text-2xl font-bold text-slate-800 tracking-tight mb-1">Marketing</h1>
+<p class="text-sm text-slate-500 mb-4">Clientes sin servicio activo hace tiempo. Oportunidades para volver a ofrecerles algo.</p>
+
+<% if (!leads.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">No hay clientes para re-contactar. Todos tienen algún servicio en curso.</div>
+<% } %>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <% leads.forEach(function(c){ %>
+    <div class="bg-white rounded-xl shadow-card p-4 flex flex-col">
+      <div class="flex items-center gap-2.5 mb-2">
+        <%- include('../partials/cliente-avatar', { id: c.id, nombre: c.nombre, logo: c.logo, size: 36 }) %>
+        <div class="min-w-0">
+          <a href="/clientes/<%= c.id %>" class="font-semibold text-slate-800 hover:text-brand-600 truncate block"><%= c.nombre %></a>
+          <span class="text-[11px] px-1.5 py-0.5 rounded-full <%= c.estado === 'inactivo' ? 'bg-slate-200 text-slate-500' : (c.estado === 'potencial' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') %>"><%= c.estado %></span>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-400 mb-2">
+        <% if (c.dias_sin_servicio == null) { %>Sin servicios registrados.
+        <% } else if (c.dias_sin_servicio < 90) { %>Último servicio hace <%= c.dias_sin_servicio %> días.
+        <% } else { %>Último servicio hace <%= Math.round(c.dias_sin_servicio / 30) %> meses.<% } %>
+      </p>
+
+      <% var lo = []; if (c.hizo.web) lo.push('web'); if (c.hizo.redes) lo.push('redes'); if (c.hizo.google) lo.push('Google Ads'); if (c.hizo.meta) lo.push('Meta Ads'); %>
+      <% if (lo.length) { %><p class="text-xs text-slate-400 mb-2">Ya hizo con nosotros: <%= lo.join(', ') %>.</p><% } %>
+
+      <div class="mt-auto">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-1">Qué ofrecerle</div>
+        <div class="flex flex-wrap gap-1.5">
+          <% c.sugerencias.forEach(function(s){ %>
+            <span class="text-xs rounded-full px-2 py-0.5 <%= s.k === 'redes' ? 'bg-purple-100 text-purple-700' : (s.k === 'google' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700') %>"><%= s.txt %></span>
+          <% }); %>
+          <% if (!c.sugerencias.length) { %><span class="text-xs text-slate-400">Ya tiene de todo — pensar algo nuevo.</span><% } %>
+        </div>
+        <% if (c.hizo.web && !c.hizo.redes) { %>
+          <p class="text-[11px] text-purple-600 mt-1.5">Hizo la web con nosotros → buen momento para proponerle redes.</p>
+        <% } %>
+      </div>
+    </div>
+  <% }); %>
+</div>
