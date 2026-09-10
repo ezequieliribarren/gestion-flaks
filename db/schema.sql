@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS clientes (
   logo       TEXT,                                -- ruta relativa dentro de storage/ (uploads/logos/...)
   estado     TEXT NOT NULL DEFAULT 'potencial',   -- activo | potencial | inactivo (se valida en la app)
   notas      TEXT NOT NULL DEFAULT '',
+  contacto_nombre   TEXT NOT NULL DEFAULT '',      -- responsable / persona de contacto
+  contacto_telefono TEXT NOT NULL DEFAULT '',
+  contacto_email    TEXT NOT NULL DEFAULT '',
   redes           INTEGER NOT NULL DEFAULT 0,     -- 1 = tiene redes sociales / contenido como servicio
   redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
   redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido

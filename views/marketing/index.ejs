@@ -37,6 +37,13 @@
         <% } else { %>Último servicio hace <%= Math.round(c.dias_sin_servicio / 30) %> meses.<% } %>
         <% if (c.dias_ult_contacto != null) { %>· <strong class="text-slate-600">Último contacto hace <%= c.dias_ult_contacto %> día<%= c.dias_ult_contacto === 1 ? '' : 's' %></strong><% } %>
       </p>
+      <% var _t = String(c.contacto_telefono || '').replace(/[^\d+]/g, ''); %>
+      <% if (c.contacto_nombre || c.contacto_telefono) { %>
+        <p class="text-xs text-slate-500 mb-2">
+          <% if (c.contacto_nombre) { %>👤 <%= c.contacto_nombre %><% } %>
+          <% if (c.contacto_telefono) { %> · <a href="https://wa.me/<%= _t.replace(/^\+/, '') %>" target="_blank" rel="noopener" class="text-green-600 hover:underline">📞 <%= c.contacto_telefono %></a><% } %>
+        </p>
+      <% } %>
 
       <!-- Sugerencias con "ofrecer" en 1 clic -->
       <% if (c.sugerencias.length) { %>

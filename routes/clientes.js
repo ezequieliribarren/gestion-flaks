@@ -216,7 +216,11 @@ router.post('/:id', (req, res) => {
     if (err) { req.session.flash = { tipo: 'error', msg: err.message }; return res.redirect('/clientes/' + cliente.id); }
     const nombre = String(req.body.nombre || '').trim() || cliente.nombre;
     const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : cliente.estado;
-    db.prepare('UPDATE clientes SET nombre = ?, estado = ? WHERE id = ?').run(nombre, estado, cliente.id);
+    const campo = (k) => (k in req.body ? String(req.body[k] || '').trim() : cliente[k]);
+    db.prepare(`
+      UPDATE clientes SET nombre = ?, estado = ?, contacto_nombre = ?, contacto_telefono = ?, contacto_email = ?
+      WHERE id = ?
+    `).run(nombre, estado, campo('contacto_nombre'), campo('contacto_telefono'), campo('contacto_email'), cliente.id);
     guardarLogo(req, cliente);
     audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cliente "${nombre}"`);
     req.session.flash = { tipo: 'ok', msg: 'Cliente actualizado.' };

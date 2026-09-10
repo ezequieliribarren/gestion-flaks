@@ -34,6 +34,7 @@ function diasDesde(fecha) {
 router.get('/', (req, res) => {
   const filas = db.prepare(`
     SELECT c.id, c.nombre, c.logo, c.estado, c.redes, c.marketing_excluido,
+      c.contacto_nombre, c.contacto_telefono,
       (SELECT COUNT(*) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS rec_activos,
       (SELECT MAX(fecha) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'realizado') AS ultimo_unico
     FROM clientes c

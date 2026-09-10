@@ -41,6 +41,18 @@
   <a href="/contenido/<%= cliente.id %>" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand-600 hover:underline">📸 Este cliente hace redes — ver en Contenido →</a>
 <% } %>
 
+<% var _tel = String(cliente.contacto_telefono || '').replace(/[^\d+]/g, ''); %>
+<% if (cliente.contacto_nombre || cliente.contacto_telefono || cliente.contacto_email) { %>
+  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-slate-600">
+    <% if (cliente.contacto_nombre) { %><span>👤 <%= cliente.contacto_nombre %></span><% } %>
+    <% if (cliente.contacto_telefono) { %>
+      <span>📞 <a href="tel:<%= _tel %>" class="hover:underline"><%= cliente.contacto_telefono %></a>
+        <a href="https://wa.me/<%= _tel.replace(/^\+/, '') %>" target="_blank" rel="noopener" class="text-green-600 hover:underline ml-1">WhatsApp</a></span>
+    <% } %>
+    <% if (cliente.contacto_email) { %><span>✉️ <a href="mailto:<%= cliente.contacto_email %>" class="hover:underline"><%= cliente.contacto_email %></a></span><% } %>
+  </div>
+<% } %>
+
 <!-- Resumen -->
 <div class="grid sm:grid-cols-2 gap-4 mt-4">
   <div class="bg-white rounded-xl shadow-card p-5">
@@ -214,15 +226,18 @@
     </form>
   </div>
 
-  <form method="POST" action="/clientes/<%= cliente.id %>" class="flex flex-wrap gap-3 items-end">
-    <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="<%= cliente.nombre %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+  <form method="POST" action="/clientes/<%= cliente.id %>" class="grid sm:grid-cols-2 gap-3">
+    <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="<%= cliente.nombre %>" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div>
       <label class="block text-xs text-slate-500 mb-1">Estado</label>
-      <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
+      <select name="estado" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm">
         <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= cliente.estado === e ? 'selected' : '' %>><%= e %></option><% }); %>
       </select>
     </div>
-    <button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-3 py-1.5">Guardar</button>
+    <div><label class="block text-xs text-slate-500 mb-1">Responsable / contacto</label><input name="contacto_nombre" value="<%= cliente.contacto_nombre || '' %>" placeholder="Ej: Marta González" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Teléfono</label><input name="contacto_telefono" value="<%= cliente.contacto_telefono || '' %>" placeholder="Ej: +54 9 11 5555 5555" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div class="sm:col-span-2"><label class="block text-xs text-slate-500 mb-1">Email</label><input type="email" name="contacto_email" value="<%= cliente.contacto_email || '' %>" placeholder="Ej: contacto@cliente.com" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div class="sm:col-span-2"><button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-4 py-1.5">Guardar</button></div>
   </form>
 
   <%- include('../partials/historial', { historial: historial }) %>
