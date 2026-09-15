@@ -133,13 +133,37 @@
     <form method="POST" action="/inicio/tarjetas/facturado_mes/ocultar" class="absolute top-2 right-2">
       <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
     </form>
-    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💰 Facturado de <%= nombreMes %></div>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💰 Facturado del mes <span class="normal-case text-slate-400">(<%= nombreMes %>)</span></div>
     <div class="text-3xl font-bold text-slate-800 mt-1 mb-2"><%= fmt.formatARS(facturadoMes.total) %></div>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Cobrado del mes</div>
     <div class="flex gap-4 text-sm mb-2">
       <div><div class="text-[11px] text-slate-400">Cobrado</div><div class="font-semibold text-green-600"><%= fmt.formatARS(facturadoMes.cobrado) %></div></div>
       <div><div class="text-[11px] text-slate-400">Pendiente por cobrar</div><div class="font-semibold text-amber-600"><%= fmt.formatARS(facturadoMes.pendiente) %></div></div>
     </div>
     <a href="/facturacion" class="text-sm text-brand-600 hover:underline">Ver Facturación →</a>
+  </div>
+  <% } %>
+
+  <!-- Mes anterior -->
+  <% if (!ocultas.has('mes_anterior')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4">
+    <form method="POST" action="/inicio/tarjetas/mes_anterior/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">📅 Mes anterior <span class="normal-case text-slate-400">(<%= mesAnterior.nombre %>)</span></div>
+    <div class="text-xl font-bold text-slate-800 mt-1">Facturado: <%= fmt.formatARS(mesAnterior.total) %></div>
+  </div>
+  <% } %>
+
+  <!-- Mes posterior (proyección) -->
+  <% if (!ocultas.has('mes_posterior')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4">
+    <form method="POST" action="/inicio/tarjetas/mes_posterior/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">🔮 Mes que viene <span class="normal-case text-slate-400">(<%= mesPosterior.nombre %>)</span></div>
+    <div class="text-xl font-bold text-slate-800 mt-1">Proyectado: <%= fmt.formatARS(mesPosterior.total) %></div>
+    <p class="text-[11px] text-slate-400 mt-1">Recurrentes activos + trabajos potenciales cargados.</p>
   </div>
   <% } %>
 

@@ -65,6 +65,15 @@ function deudaAntigua(prefijoActual) {
   return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 8) };
 }
 
+// { anio, mes } del mes que está `delta` meses antes/después de (anio, mes).
+function mesAdyacente(anio, mes, delta) {
+  let m = mes + delta;
+  let a = anio;
+  while (m < 1) { m += 12; a -= 1; }
+  while (m > 12) { m -= 12; a += 1; }
+  return { anio: a, mes: m };
+}
+
 router.get('/', async (req, res) => {
   const userId = req.session.user.id;
   const ocultas = ocultasDe(userId);
@@ -76,6 +85,13 @@ router.get('/', async (req, res) => {
 
   const fact = facturacionDelMes(anio, mes);
   const pendientesMes = fact.filas.filter((f) => f.pendiente).sort((a, b) => b.monto - a.monto);
+
+  // Mes anterior: lo que realmente se facturó. Mes que viene: proyección con lo
+  // único que ya se sabe hoy (recurrentes activos + trabajos/presupuestos potenciales).
+  const anterior = mesAdyacente(anio, mes, -1);
+  const posterior = mesAdyacente(anio, mes, 1);
+  const factAnterior = facturacionDelMes(anterior.anio, anterior.mes);
+  const factPosterior = facturacionDelMes(posterior.anio, posterior.mes, { incluirPotenciales: true });
 
   const [contenido, dolar, clima] = await Promise.all([
     contenidoSemana().catch(() => ({ hayClientes: false })),
@@ -94,6 +110,8 @@ router.get('/', async (req, res) => {
     pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 8) },
     deudaAntigua: deudaAntigua(prefijo),
     facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
+    mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total },
+    mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total },
     nombreMes: fmt.nombreMes(mes),
     dolar,
     clima,
