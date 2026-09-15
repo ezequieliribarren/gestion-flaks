@@ -326,11 +326,12 @@ router.post('/:id/recurrentes', (req, res) => {
   const monto = Number(req.body.monto_mensual || 0);
   const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
   const dia = req.body.dia_de_cobro ? Math.min(28, Math.max(1, Number(req.body.dia_de_cobro))) : null;
+  const desde = /^\d{4}-\d{2}$/.test(req.body.desde) ? req.body.desde : new Date().toISOString().slice(0, 7);
   if (!nombre || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo recurrente inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
   const info = db.prepare(`
-    INSERT INTO trabajos_recurrentes (cliente_id, nombre, monto_mensual, reparto_german, reparto_ezequiel, activo, dia_de_cobro)
-    VALUES (?, ?, ?, ?, ?, 1, ?)
-  `).run(cliente.id, nombre, monto, rep.rg, rep.re, dia);
+    INSERT INTO trabajos_recurrentes (cliente_id, nombre, monto_mensual, reparto_german, reparto_ezequiel, activo, dia_de_cobro, desde)
+    VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+  `).run(cliente.id, nombre, monto, rep.rg, rep.re, dia, desde);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó trabajo recurrente "${nombre}" (${monto})`);
   req.session.flash = { tipo: 'ok', msg: 'Trabajo recurrente agregado.' };
   res.redirect('/clientes/' + cliente.id + '#recurrentes');
@@ -351,10 +352,11 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
   const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: t.reparto_german, re: t.reparto_ezequiel };
   const activo = req.body.activo === '1' || req.body.activo === 'on' ? 1 : 0;
   const dia = req.body.dia_de_cobro ? Math.min(28, Math.max(1, Number(req.body.dia_de_cobro))) : null;
+  const desde = /^\d{4}-\d{2}$/.test(req.body.desde) ? req.body.desde : t.desde;
   db.prepare(`
-    UPDATE trabajos_recurrentes SET nombre=?, monto_mensual=?, reparto_german=?, reparto_ezequiel=?, activo=?, dia_de_cobro=?
+    UPDATE trabajos_recurrentes SET nombre=?, monto_mensual=?, reparto_german=?, reparto_ezequiel=?, activo=?, dia_de_cobro=?, desde=?
     WHERE id=?
-  `).run(nombre, monto, rep.rg, rep.re, activo, dia, t.id);
+  `).run(nombre, monto, rep.rg, rep.re, activo, dia, desde, t.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó trabajo recurrente "${nombre}"`);
   req.session.flash = { tipo: 'ok', msg: 'Trabajo recurrente actualizado.' };
   res.redirect('/clientes/' + cliente.id + '#recurrentes');

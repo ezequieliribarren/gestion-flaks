@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS trabajos_recurrentes (
   reparto_ezequiel REAL NOT NULL DEFAULT 50,
   activo           INTEGER NOT NULL DEFAULT 1,
   dia_de_cobro     INTEGER,
+  desde            TEXT,                            -- 'YYYY-MM': primer mes que factura (null = siempre)
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

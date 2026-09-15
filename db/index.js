@@ -94,6 +94,18 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
     const colsLinks = raw.all('PRAGMA table_info(contenido_links)').map((c) => c.name);
     if (!colsLinks.includes('empresa')) raw.exec("ALTER TABLE contenido_links ADD COLUMN empresa TEXT NOT NULL DEFAULT ''");
   }
+
+  const colsRecurrentes = raw.all('PRAGMA table_info(trabajos_recurrentes)').map((c) => c.name);
+  if (!colsRecurrentes.includes('desde')) raw.exec('ALTER TABLE trabajos_recurrentes ADD COLUMN desde TEXT');
+
+  // Una sola vez: los recurrentes ya cargados antes de esto arrancan a contar desde
+  // septiembre 2026 (antes se facturaba por un Sheet aparte, ya importado como cobros
+  // históricos — sin este corte, Facturación los duplicaría en los meses anteriores).
+  const MARCA_DESDE_RECURRENTES = 'recurrentes_desde_2026_09';
+  if (!raw.all("SELECT valor FROM app_meta WHERE clave = 'recurrentes_desde_2026_09'").length) {
+    raw.exec("UPDATE trabajos_recurrentes SET desde = '2026-09' WHERE desde IS NULL");
+    raw.exec(`INSERT OR REPLACE INTO app_meta (clave, valor) VALUES ('${MARCA_DESDE_RECURRENTES}', datetime('now'))`);
+  }
 })();
 
 // --- Adaptador con la interfaz de better-sqlite3 que usa el resto del código ---
