@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   redes_meta_posteos_sem   INTEGER,               -- meta de posteos por semana, default para semanas sin meta propia
   redes_meta_historias_mes INTEGER,               -- meta de historias por mes (null = usar default)
   marketing_excluido INTEGER NOT NULL DEFAULT 0,  -- 1 = no mostrar en Marketing / no sugerir ventas
+  grupo_id   INTEGER REFERENCES clientes(id) ON DELETE SET NULL, -- cliente "padre" del que depende (grupo de marcas)
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
   creado_por TEXT
 );

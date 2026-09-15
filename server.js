@@ -43,6 +43,13 @@ try {
   console.error('Error importando histórico de contenido:', e);
 }
 
+// Une (una sola vez) los clientes de Sistema Continuo bajo un mismo grupo.
+try {
+  require('./db/vincular-grupo').vincularGrupoSistemaContinuo();
+} catch (e) {
+  console.error('Error vinculando grupo Sistema Continuo:', e);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PROD = process.env.NODE_ENV === 'production';

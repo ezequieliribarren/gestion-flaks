@@ -41,6 +41,16 @@
   <a href="/contenido/<%= cliente.id %>" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand-600 hover:underline">📸 Este cliente hace redes — ver en Contenido →</a>
 <% } %>
 
+<% if (grupoDe) { %>
+  <div class="mt-2 text-sm text-slate-500">🏷️ Pertenece al grupo <a href="/clientes/<%= grupoDe.id %>" class="text-brand-600 hover:underline font-medium"><%= grupoDe.nombre %></a></div>
+<% } %>
+<% if (subclientes.length) { %>
+  <div class="mt-2 text-sm text-slate-500">
+    🏷️ Grupo de:
+    <% subclientes.forEach(function(s, i){ %><a href="/clientes/<%= s.id %>" class="text-brand-600 hover:underline"><%= s.nombre %></a><%= i < subclientes.length - 1 ? ', ' : '' %><% }); %>
+  </div>
+<% } %>
+
 <% var _tel = String(cliente.contacto_telefono || '').replace(/[^\d+]/g, ''); %>
 <% if (cliente.contacto_nombre || cliente.contacto_telefono || cliente.contacto_email) { %>
   <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-slate-600">
@@ -237,6 +247,18 @@
     <div><label class="block text-xs text-slate-500 mb-1">Responsable / contacto</label><input name="contacto_nombre" value="<%= cliente.contacto_nombre || '' %>" placeholder="Ej: Marta González" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">Teléfono</label><input name="contacto_telefono" value="<%= cliente.contacto_telefono || '' %>" placeholder="Ej: +54 9 11 5555 5555" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div class="sm:col-span-2"><label class="block text-xs text-slate-500 mb-1">Email</label><input type="email" name="contacto_email" value="<%= cliente.contacto_email || '' %>" placeholder="Ej: contacto@cliente.com" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div class="sm:col-span-2">
+      <label class="block text-xs text-slate-500 mb-1">Grupo (este cliente es sub-marca de…)</label>
+      <select name="grupo_id" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" <%= subclientes.length ? 'disabled' : '' %>>
+        <option value="">— Ninguno (es independiente) —</option>
+        <% gruposDisponibles.forEach(function(g){ %><option value="<%= g.id %>" <%= cliente.grupo_id === g.id ? 'selected' : '' %>><%= g.nombre %></option><% }); %>
+      </select>
+      <% if (subclientes.length) { %>
+        <p class="text-[11px] text-amber-600 mt-1">Ya es grupo de otros clientes, no puede pasar a depender de otro.</p>
+      <% } else { %>
+        <p class="text-[11px] text-slate-400 mt-1">Ej: "Senko" puede pertenecer al grupo "Sistema Continuo". Sirve para elegirlo como sub-marca en Contenido.</p>
+      <% } %>
+    </div>
     <div class="sm:col-span-2"><button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-4 py-1.5">Guardar</button></div>
   </form>
 

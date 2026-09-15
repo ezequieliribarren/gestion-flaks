@@ -173,6 +173,13 @@ router.get('/:id', (req, res) => {
 
   const clientesLista = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre COLLATE NOCASE').all();
 
+  const subclientes = db.prepare('SELECT id, nombre FROM clientes WHERE grupo_id = ? ORDER BY nombre COLLATE NOCASE').all(cliente.id);
+  const grupoDe = cliente.grupo_id ? db.prepare('SELECT id, nombre FROM clientes WHERE id = ?').get(cliente.grupo_id) : null;
+  // Sólo se puede elegir como grupo/padre a un cliente que hoy no sea, a su vez, hijo de otro (1 solo nivel).
+  const gruposDisponibles = db.prepare(`
+    SELECT id, nombre FROM clientes WHERE id <> ? AND grupo_id IS NULL ORDER BY nombre COLLATE NOCASE
+  `).all(cliente.id);
+
   res.render('clientes/detalle', {
     titulo: cliente.nombre,
     cliente,
@@ -182,6 +189,9 @@ router.get('/:id', (req, res) => {
     tareasMes,
     periodoActual: mesPrefijo,
     clientesLista,
+    subclientes,
+    grupoDe,
+    gruposDisponibles,
     ESTADOS,
     ultima: audit.ultimaModificacion('clientes', cliente.id),
     historial: audit.historial('clientes', cliente.id),
@@ -217,10 +227,34 @@ router.post('/:id', (req, res) => {
     const nombre = String(req.body.nombre || '').trim() || cliente.nombre;
     const estado = ESTADOS.includes(req.body.estado) ? req.body.estado : cliente.estado;
     const campo = (k) => (k in req.body ? String(req.body[k] || '').trim() : cliente[k]);
+
+    let grupoId = cliente.grupo_id;
+    if ('grupo_id' in req.body) {
+      const gid = parseInt(req.body.grupo_id, 10);
+      if (!gid) {
+        grupoId = null;
+      } else if (gid === cliente.id) {
+        req.session.flash = { tipo: 'error', msg: 'Un cliente no puede ser grupo de sí mismo.' };
+        return res.redirect('/clientes/' + cliente.id);
+      } else {
+        const padre = db.prepare('SELECT id, grupo_id FROM clientes WHERE id = ?').get(gid);
+        const tieneHijos = db.prepare('SELECT 1 FROM clientes WHERE grupo_id = ? LIMIT 1').get(cliente.id);
+        if (!padre || padre.grupo_id) {
+          req.session.flash = { tipo: 'error', msg: 'Ese cliente no puede ser grupo (ya pertenece a otro grupo).' };
+          return res.redirect('/clientes/' + cliente.id);
+        }
+        if (tieneHijos) {
+          req.session.flash = { tipo: 'error', msg: 'Este cliente ya tiene sub-clientes propios, no puede pasar a depender de otro.' };
+          return res.redirect('/clientes/' + cliente.id);
+        }
+        grupoId = gid;
+      }
+    }
+
     db.prepare(`
-      UPDATE clientes SET nombre = ?, estado = ?, contacto_nombre = ?, contacto_telefono = ?, contacto_email = ?
+      UPDATE clientes SET nombre = ?, estado = ?, contacto_nombre = ?, contacto_telefono = ?, contacto_email = ?, grupo_id = ?
       WHERE id = ?
-    `).run(nombre, estado, campo('contacto_nombre'), campo('contacto_telefono'), campo('contacto_email'), cliente.id);
+    `).run(nombre, estado, campo('contacto_nombre'), campo('contacto_telefono'), campo('contacto_email'), grupoId, cliente.id);
     guardarLogo(req, cliente);
     audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cliente "${nombre}"`);
     req.session.flash = { tipo: 'ok', msg: 'Cliente actualizado.' };

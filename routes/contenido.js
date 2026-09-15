@@ -15,6 +15,14 @@ function metasSemanaDe(clienteId, periodo) {
   return out;
 }
 
+// Nombres de los demás clientes del mismo grupo (padre + hermanos, o hijos si éste es el padre).
+function miembrosDelGrupo(cliente) {
+  const raiz = cliente.grupo_id || cliente.id;
+  return db.prepare(`
+    SELECT nombre FROM clientes WHERE (id = ? OR grupo_id = ?) AND id <> ? ORDER BY nombre COLLATE NOCASE
+  `).all(raiz, raiz, cliente.id).map((r) => r.nombre);
+}
+
 const router = express.Router();
 
 function hoyISO() {
@@ -188,9 +196,10 @@ router.get('/:id/tareas/:tid', (req, res) => {
     uso_previo: usoPrevio(l.url_norm, l.id),
   }));
 
-  const empresas = db.prepare(
+  const empresasUsadas = db.prepare(
     "SELECT DISTINCT empresa FROM contenido_links WHERE cliente_id = ? AND empresa <> '' ORDER BY empresa COLLATE NOCASE"
   ).all(cliente.id).map((r) => r.empresa);
+  const empresas = [...new Set([...miembrosDelGrupo(cliente), ...empresasUsadas])];
 
   res.render('contenido/tarea', {
     titulo: tarea.titulo,
