@@ -8,7 +8,7 @@ const { cuentaCorrienteGlobal } = require('../lib/billing');
 const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
 const { dolarMEP, climaCaba } = require('../lib/externos');
-const { TARJETAS, saludo, ocultasDe, ocultar, mostrar } = require('../lib/inicio');
+const { TARJETAS, saludo, ocultasDe, ocultar, mostrar, limpiarPagosOcultosResueltos } = require('../lib/inicio');
 
 const router = express.Router();
 
@@ -60,7 +60,13 @@ router.get('/', async (req, res) => {
   const mes = Number(iso.slice(5, 7));
 
   const fact = facturacionDelMes(anio, mes);
-  const pendientes = fact.filas.filter((f) => f.pendiente);
+  const deudas = fact.filas
+    .filter((f) => f.pendiente)
+    .map((f) => ({ ...f, tarjetaId: `pago_${f.tipo}_${f.id}` }))
+    .sort((a, b) => b.monto - a.monto);
+
+  limpiarPagosOcultosResueltos(userId, deudas.map((d) => d.tarjetaId));
+  const deudasVisibles = deudas.filter((d) => !ocultas.has(d.tarjetaId));
 
   const [contenido, dolar, clima] = await Promise.all([
     contenidoSemana().catch(() => ({ hayClientes: false })),
@@ -76,7 +82,8 @@ router.get('/', async (req, res) => {
     tareasVencidas: tareasVencidas(),
     contenido,
     saldoSocios: cuentaCorrienteGlobal(),
-    pagosPendientes: { total: pendientes.length, monto: pendientes.reduce((a, f) => a + f.monto, 0), filas: pendientes.slice(0, 6) },
+    deudas,
+    deudasVisibles,
     facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
     nombreMes: fmt.nombreMes(mes),
     dolar,

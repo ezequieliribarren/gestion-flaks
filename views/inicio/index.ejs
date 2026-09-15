@@ -73,26 +73,38 @@
   </div>
   <% } %>
 
-  <!-- Pagos de clientes pendientes -->
+  <!-- Pagos de clientes pendientes: una tarjeta por deuda -->
   <% if (!ocultas.has('pagos_pendientes')) { %>
-  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
-    <form method="POST" action="/inicio/tarjetas/pagos_pendientes/ocultar" class="absolute top-2 right-2">
-      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
-    </form>
-    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💳 Pagos de clientes pendientes</div>
-    <% if (!pagosPendientes.total) { %>
-      <p class="text-sm text-green-600 mt-2">🎉 No hay pagos pendientes este mes.</p>
-    <% } else { %>
-      <div class="flex items-end gap-2 mt-1 mb-2">
-        <span class="text-4xl font-bold text-amber-500"><%= pagosPendientes.total %></span>
-        <span class="text-sm text-slate-400 mb-1"><%= fmt.formatARS(pagosPendientes.monto) %></span>
+    <% if (!deudas.length) { %>
+      <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+        <form method="POST" action="/inicio/tarjetas/pagos_pendientes/ocultar" class="absolute top-2 right-2">
+          <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+        </form>
+        <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💳 Pagos de clientes pendientes</div>
+        <p class="text-sm text-green-600 mt-2">🎉 No hay pagos pendientes este mes.</p>
       </div>
-      <ul class="text-sm text-slate-600 space-y-0.5 mb-2">
-        <% pagosPendientes.filas.forEach(function(f){ %><li class="truncate flex justify-between gap-2"><span>· <%= f.cliente %></span><span class="text-slate-400 shrink-0"><%= fmt.formatARS(f.monto) %></span></li><% }); %>
-      </ul>
+    <% } else { %>
+      <% deudasVisibles.forEach(function(f){ %>
+        <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4">
+          <form method="POST" action="/inicio/tarjetas/<%= f.tarjetaId %>/ocultar" class="absolute top-2 right-2">
+            <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+          </form>
+          <div class="text-xs text-slate-500 uppercase tracking-wide mb-2 pr-6">💳 Debe <%= f.cliente %></div>
+          <div class="flex items-center gap-2.5 mb-1.5">
+            <%- include('../partials/cliente-avatar', { id: f.cliente_id, nombre: f.cliente, logo: f.cliente_logo, size: 28 }) %>
+            <div class="min-w-0">
+              <div class="font-semibold text-slate-800 truncate"><%= f.cliente %></div>
+              <div class="text-xs text-slate-400 truncate"><%= f.concepto %></div>
+            </div>
+          </div>
+          <div class="text-2xl font-bold text-amber-600 mb-1"><%= fmt.formatARS(f.monto) %></div>
+          <% if (f.tipo === 'recurrente' && f.vencido) { %>
+            <div class="text-xs text-red-600 font-medium mb-1">⚠ Vencido<% if (f.vence_dia) { %> (día <%= f.vence_dia %>)<% } %></div>
+          <% } %>
+          <a href="/clientes/<%= f.cliente_id %>#<%= f.tipo === 'recurrente' ? 'recurrentes' : 'unicos' %>" class="text-sm text-brand-600 hover:underline">Ver cliente →</a>
+        </div>
+      <% }); %>
     <% } %>
-    <a href="/facturacion" class="text-sm text-brand-600 hover:underline">Ver Facturación →</a>
-  </div>
   <% } %>
 
   <!-- Facturado del mes -->
@@ -149,7 +161,12 @@
 
 </div>
 
-<% var ocultasArr = TARJETAS.filter(function(t){ return ocultas.has(t.id); }); %>
+<%
+  var ocultasArr = TARJETAS.filter(function(t){ return ocultas.has(t.id); })
+    .concat(deudas.filter(function(f){ return ocultas.has(f.tarjetaId); }).map(function(f){
+      return { id: f.tarjetaId, label: 'Debe ' + f.cliente + ' — ' + f.concepto };
+    }));
+%>
 <% if (ocultasArr.length) { %>
   <details class="bg-white rounded-xl shadow-card p-4 mt-2">
     <summary class="text-sm text-brand-600 cursor-pointer">Tarjetas ocultas (<%= ocultasArr.length %>)</summary>
