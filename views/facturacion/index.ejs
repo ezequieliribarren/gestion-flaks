@@ -13,7 +13,7 @@
 
 <% if (totales.pendiente > 0) { %>
   <div class="mb-3 text-sm bg-amber-50 text-amber-800 border border-amber-200 rounded-lg px-3 py-2">
-    <strong><%= fmt.formatARS(totales.pendiente) %></strong> pendientes de cobro en recurrentes este mes.
+    <strong><%= fmt.formatARS(totales.pendiente) %></strong> pendientes de cobro este mes.
   </div>
 <% } %>
 
@@ -35,7 +35,7 @@
         <tr><td colspan="7" class="px-4 py-6 text-center text-slate-500">Sin facturación para este mes.</td></tr>
       <% } %>
       <% filas.forEach(function(f){ %>
-        <tr class="<%= (f.es_potencial || f.vencido) ? 'pendiente' : '' %>">
+        <tr class="<%= (f.es_potencial || f.vencido || f.pendiente) ? 'pendiente' : '' %>">
           <td class="px-4 py-3">
             <a href="/clientes/<%= f.cliente_id %>" class="flex items-center gap-2 hover:text-brand-600">
               <%- include('../partials/cliente-avatar', { id: f.cliente_id, nombre: f.cliente, logo: f.cliente_logo, size: 20 }) %><%= f.cliente %>
@@ -48,14 +48,18 @@
           </td>
           <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= f.tipo === 'recurrente' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' %>"><%= f.tipo === 'recurrente' ? 'Recurrente' : 'Único' %></span></td>
           <td class="px-4 py-3">
-            <% if (f.tipo !== 'recurrente' || f.es_potencial) { %>
+            <% if (f.es_potencial) { %>
               <span class="text-xs text-slate-300">—</span>
-            <% } else if (f.cobrado) { %>
+            <% } else if (f.tipo === 'recurrente' && f.cobrado) { %>
               <span class="text-xs text-green-700">Cobrado <%= f.fecha_pago ? 'el ' + fmt.formatFecha(f.fecha_pago) : '' %></span>
-            <% } else if (f.vencido) { %>
+            <% } else if (f.tipo === 'recurrente' && f.vencido) { %>
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs font-medium text-red-600 hover:underline">⚠ Vencido<% if (f.vence_dia) { %> (día <%= f.vence_dia %>)<% } %></a>
-            <% } else { %>
+            <% } else if (f.tipo === 'recurrente' && f.pendiente) { %>
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs text-amber-600 hover:underline">Pendiente<% if (f.vence_dia) { %> (hasta el <%= f.vence_dia %>)<% } %></a>
+            <% } else if (f.pendiente) { %>
+              <a href="/clientes/<%= f.cliente_id %>#unicos" class="text-xs font-medium text-red-600 hover:underline">⚠ Adeuda</a>
+            <% } else { %>
+              <span class="text-xs text-slate-300">—</span>
             <% } %>
           </td>
           <td class="px-4 py-3 text-right font-medium"><%= fmt.formatARS(f.monto) %></td>
@@ -73,7 +77,7 @@
       </tr>
       <% if (totales.pendiente > 0) { %>
         <tr class="text-amber-800 font-medium">
-          <td class="px-4 py-2" colspan="4">— de eso, pendiente de cobro (recurrentes)</td>
+          <td class="px-4 py-2" colspan="4">— de eso, pendiente de cobro</td>
           <td class="px-4 py-2 text-right"><%= fmt.formatARS(totales.pendiente) %></td>
           <td colspan="2"></td>
         </tr>

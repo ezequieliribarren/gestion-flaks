@@ -65,7 +65,7 @@ router.get('/', (req, res) => {
     SELECT c.id, c.nombre, c.logo, c.estado, c.redes, c.marketing_excluido,
       c.contacto_nombre, c.contacto_telefono, c.contacto_email,
       (SELECT COUNT(*) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS rec_activos,
-      (SELECT MAX(fecha) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'realizado') AS ultimo_unico
+      (SELECT MAX(fecha) FROM trabajos_unicos WHERE cliente_id = c.id AND estado IN ('realizado', 'adeuda')) AS ultimo_unico
     FROM clientes c
     ORDER BY c.nombre COLLATE NOCASE
   `).all();

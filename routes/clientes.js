@@ -101,7 +101,7 @@ router.get('/', (req, res) => {
       SELECT c.*,
         (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS mensual,
         (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1)
-          + (SELECT COALESCE(SUM(monto),0) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'realizado') AS total_facturado,
+          + (SELECT COALESCE(SUM(monto),0) FROM trabajos_unicos WHERE cliente_id = c.id AND estado IN ('realizado', 'adeuda')) AS total_facturado,
         (SELECT COUNT(*) FROM tareas WHERE cliente_id = c.id AND estado != 'completada') AS tareas_abiertas,
         (SELECT COUNT(*) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'potencial') AS trabajos_potenciales,
         ${ESTADO_EFECTIVO} AS estado_efectivo
@@ -380,7 +380,7 @@ router.post('/:id/recurrentes/:tid/pago', (req, res) => {
 });
 
 // --- Trabajos únicos ---
-const ESTADOS_TRABAJO = ['realizado', 'potencial'];
+const ESTADOS_TRABAJO = ['realizado', 'adeuda', 'potencial'];
 
 router.post('/:id/unicos', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
@@ -400,6 +400,8 @@ router.post('/:id/unicos', (req, res) => {
   res.redirect('/clientes/' + cliente.id + '#unicos');
 });
 
+const ETIQUETAS_ESTADO_TRABAJO = { realizado: 'Realizado', adeuda: 'Adeuda', potencial: 'Potencial' };
+
 router.post('/:id/unicos/:tid', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
@@ -412,21 +414,6 @@ router.post('/:id/unicos/:tid', (req, res) => {
     return res.redirect('/clientes/' + cliente.id + '#unicos');
   }
 
-  // Confirmar un trabajo potencial -> realizado (y reactivar al cliente si estaba inactivo/potencial).
-  if (req.body._accion === 'confirmar' || req.body._accion === 'volver_potencial') {
-    const nuevoEstado = req.body._accion === 'confirmar' ? 'realizado' : 'potencial';
-    db.prepare('UPDATE trabajos_unicos SET estado = ? WHERE id = ?').run(nuevoEstado, t.id);
-    let extra = '';
-    if (nuevoEstado === 'realizado' && cliente.estado !== 'activo') {
-      db.prepare("UPDATE clientes SET estado = 'activo' WHERE id = ?").run(cliente.id);
-      extra = ' El cliente pasó a Activo.';
-    }
-    audit.registrar(req, 'clientes', cliente.id, 'editar',
-      nuevoEstado === 'realizado' ? `Confirmó el trabajo "${t.nombre}".${extra}` : `Marcó "${t.nombre}" como potencial`);
-    req.session.flash = { tipo: 'ok', msg: (nuevoEstado === 'realizado' ? 'Trabajo confirmado.' : 'Trabajo marcado como potencial.') + extra };
-    return res.redirect('/clientes/' + cliente.id + '#unicos');
-  }
-
   const nombre = String(req.body.nombre || '').trim() || t.nombre;
   const monto = req.body.monto != null ? Number(req.body.monto) : t.monto;
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : t.fecha;
@@ -434,8 +421,17 @@ router.post('/:id/unicos/:tid', (req, res) => {
   const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : t.estado;
   db.prepare('UPDATE trabajos_unicos SET nombre=?, monto=?, fecha=?, reparto_german=?, reparto_ezequiel=?, estado=? WHERE id=?')
     .run(nombre, monto, fecha, rep.rg, rep.re, estado, t.id);
-  audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó trabajo único "${nombre}"`);
-  req.session.flash = { tipo: 'ok', msg: 'Trabajo único actualizado.' };
+
+  // Si el trabajo pasa a confirmado (realizado o adeuda) y el cliente estaba inactivo/potencial, se reactiva.
+  let extra = '';
+  if (estado !== 'potencial' && t.estado === 'potencial' && cliente.estado !== 'activo') {
+    db.prepare("UPDATE clientes SET estado = 'activo' WHERE id = ?").run(cliente.id);
+    extra = ' El cliente pasó a Activo.';
+  }
+
+  audit.registrar(req, 'clientes', cliente.id, 'editar',
+    estado !== t.estado ? `Marcó "${nombre}" como ${ETIQUETAS_ESTADO_TRABAJO[estado] || estado}.${extra}` : `Editó trabajo único "${nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Trabajo único actualizado.' + extra };
   res.redirect('/clientes/' + cliente.id + '#unicos');
 });
 

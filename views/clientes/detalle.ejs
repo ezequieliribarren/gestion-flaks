@@ -18,6 +18,13 @@
       inactivo:  ['Inactivo', 'bg-slate-200 text-slate-500'],
     }[e] || ['—', 'bg-slate-100 text-slate-600'];
   }
+  function estadoTrabajoClase(e){
+    return {
+      realizado: 'bg-green-100 text-green-700',
+      adeuda:    'bg-red-100 text-red-700',
+      potencial: 'bg-amber-100 text-amber-700',
+    }[e] || 'bg-slate-100 text-slate-600';
+  }
 %>
 
 <a href="/clientes" class="text-sm text-brand-600 hover:underline">&larr; Volver a clientes</a>
@@ -157,7 +164,7 @@
 <!-- Trabajos únicos -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-1">Trabajos de una sola vez</h2>
-  <p class="text-xs text-slate-400 mb-3">Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar: sólo suma en la proyección de Facturación. Al confirmarlo pasa a <strong>realizado</strong> y cuenta como facturación real.</p>
+  <p class="text-xs text-slate-400 mb-3">Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar: sólo suma en la proyección de Facturación. <strong>Realizado</strong> cuenta como facturación real y cobrada. <strong>Adeuda</strong> también cuenta como facturación real, pero figura pendiente de cobro (en Facturación y en Inicio) hasta que se marque como Realizado.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
@@ -165,7 +172,7 @@
       </thead>
       <tbody>
         <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
-          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : '' %>">
+          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : (u.estado === 'adeuda' ? 'bg-red-50/60' : '') %>">
             <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>">
               <td class="py-2 pr-2"><input name="nombre" value="<%= u.nombre %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
               <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= u.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
@@ -173,15 +180,14 @@
               <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" value="<%= u.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
               <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= u.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
               <td class="py-2 px-2">
-                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full <%= pot ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700' %>"><%= pot ? 'Potencial' : 'Realizado' %></span>
+                <select name="estado" onchange="this.form.submit()" class="text-[11px] font-medium rounded-full px-2 py-1 border-0 cursor-pointer <%= estadoTrabajoClase(u.estado) %>">
+                  <option value="potencial" <%= u.estado === 'potencial' ? 'selected' : '' %>>Potencial</option>
+                  <option value="realizado" <%= u.estado === 'realizado' ? 'selected' : '' %>>Realizado</option>
+                  <option value="adeuda" <%= u.estado === 'adeuda' ? 'selected' : '' %>>Adeuda</option>
+                </select>
               </td>
               <td class="py-2 px-2 whitespace-nowrap">
                 <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
-                <% if (pot) { %>
-                  <button name="_accion" value="confirmar" class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 ml-1">Confirmar</button>
-                <% } else { %>
-                  <button name="_accion" value="volver_potencial" class="text-xs text-amber-700 hover:underline ml-1">→ Potencial</button>
-                <% } %>
                 <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
               </td>
             </form>
@@ -202,6 +208,7 @@
       <label class="block text-xs text-slate-500 mb-1">Estado</label>
       <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
         <option value="realizado">Realizado</option>
+        <option value="adeuda">Adeuda (pendiente de cobro)</option>
         <option value="potencial">Potencial (presupuesto)</option>
       </select>
     </div>
