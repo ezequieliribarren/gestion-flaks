@@ -7,13 +7,7 @@ const { esAdmin } = require('../middleware/auth');
 const { TIPOS, ESTADOS_TAREA, normalizarUrl, usoPrevio } = require('../lib/contenido');
 const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
 const { resumenCliente, periodoActual, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES } = require('../lib/redes-sheet');
-
-function metasSemanaDe(clienteId, periodo) {
-  const filas = db.prepare('SELECT semana, meta FROM redes_metas_semana WHERE cliente_id = ? AND periodo = ?').all(clienteId, periodo);
-  const out = {};
-  filas.forEach((f) => { out[f.semana] = f.meta; });
-  return out;
-}
+const { metasSemanaDe } = require('../lib/redes-metas');
 
 // Nombres de los demás clientes del mismo grupo (padre + hermanos, o hijos si éste es el padre).
 function miembrosDelGrupo(cliente) {

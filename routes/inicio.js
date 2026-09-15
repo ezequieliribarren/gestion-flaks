@@ -5,19 +5,12 @@ const db = require('../db');
 const fmt = require('../lib/format');
 const { facturacionDelMes } = require('../lib/billing');
 const { cuentaCorrienteGlobal } = require('../lib/billing');
-const { diasPublicadosSemanaActual } = require('../lib/redes-sheet');
+const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
+const { metasSemanaDe } = require('../lib/redes-metas');
 const { dolarMEP, climaCaba } = require('../lib/externos');
 const { TARJETAS, saludo, ocultasDe, ocultar, mostrar } = require('../lib/inicio');
 
 const router = express.Router();
-
-const DIAS_SEMANA = [null, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-
-function isoWeekday(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  const w = d.getDay();
-  return w === 0 ? 7 : w;
-}
 
 function tareasVencidas() {
   const filas = db.prepare(`
@@ -32,27 +25,30 @@ function tareasVencidas() {
   return { total: vencidas.length, titulos: vencidas.slice(0, 6).map((t) => t.nombre) };
 }
 
+// Para cada cliente con Sheet, compara lo publicado esta semana contra su meta de
+// la semana (propia o default) y arma la lista de "cuánto le falta a cada uno".
 async function contenidoSemana() {
   const clientes = db.prepare(
     "SELECT * FROM clientes WHERE redes = 1 AND redes_sheet_url IS NOT NULL AND redes_sheet_url <> ''"
   ).all();
   if (!clientes.length) return { hayClientes: false };
 
-  const porCliente = await Promise.all(clientes.map((c) => diasPublicadosSemanaActual(c)));
-  const hoyIso = isoWeekday(fmt.ahora().iso);
+  const periodo = periodoActual().periodo;
+  const resultados = await Promise.all(clientes.map(async (c) => {
+    const metas = metasSemanaDe(c.id, periodo);
+    let avance;
+    try { avance = await resumenCliente(c, metas); } catch (e) { avance = null; }
+    if (!avance || !avance.ok) return null;
+    const semAct = avance.posteos.semanas.find((s) => s.n === avance.posteos.semana_actual);
+    if (!semAct) return null;
+    return { cliente: c.nombre, meta: semAct.meta, hechos: semAct.cantidad, faltante: Math.max(0, semAct.meta - semAct.cantidad) };
+  }));
 
-  const dias = [1, 2, 3, 4, 5].map((n) => {
-    const conPosteo = porCliente.filter((set) => set.has(n)).length;
-    let estado;
-    if (n > hoyIso) estado = 'pendiente';
-    else if (conPosteo === 0) estado = 'faltante';
-    else if (conPosteo < clientes.length) estado = 'parcial';
-    else estado = 'completo';
-    return { n, nombre: DIAS_SEMANA[n], conPosteo, estado };
-  });
+  const validos = resultados.filter(Boolean);
+  const conFaltante = validos.filter((r) => r.faltante > 0).sort((a, b) => b.faltante - a.faltante);
+  const totalFaltante = conFaltante.reduce((a, r) => a + r.faltante, 0);
 
-  const faltantes = dias.filter((d) => d.estado === 'faltante' || d.estado === 'parcial');
-  return { hayClientes: true, totalClientes: clientes.length, dias, hoyIso, faltantes };
+  return { hayClientes: true, totalClientes: clientes.length, conFaltante, totalFaltante };
 }
 
 router.get('/', async (req, res) => {
