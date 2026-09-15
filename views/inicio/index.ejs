@@ -1,0 +1,178 @@
+<%
+  function colorDia(e){
+    return {
+      completo: 'bg-green-500 text-white',
+      parcial: 'bg-amber-400 text-white',
+      faltante: 'bg-red-400 text-white',
+      pendiente: 'bg-slate-100 text-slate-400',
+    }[e] || 'bg-slate-100 text-slate-400';
+  }
+%>
+
+<div class="mb-5">
+  <h1 class="text-2xl font-bold text-slate-800 tracking-tight"><%= saludoTexto %> 👋</h1>
+  <p class="text-sm text-slate-500 mt-0.5">Esto es lo que está pasando hoy.</p>
+</div>
+
+<div class="columns-1 sm:columns-2 xl:columns-3 gap-4" style="column-gap: 1rem;">
+
+  <!-- Tareas vencidas -->
+  <% if (!ocultas.has('tareas_vencidas')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/tareas_vencidas/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">⏰ Tareas vencidas</div>
+    <% if (!tareasVencidas.total) { %>
+      <p class="text-sm text-green-600 mt-2">🎉 No hay tareas vencidas.</p>
+    <% } else { %>
+      <div class="flex items-end gap-2 mt-1 mb-2">
+        <span class="text-4xl font-bold text-red-500"><%= tareasVencidas.total %></span>
+        <span class="text-sm text-slate-400 mb-1">vencida<%= tareasVencidas.total === 1 ? '' : 's' %></span>
+      </div>
+      <ul class="text-sm text-slate-600 space-y-0.5 mb-2">
+        <% tareasVencidas.titulos.forEach(function(t){ %><li class="truncate">· <%= t %></li><% }); %>
+      </ul>
+      <% if (tareasVencidas.total > tareasVencidas.titulos.length) { %>
+        <p class="text-xs text-slate-400 mb-2">+<%= tareasVencidas.total - tareasVencidas.titulos.length %> más</p>
+      <% } %>
+    <% } %>
+    <a href="/tareas" class="text-sm text-brand-600 hover:underline">Ver tareas →</a>
+  </div>
+  <% } %>
+
+  <!-- Contenido de la semana -->
+  <% if (!ocultas.has('contenido_semana')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/contenido_semana/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">📸 Contenido de la semana</div>
+    <% if (!contenido.hayClientes) { %>
+      <p class="text-sm text-slate-400 mt-2 mb-2">No hay clientes con Sheet de planificación cargado.</p>
+    <% } else { %>
+      <div class="flex gap-1.5 mt-2 mb-2">
+        <% contenido.dias.forEach(function(d){ %>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <span class="text-[10px] text-slate-400"><%= d.nombre.slice(0,2) %></span>
+            <div class="w-full h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold <%= colorDia(d.estado) %>">
+              <%= d.estado === 'pendiente' ? '' : d.conPosteo + '/' + contenido.totalClientes %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+      <% if (contenido.faltantes.length) { %>
+        <p class="text-sm text-amber-600 mb-2">Falta publicar: <%= contenido.faltantes.map(function(d){return d.nombre;}).join(', ') %></p>
+      <% } else { %>
+        <p class="text-sm text-green-600 mb-2">Al día con las publicaciones de la semana.</p>
+      <% } %>
+    <% } %>
+    <a href="/contenido" class="text-sm text-brand-600 hover:underline">Ver Contenido →</a>
+  </div>
+  <% } %>
+
+  <!-- Saldo entre socios -->
+  <% if (!ocultas.has('saldo_socios')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/saldo_socios/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">🤝 Saldo entre socios</div>
+    <% if (saldoSocios.igualado) { %>
+      <p class="text-sm text-green-600 mt-2 mb-2">✅ Todo igualado entre German y Ezequiel.</p>
+    <% } else { %>
+      <p class="text-lg font-semibold text-slate-800 mt-2 mb-1"><%= saldoSocios.deQuien %> le debe a <%= saldoSocios.aQuien %></p>
+      <p class="text-2xl font-bold text-amber-600 mb-2"><%= fmt.formatARS(saldoSocios.montoAIgualar) %></p>
+    <% } %>
+    <a href="/gastos" class="text-sm text-brand-600 hover:underline">Ver Gastos →</a>
+  </div>
+  <% } %>
+
+  <!-- Pagos de clientes pendientes -->
+  <% if (!ocultas.has('pagos_pendientes')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/pagos_pendientes/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💳 Pagos de clientes pendientes</div>
+    <% if (!pagosPendientes.total) { %>
+      <p class="text-sm text-green-600 mt-2">🎉 No hay pagos pendientes este mes.</p>
+    <% } else { %>
+      <div class="flex items-end gap-2 mt-1 mb-2">
+        <span class="text-4xl font-bold text-amber-500"><%= pagosPendientes.total %></span>
+        <span class="text-sm text-slate-400 mb-1"><%= fmt.formatARS(pagosPendientes.monto) %></span>
+      </div>
+      <ul class="text-sm text-slate-600 space-y-0.5 mb-2">
+        <% pagosPendientes.filas.forEach(function(f){ %><li class="truncate flex justify-between gap-2"><span>· <%= f.cliente %></span><span class="text-slate-400 shrink-0"><%= fmt.formatARS(f.monto) %></span></li><% }); %>
+      </ul>
+    <% } %>
+    <a href="/facturacion" class="text-sm text-brand-600 hover:underline">Ver Facturación →</a>
+  </div>
+  <% } %>
+
+  <!-- Facturado del mes -->
+  <% if (!ocultas.has('facturado_mes')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/facturado_mes/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💰 Facturado de <%= nombreMes %></div>
+    <div class="text-3xl font-bold text-slate-800 mt-1 mb-2"><%= fmt.formatARS(facturadoMes) %></div>
+    <a href="/facturacion" class="text-sm text-brand-600 hover:underline">Ver Facturación →</a>
+  </div>
+  <% } %>
+
+  <!-- Dólar MEP -->
+  <% if (!ocultas.has('dolar_mep')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4">
+    <form method="POST" action="/inicio/tarjetas/dolar_mep/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">💵 Dólar MEP</div>
+    <% if (dolar) { %>
+      <div class="flex gap-4 mt-1">
+        <div><div class="text-[11px] text-slate-400">Compra</div><div class="text-lg font-bold text-slate-800">$<%= dolar.compra.toLocaleString('es-AR') %></div></div>
+        <div><div class="text-[11px] text-slate-400">Venta</div><div class="text-lg font-bold text-slate-800">$<%= dolar.venta.toLocaleString('es-AR') %></div></div>
+      </div>
+    <% } else { %>
+      <p class="text-sm text-slate-400 mt-1">No disponible ahora.</p>
+    <% } %>
+  </div>
+  <% } %>
+
+  <!-- Clima -->
+  <% if (!ocultas.has('clima')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4">
+    <form method="POST" action="/inicio/tarjetas/clima/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">🌤️ Clima Capital Federal</div>
+    <% if (clima) { %>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="text-3xl"><%= clima.icono %></span>
+        <div><div class="text-xl font-bold text-slate-800"><%= clima.temp %>°C</div><div class="text-xs text-slate-400"><%= clima.descripcion %></div></div>
+      </div>
+    <% } else { %>
+      <p class="text-sm text-slate-400 mt-1">No disponible ahora.</p>
+    <% } %>
+  </div>
+  <% } %>
+
+</div>
+
+<% var ocultasArr = TARJETAS.filter(function(t){ return ocultas.has(t.id); }); %>
+<% if (ocultasArr.length) { %>
+  <details class="bg-white rounded-xl shadow-card p-4 mt-2">
+    <summary class="text-sm text-brand-600 cursor-pointer">Tarjetas ocultas (<%= ocultasArr.length %>)</summary>
+    <ul class="mt-3 divide-y divide-slate-100">
+      <% ocultasArr.forEach(function(t){ %>
+        <li class="flex items-center justify-between gap-3 py-2">
+          <span class="text-sm text-slate-600"><%= t.label %></span>
+          <form method="POST" action="/inicio/tarjetas/<%= t.id %>/mostrar">
+            <button class="text-xs text-brand-600 hover:underline">Volver a mostrar</button>
+          </form>
+        </li>
+      <% }); %>
+    </ul>
+  </details>
+<% } %>

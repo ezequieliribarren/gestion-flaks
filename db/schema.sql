@@ -234,6 +234,15 @@ CREATE TABLE IF NOT EXISTS redes_metas_semana (
   UNIQUE(cliente_id, periodo, semana)
 );
 
+-- Tarjetas del Inicio que cada usuario decidió ocultar (botón "X").
+CREATE TABLE IF NOT EXISTS inicio_ocultas (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tarjeta    TEXT NOT NULL,
+  creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, tarjeta)
+);
+
 -- Marca de alertas ya enviadas por bajo avance de contenido (historias) por mes,
 -- para no notificar más de una vez por cliente/mes.
 CREATE TABLE IF NOT EXISTS redes_alertas (

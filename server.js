@@ -114,6 +114,7 @@ app.use((req, res, next) => {
 
 // --- Rutas ---
 app.use('/', require('./routes/auth'));
+app.use('/inicio', requireAuth, soloAdmin, require('./routes/inicio'));
 app.use('/notificaciones', requireAuth, require('./routes/notificaciones'));
 app.use('/contenido', requireAuth, require('./routes/contenido'));
 app.use('/tareas', requireAuth, soloAdmin, require('./routes/tareas'));
@@ -125,7 +126,7 @@ app.use('/caja', requireAuth, soloAdmin, require('./routes/caja'));
 app.use('/documentos', requireAuth, soloAdmin, require('./routes/documentos'));
 
 app.get('/', requireAuth, (req, res) =>
-  res.redirect(req.session.user.rol === 'contenido' ? '/contenido' : '/tareas'));
+  res.redirect(req.session.user.rol === 'contenido' ? '/contenido' : '/inicio'));
 
 // 404
 app.use((req, res) => {

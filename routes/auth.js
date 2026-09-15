@@ -7,7 +7,7 @@ const db = require('../db');
 const router = express.Router();
 
 function inicio(user) {
-  return user && user.rol === 'contenido' ? '/contenido' : '/tareas';
+  return user && user.rol === 'contenido' ? '/contenido' : '/inicio';
 }
 
 router.get('/login', (req, res) => {
@@ -25,7 +25,7 @@ router.post('/login', (req, res) => {
   }
 
   req.session.user = { id: user.id, nombre: user.nombre, usuario: user.usuario, rol: user.rol || 'admin' };
-  const dest = (user.rol === 'contenido') ? '/contenido' : (req.session.returnTo || '/tareas');
+  const dest = (user.rol === 'contenido') ? '/contenido' : (req.session.returnTo || '/inicio');
   delete req.session.returnTo;
   res.redirect(dest);
 });
