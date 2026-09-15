@@ -28,9 +28,10 @@ function yaImportado() {
 
 function limpiarImportado(log) {
   const c = db.prepare("DELETE FROM clientes WHERE creado_por = ?").run(ORIGEN);
+  const co = db.prepare("DELETE FROM cobros WHERE creado_por = ?").run(ORIGEN);
   const g = db.prepare("DELETE FROM gastos WHERE creado_por = ?").run(ORIGEN);
   db.prepare('DELETE FROM app_meta WHERE clave = ?').run(MARCA);
-  log(`  Borrados: ${c.changes} clientes (con sus trabajos) y ${g.changes} gastos importados.`);
+  log(`  Borrados: ${c.changes} clientes (con sus trabajos), ${co.changes} cobros y ${g.changes} gastos importados.`);
 }
 
 function importarDatosIniciales(log = console.log, { reset = false } = {}) {
@@ -53,9 +54,13 @@ function importarDatosIniciales(log = console.log, { reset = false } = {}) {
   const insCliente = db.prepare(
     "INSERT INTO clientes (nombre, color, estado, notas, creado_por) VALUES (@nombre, @color, @estado, @notas, 'import-xlsx')"
   );
-  const insTrabajo = db.prepare(
-    'INSERT INTO trabajos_unicos (cliente_id, nombre, monto, fecha, reparto_german, reparto_ezequiel) VALUES (@cliente_id, @nombre, @monto, @fecha, @rg, @re)'
-  );
+  // La planilla anterior registraba trabajos ya facturados y cobrados: se importan
+  // directo como "cobros" (no como trabajos pendientes), con la misma fecha para
+  // fecha_trabajo y fecha (no hay una fecha de cobro real distinta en el histórico).
+  const insTrabajo = db.prepare(`
+    INSERT INTO cobros (cliente_id, concepto, monto, fecha_trabajo, fecha, reparto_german, reparto_ezequiel, creado_por)
+    VALUES (@cliente_id, @nombre, @monto, @fecha, @fecha, @rg, @re, 'import-xlsx')
+  `);
   const insGasto = db.prepare(
     "INSERT INTO gastos (descripcion, monto, tipo, fecha, categoria, creado_por) VALUES (@descripcion, @monto, @tipo, @fecha, @categoria, 'import-xlsx')"
   );

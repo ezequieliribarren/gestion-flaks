@@ -8,7 +8,7 @@ const { cuentaCorrienteGlobal } = require('../lib/billing');
 const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
 const { dolarMEP, climaCaba } = require('../lib/externos');
-const { TARJETAS, saludo, ocultasDe, ocultar, mostrar, limpiarPagosOcultosResueltos } = require('../lib/inicio');
+const { TARJETAS, saludo, ocultasDe, ocultar, mostrar } = require('../lib/inicio');
 
 const router = express.Router();
 
@@ -51,6 +51,20 @@ async function contenidoSemana() {
   return { hayClientes: true, totalClientes: clientes.length, conFaltante, totalFaltante };
 }
 
+// Trabajos únicos pendientes de cobro cuya fecha (mes al que pertenecen) es de un
+// mes anterior al actual: deuda "vieja" que quedó arrastrada.
+function deudaAntigua(prefijoActual) {
+  const filas = db.prepare(`
+    SELECT tu.id, tu.nombre AS concepto, tu.monto, tu.fecha,
+           c.id AS cliente_id, c.nombre AS cliente, c.logo AS cliente_logo
+    FROM trabajos_unicos tu
+    JOIN clientes c ON c.id = tu.cliente_id
+    WHERE tu.estado = 'pendiente' AND substr(tu.fecha, 1, 7) < ?
+    ORDER BY tu.fecha ASC
+  `).all(prefijoActual);
+  return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 8) };
+}
+
 router.get('/', async (req, res) => {
   const userId = req.session.user.id;
   const ocultas = ocultasDe(userId);
@@ -58,15 +72,10 @@ router.get('/', async (req, res) => {
   const { iso } = fmt.ahora();
   const anio = Number(iso.slice(0, 4));
   const mes = Number(iso.slice(5, 7));
+  const prefijo = iso.slice(0, 7);
 
   const fact = facturacionDelMes(anio, mes);
-  const deudas = fact.filas
-    .filter((f) => f.pendiente)
-    .map((f) => ({ ...f, tarjetaId: `pago_${f.tipo}_${f.id}` }))
-    .sort((a, b) => b.monto - a.monto);
-
-  limpiarPagosOcultosResueltos(userId, deudas.map((d) => d.tarjetaId));
-  const deudasVisibles = deudas.filter((d) => !ocultas.has(d.tarjetaId));
+  const pendientesMes = fact.filas.filter((f) => f.pendiente).sort((a, b) => b.monto - a.monto);
 
   const [contenido, dolar, clima] = await Promise.all([
     contenidoSemana().catch(() => ({ hayClientes: false })),
@@ -82,8 +91,8 @@ router.get('/', async (req, res) => {
     tareasVencidas: tareasVencidas(),
     contenido,
     saldoSocios: cuentaCorrienteGlobal(),
-    deudas,
-    deudasVisibles,
+    pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 8) },
+    deudaAntigua: deudaAntigua(prefijo),
     facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
     nombreMes: fmt.nombreMes(mes),
     dolar,

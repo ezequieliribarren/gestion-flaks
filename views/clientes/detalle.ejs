@@ -20,8 +20,7 @@
   }
   function estadoTrabajoClase(e){
     return {
-      realizado: 'bg-green-100 text-green-700',
-      adeuda:    'bg-red-100 text-red-700',
+      pendiente: 'bg-red-100 text-red-700',
       potencial: 'bg-amber-100 text-amber-700',
     }[e] || 'bg-slate-100 text-slate-600';
   }
@@ -161,18 +160,18 @@
   </form>
 </div>
 
-<!-- Trabajos únicos -->
+<!-- Trabajos (sin cobrar) -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
-  <h2 class="font-semibold text-slate-800 mb-1">Trabajos de una sola vez</h2>
-  <p class="text-xs text-slate-400 mb-3">Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar: sólo suma en la proyección de Facturación. <strong>Realizado</strong> cuenta como facturación real y cobrada. <strong>Adeuda</strong> también cuenta como facturación real, pero figura pendiente de cobro (en Facturación y en Inicio) hasta que se marque como Realizado.</p>
+  <h2 class="font-semibold text-slate-800 mb-1">Trabajos</h2>
+  <p class="text-xs text-slate-400 mb-3">La <strong>fecha</strong> es el mes al que pertenece el trabajo (define el mes de Facturado). Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar. Al cobrar un trabajo <strong>pendiente</strong> se le carga la fecha real de cobro y pasa a "Cobros realizados", abajo.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Fecha</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th><th class="py-2 px-2">Pasar</th></tr>
+        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Mes (fecha)</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th><th class="py-2 px-2">Cobrar</th><th class="py-2 px-2">Pasar</th></tr>
       </thead>
       <tbody>
         <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
-          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : (u.estado === 'adeuda' ? 'bg-red-50/60' : '') %>">
+          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : 'bg-red-50/60' %>">
             <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>">
               <td class="py-2 pr-2"><input name="nombre" value="<%= u.nombre %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
               <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= u.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
@@ -181,9 +180,8 @@
               <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= u.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
               <td class="py-2 px-2">
                 <select name="estado" onchange="this.form.submit()" class="text-[11px] font-medium rounded-full px-2 py-1 border-0 cursor-pointer <%= estadoTrabajoClase(u.estado) %>">
-                  <option value="potencial" <%= u.estado === 'potencial' ? 'selected' : '' %>>Potencial</option>
-                  <option value="realizado" <%= u.estado === 'realizado' ? 'selected' : '' %>>Realizado</option>
-                  <option value="adeuda" <%= u.estado === 'adeuda' ? 'selected' : '' %>>Adeuda</option>
+                  <option value="potencial" <%= pot ? 'selected' : '' %>>Potencial</option>
+                  <option value="pendiente" <%= !pot ? 'selected' : '' %>>Pendiente de cobro</option>
                 </select>
               </td>
               <td class="py-2 px-2 whitespace-nowrap">
@@ -191,6 +189,14 @@
                 <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
               </td>
             </form>
+            <td class="py-2 px-2">
+              <% if (!pot) { %>
+                <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/cobrar" class="flex items-center gap-1">
+                  <input type="date" name="fecha" value="<%= hoyISO %>" class="rounded border border-slate-200 px-1.5 py-1 text-xs w-32" />
+                  <button class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 whitespace-nowrap">Cobrar</button>
+                </form>
+              <% } %>
+            </td>
             <td class="py-2 px-2"><%- pasarSelect('unicos', u.id) %></td>
           </tr>
         <% }); %>
@@ -201,18 +207,59 @@
   <form method="POST" action="/clientes/<%= cliente.id %>/unicos" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
     <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" class="w-28 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Fecha</label><input name="fecha" type="date" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Mes (fecha)</label><input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
     <div>
       <label class="block text-xs text-slate-500 mb-1">Estado</label>
       <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
-        <option value="realizado">Realizado</option>
-        <option value="adeuda">Adeuda (pendiente de cobro)</option>
+        <option value="pendiente">Pendiente de cobro</option>
         <option value="potencial">Potencial (presupuesto)</option>
       </select>
     </div>
     <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar</button>
+  </form>
+</div>
+
+<!-- Cobros realizados -->
+<div id="cobros" class="bg-white rounded-xl shadow-card p-5 mt-4">
+  <h2 class="font-semibold text-slate-800 mb-1">Cobros realizados</h2>
+  <p class="text-xs text-slate-400 mb-3">Plata que ya entró. <strong>Fecha de cobro</strong> = cuándo se cobró de verdad (define el mes de Cobrado). <strong>Mes de facturación</strong> = a qué mes pertenece el trabajo (puede ser un mes distinto al del cobro).</p>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-slate-500 text-left border-b border-slate-200">
+        <tr><th class="py-2 pr-2">Concepto</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Mes de facturación</th><th class="py-2 px-2">Fecha de cobro</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% cobros.forEach(function(co){ %>
+          <tr class="border-b border-slate-100 bg-green-50/40">
+            <form method="POST" action="/clientes/<%= cliente.id %>/cobros/<%= co.id %>">
+              <td class="py-2 pr-2"><input name="nombre" value="<%= co.concepto %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
+              <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= co.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
+              <td class="py-2 px-2"><input name="fecha_trabajo" type="date" value="<%= String(co.fecha_trabajo).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
+              <td class="py-2 px-2"><input name="fecha" type="date" value="<%= String(co.fecha).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
+              <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" value="<%= co.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
+              <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= co.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
+              <td class="py-2 px-2 whitespace-nowrap">
+                <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
+                <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este cobro?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
+              </td>
+            </form>
+          </tr>
+        <% }); %>
+        <% if (!cobros.length) { %><tr><td colspan="7" class="py-4 text-center text-slate-400">Todavía no hay cobros cargados.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <form method="POST" action="/clientes/<%= cliente.id %>/cobros" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
+    <div><label class="block text-xs text-slate-500 mb-1">Concepto</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" class="w-28 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Mes de facturación (opcional)</label><input name="fecha_trabajo" type="date" placeholder="= fecha de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
+    <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar cobro</button>
   </form>
 </div>
 

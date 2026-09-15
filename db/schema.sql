@@ -132,6 +132,9 @@ CREATE TABLE IF NOT EXISTS pagos_recurrentes (
   UNIQUE (recurrente_id, periodo)
 );
 
+-- "Trabajos": un trabajo de una sola vez que todavía no se cobró. 'fecha' = mes al
+-- que pertenece (factura). Cuando se cobra, se convierte en una fila de "cobros" y
+-- se borra de acá (routes/clientes.js: POST /:id/unicos/:tid/cobrar).
 CREATE TABLE IF NOT EXISTS trabajos_unicos (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   cliente_id       INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
@@ -140,9 +143,26 @@ CREATE TABLE IF NOT EXISTS trabajos_unicos (
   fecha            TEXT NOT NULL,
   reparto_german   REAL NOT NULL DEFAULT 50,
   reparto_ezequiel REAL NOT NULL DEFAULT 50,
-  estado           TEXT NOT NULL DEFAULT 'realizado',   -- realizado | adeuda (hecho, pendiente de cobro) | potencial (presupuesto sin confirmar)
+  estado           TEXT NOT NULL DEFAULT 'pendiente',   -- pendiente (confirmado, sin cobrar) | potencial (presupuesto sin confirmar)
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- "Cobros realizados": plata que ya entró. fecha_trabajo = mes al que pertenece el
+-- trabajo (factura, arrastrado desde trabajos_unicos.fecha al convertirlo, o igual a
+-- 'fecha' si el cobro se cargó directo acá). fecha = fecha real en la que se cobró.
+CREATE TABLE IF NOT EXISTS cobros (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id       INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  concepto         TEXT NOT NULL,
+  monto            REAL NOT NULL DEFAULT 0,
+  reparto_german   REAL NOT NULL DEFAULT 50,
+  reparto_ezequiel REAL NOT NULL DEFAULT 50,
+  fecha_trabajo    TEXT NOT NULL,
+  fecha            TEXT NOT NULL,
+  creado_por       TEXT,
+  creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_cobros_cliente ON cobros(cliente_id);
 
 CREATE TABLE IF NOT EXISTS gastos (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,

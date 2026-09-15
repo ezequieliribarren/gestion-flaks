@@ -50,6 +50,13 @@ try {
   console.error('Error vinculando grupo Sistema Continuo:', e);
 }
 
+// Migra (una sola vez) trabajos_unicos "realizado"/"adeuda" al modelo Trabajos/Cobros.
+try {
+  require('./db/migrar-cobros').migrarCobros();
+} catch (e) {
+  console.error('Error migrando a Trabajos/Cobros:', e);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PROD = process.env.NODE_ENV === 'production';

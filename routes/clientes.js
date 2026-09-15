@@ -101,7 +101,8 @@ router.get('/', (req, res) => {
       SELECT c.*,
         (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1) AS mensual,
         (SELECT COALESCE(SUM(monto_mensual),0) FROM trabajos_recurrentes WHERE cliente_id = c.id AND activo = 1)
-          + (SELECT COALESCE(SUM(monto),0) FROM trabajos_unicos WHERE cliente_id = c.id AND estado IN ('realizado', 'adeuda')) AS total_facturado,
+          + (SELECT COALESCE(SUM(monto),0) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'pendiente')
+          + (SELECT COALESCE(SUM(monto),0) FROM cobros WHERE cliente_id = c.id) AS total_facturado,
         (SELECT COUNT(*) FROM tareas WHERE cliente_id = c.id AND estado != 'completada') AS tareas_abiertas,
         (SELECT COUNT(*) FROM trabajos_unicos WHERE cliente_id = c.id AND estado = 'potencial') AS trabajos_potenciales,
         ${ESTADO_EFECTIVO} AS estado_efectivo
@@ -163,6 +164,7 @@ router.get('/:id', (req, res) => {
     ORDER BY tr.activo DESC, tr.nombre
   `).all(mesPrefijo, cliente.id);
   const unicos = db.prepare('SELECT * FROM trabajos_unicos WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
+  const cobros = db.prepare('SELECT * FROM cobros WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
   const mensualTotal = recurrentes.filter((r) => r.activo).reduce((a, r) => a + r.monto_mensual, 0);
 
   const tareasMes = db.prepare(`
@@ -185,6 +187,8 @@ router.get('/:id', (req, res) => {
     cliente,
     recurrentes,
     unicos,
+    cobros,
+    hoyISO: hoyISO(),
     mensualTotal,
     tareasMes,
     periodoActual: mesPrefijo,
@@ -379,8 +383,16 @@ router.post('/:id/recurrentes/:tid/pago', (req, res) => {
   res.redirect('/clientes/' + req.params.id + '#recurrentes');
 });
 
-// --- Trabajos únicos ---
-const ESTADOS_TRABAJO = ['realizado', 'adeuda', 'potencial'];
+// --- Trabajos (de una sola vez, sin cobrar todavía) ---
+const ESTADOS_TRABAJO = ['pendiente', 'potencial'];
+
+function hoyISO() { return new Date().toISOString().slice(0, 10); }
+
+function activarSiHaciaFalta(req, cliente) {
+  if (cliente.estado === 'activo') return '';
+  db.prepare("UPDATE clientes SET estado = 'activo' WHERE id = ?").run(cliente.id);
+  return ' El cliente pasó a Activo.';
+}
 
 router.post('/:id/unicos', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
@@ -389,18 +401,16 @@ router.post('/:id/unicos', (req, res) => {
   const monto = Number(req.body.monto || 0);
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
   const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
-  const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : 'realizado';
-  if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo único inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
+  const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : 'pendiente';
+  if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
   db.prepare(`
     INSERT INTO trabajos_unicos (cliente_id, nombre, monto, fecha, reparto_german, reparto_ezequiel, estado)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(cliente.id, nombre, monto, fecha, rep.rg, rep.re, estado);
-  audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó trabajo único "${nombre}" (${monto}) — ${estado}`);
-  req.session.flash = { tipo: 'ok', msg: estado === 'potencial' ? 'Trabajo potencial agregado.' : 'Trabajo único agregado.' };
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó el trabajo "${nombre}" (${monto}) — ${estado}`);
+  req.session.flash = { tipo: 'ok', msg: estado === 'potencial' ? 'Trabajo potencial agregado.' : 'Trabajo agregado.' };
   res.redirect('/clientes/' + cliente.id + '#unicos');
 });
-
-const ETIQUETAS_ESTADO_TRABAJO = { realizado: 'Realizado', adeuda: 'Adeuda', potencial: 'Potencial' };
 
 router.post('/:id/unicos/:tid', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
@@ -409,8 +419,8 @@ router.post('/:id/unicos/:tid', (req, res) => {
 
   if (req.body._accion === 'eliminar') {
     db.prepare('DELETE FROM trabajos_unicos WHERE id = ?').run(t.id);
-    audit.registrar(req, 'clientes', cliente.id, 'editar', `Eliminó trabajo único "${t.nombre}"`);
-    req.session.flash = { tipo: 'ok', msg: 'Trabajo único eliminado.' };
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Eliminó el trabajo "${t.nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Trabajo eliminado.' };
     return res.redirect('/clientes/' + cliente.id + '#unicos');
   }
 
@@ -422,17 +432,76 @@ router.post('/:id/unicos/:tid', (req, res) => {
   db.prepare('UPDATE trabajos_unicos SET nombre=?, monto=?, fecha=?, reparto_german=?, reparto_ezequiel=?, estado=? WHERE id=?')
     .run(nombre, monto, fecha, rep.rg, rep.re, estado, t.id);
 
-  // Si el trabajo pasa a confirmado (realizado o adeuda) y el cliente estaba inactivo/potencial, se reactiva.
-  let extra = '';
-  if (estado !== 'potencial' && t.estado === 'potencial' && cliente.estado !== 'activo') {
-    db.prepare("UPDATE clientes SET estado = 'activo' WHERE id = ?").run(cliente.id);
-    extra = ' El cliente pasó a Activo.';
-  }
+  // Si el trabajo pasa a confirmado (pendiente) y el cliente estaba inactivo/potencial, se reactiva.
+  const extra = (estado === 'pendiente' && t.estado === 'potencial') ? activarSiHaciaFalta(req, cliente) : '';
 
   audit.registrar(req, 'clientes', cliente.id, 'editar',
-    estado !== t.estado ? `Marcó "${nombre}" como ${ETIQUETAS_ESTADO_TRABAJO[estado] || estado}.${extra}` : `Editó trabajo único "${nombre}"`);
-  req.session.flash = { tipo: 'ok', msg: 'Trabajo único actualizado.' + extra };
+    estado !== t.estado ? `Marcó "${nombre}" como ${estado === 'pendiente' ? 'Pendiente de cobro' : 'Potencial'}.${extra}` : `Editó el trabajo "${nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Trabajo actualizado.' + extra };
   res.redirect('/clientes/' + cliente.id + '#unicos');
+});
+
+// Convierte un trabajo pendiente en un cobro (con la fecha real en que se cobró) y lo saca de Trabajos.
+router.post('/:id/unicos/:tid/cobrar', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!cliente || !t) return res.redirect('/clientes');
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : hoyISO();
+
+  db.prepare(`
+    INSERT INTO cobros (cliente_id, concepto, monto, reparto_german, reparto_ezequiel, fecha_trabajo, fecha, creado_por)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(cliente.id, t.nombre, t.monto, t.reparto_german, t.reparto_ezequiel, t.fecha, fecha, req.session.user.nombre);
+  db.prepare('DELETE FROM trabajos_unicos WHERE id = ?').run(t.id);
+
+  const extra = activarSiHaciaFalta(req, cliente);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Cobró "${t.nombre}" (${t.monto}) el ${fecha}.${extra}`);
+  req.session.flash = { tipo: 'ok', msg: 'Cobro registrado.' + extra };
+  res.redirect('/clientes/' + cliente.id + '#cobros');
+});
+
+// --- Cobros realizados ---
+router.post('/:id/cobros', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  if (!cliente) return res.redirect('/clientes');
+  const nombre = String(req.body.nombre || '').trim();
+  const monto = Number(req.body.monto || 0);
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
+  const fechaTrabajo = req.body.fecha_trabajo ? String(req.body.fecha_trabajo).slice(0, 10) : fecha;
+  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
+  if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del cobro inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
+  db.prepare(`
+    INSERT INTO cobros (cliente_id, concepto, monto, reparto_german, reparto_ezequiel, fecha_trabajo, fecha, creado_por)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(cliente.id, nombre, monto, rep.rg, rep.re, fechaTrabajo, fecha, req.session.user.nombre);
+  const extra = activarSiHaciaFalta(req, cliente);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Registró el cobro "${nombre}" (${monto}).${extra}`);
+  req.session.flash = { tipo: 'ok', msg: 'Cobro agregado.' + extra };
+  res.redirect('/clientes/' + cliente.id + '#cobros');
+});
+
+router.post('/:id/cobros/:cid', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  const co = db.prepare('SELECT * FROM cobros WHERE id = ? AND cliente_id = ?').get(req.params.cid, req.params.id);
+  if (!cliente || !co) return res.redirect('/clientes');
+
+  if (req.body._accion === 'eliminar') {
+    db.prepare('DELETE FROM cobros WHERE id = ?').run(co.id);
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Eliminó el cobro "${co.concepto}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Cobro eliminado.' };
+    return res.redirect('/clientes/' + cliente.id + '#cobros');
+  }
+
+  const nombre = String(req.body.nombre || '').trim() || co.concepto;
+  const monto = req.body.monto != null ? Number(req.body.monto) : co.monto;
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : co.fecha;
+  const fechaTrabajo = req.body.fecha_trabajo ? String(req.body.fecha_trabajo).slice(0, 10) : co.fecha_trabajo;
+  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: co.reparto_german, re: co.reparto_ezequiel };
+  db.prepare('UPDATE cobros SET concepto=?, monto=?, fecha=?, fecha_trabajo=?, reparto_german=?, reparto_ezequiel=? WHERE id=?')
+    .run(nombre, monto, fecha, fechaTrabajo, rep.rg, rep.re, co.id);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cobro "${nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Cobro actualizado.' };
+  res.redirect('/clientes/' + cliente.id + '#cobros');
 });
 
 module.exports = router;

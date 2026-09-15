@@ -43,10 +43,10 @@
           </td>
           <td class="px-4 py-3">
             <%= f.concepto %>
-            <% if (f.tipo === 'unico' && f.fecha) { %><span class="text-xs text-slate-400">(<%= fmt.formatFecha(f.fecha) %>)</span><% } %>
+            <% if ((f.tipo === 'unico' || f.tipo === 'cobro') && f.fecha) { %><span class="text-xs text-slate-400">(<%= fmt.formatFecha(f.fecha) %>)</span><% } %>
             <% if (f.es_potencial) { %><span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 ml-1">potencial</span><% } %>
           </td>
-          <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= f.tipo === 'recurrente' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' %>"><%= f.tipo === 'recurrente' ? 'Recurrente' : 'Único' %></span></td>
+          <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= f.tipo === 'recurrente' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' %>"><%= f.tipo === 'recurrente' ? 'Recurrente' : (f.tipo === 'cobro' ? 'Cobro' : 'Único') %></span></td>
           <td class="px-4 py-3">
             <% if (f.es_potencial) { %>
               <span class="text-xs text-slate-300">—</span>
@@ -56,8 +56,10 @@
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs font-medium text-red-600 hover:underline">⚠ Vencido<% if (f.vence_dia) { %> (día <%= f.vence_dia %>)<% } %></a>
             <% } else if (f.tipo === 'recurrente' && f.pendiente) { %>
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs text-amber-600 hover:underline">Pendiente<% if (f.vence_dia) { %> (hasta el <%= f.vence_dia %>)<% } %></a>
+            <% } else if (f.tipo === 'cobro') { %>
+              <span class="text-xs text-green-700">Cobrado el <%= fmt.formatFecha(f.fecha_cobro) %></span>
             <% } else if (f.pendiente) { %>
-              <a href="/clientes/<%= f.cliente_id %>#unicos" class="text-xs font-medium text-red-600 hover:underline">⚠ Adeuda</a>
+              <a href="/clientes/<%= f.cliente_id %>#unicos" class="text-xs font-medium text-red-600 hover:underline">⚠ Sin cobrar</a>
             <% } else { %>
               <span class="text-xs text-slate-300">—</span>
             <% } %>
