@@ -114,8 +114,19 @@ router.post('/:id/config', (req, res) => {
   const sheet = String(req.body.redes_sheet_url || '').trim() || null;
   const metaPosteos = parseInt(req.body.redes_meta_posteos_sem, 10);
   const metaHistorias = parseInt(req.body.redes_meta_historias_mes, 10);
-  db.prepare('UPDATE clientes SET redes_plan = ?, redes_sheet_url = ?, redes_meta_posteos_sem = ?, redes_meta_historias_mes = ? WHERE id = ?')
-    .run(plan, sheet, metaPosteos > 0 ? metaPosteos : null, metaHistorias > 0 ? metaHistorias : null, cliente.id);
+
+  const metasSemana = {};
+  for (let n = 1; n <= 5; n++) {
+    const v = parseInt(req.body['meta_sem_' + n], 10);
+    if (v > 0) metasSemana[n] = v;
+  }
+  const metasSemanaJSON = Object.keys(metasSemana).length ? JSON.stringify(metasSemana) : null;
+
+  db.prepare(`
+    UPDATE clientes
+    SET redes_plan = ?, redes_sheet_url = ?, redes_meta_posteos_sem = ?, redes_metas_posteos_sem = ?, redes_meta_historias_mes = ?
+    WHERE id = ?
+  `).run(plan, sheet, metaPosteos > 0 ? metaPosteos : null, metasSemanaJSON, metaHistorias > 0 ? metaHistorias : null, cliente.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', 'Actualizó el plan / sheet de contenido');
   req.session.flash = { tipo: 'ok', msg: 'Datos de contenido guardados.' };
   res.redirect('/contenido/' + cliente.id);

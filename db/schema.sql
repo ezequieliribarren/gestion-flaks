@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   redes           INTEGER NOT NULL DEFAULT 0,     -- 1 = tiene redes sociales / contenido como servicio
   redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
   redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido
-  redes_meta_posteos_sem   INTEGER,               -- meta de posteos por semana (null = usar default)
+  redes_meta_posteos_sem   INTEGER,               -- meta de posteos por semana, default para semanas sin meta propia
+  redes_metas_posteos_sem  TEXT,                  -- JSON {"1":n,"2":n,...} con meta propia por semana del mes (opcional)
   redes_meta_historias_mes INTEGER,               -- meta de historias por mes (null = usar default)
   marketing_excluido INTEGER NOT NULL DEFAULT 0,  -- 1 = no mostrar en Marketing / no sugerir ventas
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),

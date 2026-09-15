@@ -73,6 +73,7 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   if (!colsClientes.includes('contacto_telefono')) raw.exec("ALTER TABLE clientes ADD COLUMN contacto_telefono TEXT NOT NULL DEFAULT ''");
   if (!colsClientes.includes('contacto_email')) raw.exec("ALTER TABLE clientes ADD COLUMN contacto_email TEXT NOT NULL DEFAULT ''");
   if (!colsClientes.includes('redes_meta_posteos_sem')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_meta_posteos_sem INTEGER');
+  if (!colsClientes.includes('redes_metas_posteos_sem')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_metas_posteos_sem TEXT');
   if (!colsClientes.includes('redes_meta_historias_mes')) raw.exec('ALTER TABLE clientes ADD COLUMN redes_meta_historias_mes INTEGER');
 
   const tMkt = raw.all("SELECT name FROM sqlite_master WHERE type='table' AND name='marketing_acciones'").length;
