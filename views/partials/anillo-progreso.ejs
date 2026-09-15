@@ -1,0 +1,24 @@
+<%
+// Locals esperados: pct (0-100), label, sub, size (opcional, default 76).
+const _size = typeof size !== 'undefined' ? size : 76;
+const _stroke = Math.round(_size / 9);
+const _r = (_size - _stroke) / 2;
+const _c = 2 * Math.PI * _r;
+const _pct = Math.max(0, Math.min(100, Math.round(pct)));
+const _dash = (_pct / 100) * _c;
+// Rojo (0%) a verde (100%) en HSL.
+const _hue = Math.round((_pct / 100) * 120);
+const _color = `hsl(${_hue}, 72%, 42%)`;
+%>
+<div class="flex flex-col items-center gap-1">
+  <div class="relative" style="width:<%= _size %>px;height:<%= _size %>px">
+    <svg width="<%= _size %>" height="<%= _size %>" viewBox="0 0 <%= _size %> <%= _size %>" style="transform:rotate(-90deg)">
+      <circle cx="<%= _size / 2 %>" cy="<%= _size / 2 %>" r="<%= _r %>" fill="none" stroke="#e2e8f0" stroke-width="<%= _stroke %>" />
+      <circle cx="<%= _size / 2 %>" cy="<%= _size / 2 %>" r="<%= _r %>" fill="none" stroke="<%= _color %>" stroke-width="<%= _stroke %>"
+              stroke-linecap="round" stroke-dasharray="<%= _dash.toFixed(1) %> <%= _c.toFixed(1) %>" />
+    </svg>
+    <div class="absolute inset-0 flex items-center justify-center text-xs font-bold" style="color:<%= _color %>"><%= _pct %>%</div>
+  </div>
+  <% if (typeof label !== 'undefined' && label) { %><div class="text-xs font-medium text-slate-700 text-center"><%= label %></div><% } %>
+  <% if (typeof sub !== 'undefined' && sub) { %><div class="text-[11px] text-slate-400 text-center"><%= sub %></div><% } %>
+</div>

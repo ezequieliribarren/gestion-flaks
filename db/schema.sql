@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS clientes (
   redes           INTEGER NOT NULL DEFAULT 0,     -- 1 = tiene redes sociales / contenido como servicio
   redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
   redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido
+  redes_meta_posteos_sem   INTEGER,               -- meta de posteos por semana (null = usar default)
+  redes_meta_historias_mes INTEGER,               -- meta de historias por mes (null = usar default)
   marketing_excluido INTEGER NOT NULL DEFAULT 0,  -- 1 = no mostrar en Marketing / no sugerir ventas
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
   creado_por TEXT
@@ -218,6 +220,17 @@ CREATE TABLE IF NOT EXISTS remarketing_recordatorios (
   creado_en  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_remk_pendientes ON remarketing_recordatorios(notificado, fecha);
+
+-- Marca de alertas ya enviadas por bajo avance de contenido (historias) por mes,
+-- para no notificar más de una vez por cliente/mes.
+CREATE TABLE IF NOT EXISTS redes_alertas (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  periodo    TEXT NOT NULL,                         -- 'YYYY-MM'
+  tipo       TEXT NOT NULL DEFAULT 'historias_bajas',
+  creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(cliente_id, periodo, tipo)
+);
 
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);

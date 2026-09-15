@@ -6,6 +6,7 @@ const audit = require('../lib/audit');
 const { esAdmin } = require('../middleware/auth');
 const { TIPOS, ESTADOS_TAREA, normalizarUrl, usoPrevio } = require('../lib/contenido');
 const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
+const { resumenCliente, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES } = require('../lib/redes-sheet');
 
 const router = express.Router();
 
@@ -72,7 +73,7 @@ router.post('/agregar', (req, res) => {
 });
 
 // --- Detalle de un cliente de contenido ---
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ? AND redes = 1').get(req.params.id);
   if (!cliente) return res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'Este cliente no está en el módulo de contenido.' });
 
@@ -85,7 +86,15 @@ router.get('/:id', (req, res) => {
     ORDER BY CASE tc.estado WHEN 'completada' THEN 1 ELSE 0 END, tc.creado_en DESC
   `).all(cliente.id).map((t) => ({ ...t, asignados: asignadosDe('contenido', t.id) }));
 
-  res.render('contenido/cliente', { titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, users: usuarios(), hoyISO: hoyISO() });
+  let avance = null;
+  if (cliente.redes_sheet_url) {
+    try { avance = await resumenCliente(cliente); } catch (e) { avance = { ok: false, error: e.message }; }
+  }
+
+  res.render('contenido/cliente', {
+    titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, users: usuarios(), hoyISO: hoyISO(),
+    avance, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES,
+  });
 });
 
 // Configurar plan / sheet / quitar (admin).
@@ -103,7 +112,10 @@ router.post('/:id/config', (req, res) => {
 
   const plan = String(req.body.redes_plan || '').trim() || null;
   const sheet = String(req.body.redes_sheet_url || '').trim() || null;
-  db.prepare('UPDATE clientes SET redes_plan = ?, redes_sheet_url = ? WHERE id = ?').run(plan, sheet, cliente.id);
+  const metaPosteos = parseInt(req.body.redes_meta_posteos_sem, 10);
+  const metaHistorias = parseInt(req.body.redes_meta_historias_mes, 10);
+  db.prepare('UPDATE clientes SET redes_plan = ?, redes_sheet_url = ?, redes_meta_posteos_sem = ?, redes_meta_historias_mes = ? WHERE id = ?')
+    .run(plan, sheet, metaPosteos > 0 ? metaPosteos : null, metaHistorias > 0 ? metaHistorias : null, cliente.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', 'Actualizó el plan / sheet de contenido');
   req.session.flash = { tipo: 'ok', msg: 'Datos de contenido guardados.' };
   res.redirect('/contenido/' + cliente.id);

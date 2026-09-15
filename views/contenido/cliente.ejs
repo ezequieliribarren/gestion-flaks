@@ -45,6 +45,16 @@
             <input name="redes_sheet_url" type="url" value="<%= cliente.redes_sheet_url || '' %>" placeholder="https://docs.google.com/…"
                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Meta de posteos / semana</label>
+            <input name="redes_meta_posteos_sem" type="number" min="0" value="<%= cliente.redes_meta_posteos_sem || '' %>" placeholder="<%= DEFAULT_META_POSTEOS_SEM %> (default)"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Meta de historias / mes</label>
+            <input name="redes_meta_historias_mes" type="number" min="0" value="<%= cliente.redes_meta_historias_mes || '' %>" placeholder="<%= DEFAULT_META_HISTORIAS_MES %> (default)"
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
         </div>
         <div class="flex items-center gap-3">
           <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
@@ -55,6 +65,47 @@
     </details>
   <% } %>
 </div>
+
+<!-- Avance de contenido (leído del Sheet) -->
+<% if (cliente.redes_sheet_url) { %>
+  <div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-3">Avance del mes (según el Sheet)</div>
+    <% if (!avance) { %>
+      <p class="text-sm text-slate-400">Cargando…</p>
+    <% } else if (!avance.ok) { %>
+      <p class="text-sm text-red-600"><%= avance.error %></p>
+    <% } else { %>
+      <% var semAct = avance.posteos.semanas.find(function(s){ return s.n === avance.posteos.semana_actual; }); %>
+      <div class="flex flex-wrap gap-6 items-start">
+        <%- include('../partials/anillo-progreso', {
+          pct: semAct ? Math.min(100, Math.round(semAct.cantidad / avance.posteos.meta_semana * 100)) : 0,
+          label: 'Posteos · Semana ' + avance.posteos.semana_actual,
+          sub: (semAct ? semAct.cantidad : 0) + '/' + avance.posteos.meta_semana,
+        }) %>
+        <%- include('../partials/anillo-progreso', {
+          pct: avance.historias.pct,
+          label: 'Historias del mes',
+          sub: avance.historias.cantidad + '/' + avance.historias.meta_mes,
+        }) %>
+        <div class="flex-1 min-w-[180px]">
+          <div class="text-xs text-slate-500 mb-1.5">Posteos por semana este mes</div>
+          <div class="space-y-1">
+            <% avance.posteos.semanas.forEach(function(s){ %>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="w-24 text-slate-500 shrink-0">Semana <%= s.n %> (<%= s.desde %>-<%= s.hasta %>)</span>
+                <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div class="h-full rounded-full" style="width:<%= Math.min(100, Math.round(s.cantidad / avance.posteos.meta_semana * 100)) %>%; background:<%= s.n === avance.posteos.semana_actual ? '#2563eb' : '#94a3b8' %>"></div>
+                </div>
+                <span class="w-8 text-right text-slate-600 font-medium"><%= s.cantidad %></span>
+              </div>
+            <% }); %>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Total del mes: <%= avance.posteos.total_mes %> posteo(s).</p>
+        </div>
+      </div>
+    <% } %>
+  </div>
+<% } %>
 
 <!-- Nueva tarea de contenido -->
 <div class="bg-white rounded-xl shadow-card p-4 sm:p-5 mb-4">

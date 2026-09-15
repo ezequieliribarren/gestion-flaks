@@ -12,14 +12,18 @@
 <% } %>
 
 <div class="bg-white rounded-xl shadow-card divide-y divide-slate-100 overflow-hidden">
-  <% notifs.forEach(function(n){ var mkt = n.tipo === 'remarketing'; %>
-    <a href="/notificaciones/<%= n.id %>/ir" class="block px-4 py-3 hover:bg-slate-50 <%= mkt ? 'border-l-4 border-indigo-500' : '' %> <%= n.leida ? '' : (mkt ? 'bg-indigo-50/60' : 'bg-brand-50/40') %>">
+  <% notifs.forEach(function(n){
+       var mkt = n.tipo === 'remarketing';
+       var redes = n.tipo === 'redes_historias';
+       var color = mkt ? 'indigo' : (redes ? 'orange' : null);
+  %>
+    <a href="/notificaciones/<%= n.id %>/ir" class="block px-4 py-3 hover:bg-slate-50 <%= color ? 'border-l-4 border-' + color + '-500' : '' %> <%= n.leida ? '' : (color ? 'bg-' + color + '-50/60' : 'bg-brand-50/40') %>">
       <div class="flex items-start gap-3">
-        <span class="mt-1 shrink-0 <%= mkt ? 'text-indigo-500' : '' %>">
-          <% if (mkt) { %>📣<% } else { %><span class="inline-block w-2 h-2 rounded-full <%= n.leida ? 'bg-transparent' : 'bg-brand-500' %>"></span><% } %>
+        <span class="mt-1 shrink-0 <%= color ? 'text-' + color + '-500' : '' %>">
+          <% if (mkt) { %>📣<% } else if (redes) { %>📈<% } else { %><span class="inline-block w-2 h-2 rounded-full <%= n.leida ? 'bg-transparent' : 'bg-brand-500' %>"></span><% } %>
         </span>
         <div class="min-w-0">
-          <div class="text-sm <%= mkt ? 'text-indigo-800 font-medium' : 'text-slate-700' %>"><%= n.texto %></div>
+          <div class="text-sm <%= color ? 'text-' + color + '-800 font-medium' : 'text-slate-700' %>"><%= n.texto %></div>
           <div class="text-xs text-slate-400 mt-0.5">
             <%= fmt.formatFechaHora(n.creada_en) %><% if (n.de_quien) { %> · <%= n.de_quien %><% } %>
           </div>

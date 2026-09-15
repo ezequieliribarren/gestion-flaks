@@ -84,11 +84,17 @@ const { revisar: revisarRemarketing, revisarThrottled } = require('./lib/remarke
 try { revisarRemarketing(); } catch (e) { console.error('remarketing inicial:', e.message); }
 setInterval(() => { try { revisarRemarketing(); } catch (e) { /* noop */ } }, 15 * 60 * 1000).unref();
 
+// Revisión de avance de contenido (Sheets) en la última semana del mes: al arrancar y cada 1 hora.
+const { revisar: revisarRedes, revisarThrottled: revisarRedesThrottled } = require('./lib/redes-alertas');
+revisarRedes().catch((e) => console.error('redes-alertas inicial:', e.message));
+setInterval(() => { revisarRedes().catch(() => {}); }, 60 * 60 * 1000).unref();
+
 // Helpers disponibles en todas las vistas.
 const { esAdmin } = require('./middleware/auth');
 const { contarNoLeidas } = require('./lib/participacion');
 app.use((req, res, next) => {
   revisarThrottled();
+  revisarRedesThrottled();
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;
