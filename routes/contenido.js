@@ -6,7 +6,14 @@ const audit = require('../lib/audit');
 const { esAdmin } = require('../middleware/auth');
 const { TIPOS, ESTADOS_TAREA, normalizarUrl, usoPrevio } = require('../lib/contenido');
 const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
-const { resumenCliente, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES } = require('../lib/redes-sheet');
+const { resumenCliente, periodoActual, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES } = require('../lib/redes-sheet');
+
+function metasSemanaDe(clienteId, periodo) {
+  const filas = db.prepare('SELECT semana, meta FROM redes_metas_semana WHERE cliente_id = ? AND periodo = ?').all(clienteId, periodo);
+  const out = {};
+  filas.forEach((f) => { out[f.semana] = f.meta; });
+  return out;
+}
 
 const router = express.Router();
 
@@ -86,14 +93,17 @@ router.get('/:id', async (req, res) => {
     ORDER BY CASE tc.estado WHEN 'completada' THEN 1 ELSE 0 END, tc.creado_en DESC
   `).all(cliente.id).map((t) => ({ ...t, asignados: asignadosDe('contenido', t.id) }));
 
+  const periodo = periodoActual();
+  const metasSemanaActual = metasSemanaDe(cliente.id, periodo.periodo);
+
   let avance = null;
   if (cliente.redes_sheet_url) {
-    try { avance = await resumenCliente(cliente); } catch (e) { avance = { ok: false, error: e.message }; }
+    try { avance = await resumenCliente(cliente, metasSemanaActual); } catch (e) { avance = { ok: false, error: e.message }; }
   }
 
   res.render('contenido/cliente', {
     titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, users: usuarios(), hoyISO: hoyISO(),
-    avance, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES,
+    avance, periodo, metasSemanaActual, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES,
   });
 });
 
@@ -115,18 +125,28 @@ router.post('/:id/config', (req, res) => {
   const metaPosteos = parseInt(req.body.redes_meta_posteos_sem, 10);
   const metaHistorias = parseInt(req.body.redes_meta_historias_mes, 10);
 
-  const metasSemana = {};
-  for (let n = 1; n <= 5; n++) {
-    const v = parseInt(req.body['meta_sem_' + n], 10);
-    if (v > 0) metasSemana[n] = v;
-  }
-  const metasSemanaJSON = Object.keys(metasSemana).length ? JSON.stringify(metasSemana) : null;
-
   db.prepare(`
     UPDATE clientes
-    SET redes_plan = ?, redes_sheet_url = ?, redes_meta_posteos_sem = ?, redes_metas_posteos_sem = ?, redes_meta_historias_mes = ?
+    SET redes_plan = ?, redes_sheet_url = ?, redes_meta_posteos_sem = ?, redes_meta_historias_mes = ?
     WHERE id = ?
-  `).run(plan, sheet, metaPosteos > 0 ? metaPosteos : null, metasSemanaJSON, metaHistorias > 0 ? metaHistorias : null, cliente.id);
+  `).run(plan, sheet, metaPosteos > 0 ? metaPosteos : null, metaHistorias > 0 ? metaHistorias : null, cliente.id);
+
+  // Metas por semana del mes actual (redes_metas_semana): se cargan/borran solo para el período en curso.
+  const periodo = periodoActual().periodo;
+  for (let n = 1; n <= 5; n++) {
+    const campo = 'meta_sem_' + n;
+    if (!(campo in req.body)) continue; // no vino en el form (mes con menos semanas)
+    const v = parseInt(req.body[campo], 10);
+    if (v > 0) {
+      db.prepare(`
+        INSERT INTO redes_metas_semana (cliente_id, periodo, semana, meta) VALUES (?, ?, ?, ?)
+        ON CONFLICT(cliente_id, periodo, semana) DO UPDATE SET meta = excluded.meta
+      `).run(cliente.id, periodo, n, v);
+    } else {
+      db.prepare('DELETE FROM redes_metas_semana WHERE cliente_id = ? AND periodo = ? AND semana = ?').run(cliente.id, periodo, n);
+    }
+  }
+
   audit.registrar(req, 'clientes', cliente.id, 'editar', 'Actualizó el plan / sheet de contenido');
   req.session.flash = { tipo: 'ok', msg: 'Datos de contenido guardados.' };
   res.redirect('/contenido/' + cliente.id);

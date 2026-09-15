@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS clientes (
   redes_plan      TEXT,                           -- ej. "Plan 1", "Plan 2", "A medida"
   redes_sheet_url TEXT,                           -- link al Google Sheet de planificación de contenido
   redes_meta_posteos_sem   INTEGER,               -- meta de posteos por semana, default para semanas sin meta propia
-  redes_metas_posteos_sem  TEXT,                  -- JSON {"1":n,"2":n,...} con meta propia por semana del mes (opcional)
   redes_meta_historias_mes INTEGER,               -- meta de historias por mes (null = usar default)
   marketing_excluido INTEGER NOT NULL DEFAULT 0,  -- 1 = no mostrar en Marketing / no sugerir ventas
   creado_en  TEXT NOT NULL DEFAULT (datetime('now')),
@@ -221,6 +220,18 @@ CREATE TABLE IF NOT EXISTS remarketing_recordatorios (
   creado_en  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_remk_pendientes ON remarketing_recordatorios(notificado, fecha);
+
+-- Meta de posteos por semana, propia de cada cliente y cada mes ('periodo' YYYY-MM).
+-- No tiene default: si no hay fila para una semana, se usa clientes.redes_meta_posteos_sem.
+-- Al no llevar nada del mes anterior, arranca "vacío" en cada mes nuevo.
+CREATE TABLE IF NOT EXISTS redes_metas_semana (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  periodo    TEXT NOT NULL,                         -- 'YYYY-MM'
+  semana     INTEGER NOT NULL,                       -- 1..5
+  meta       INTEGER NOT NULL,
+  UNIQUE(cliente_id, periodo, semana)
+);
 
 -- Marca de alertas ya enviadas por bajo avance de contenido (historias) por mes,
 -- para no notificar más de una vez por cliente/mes.

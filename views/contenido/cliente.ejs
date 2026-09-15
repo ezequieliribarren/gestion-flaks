@@ -2,8 +2,6 @@
   function etTipo(t){ return { historias:'Historias', reels:'Reels', posteos:'Posteos', carrusel:'Carrusel', otro:'Otro' }[t] || t; }
   function badgeEstado(e){ return { pendiente:'bg-slate-100 text-slate-600', en_progreso:'bg-blue-100 text-blue-700', completada:'bg-green-100 text-green-700' }[e] || 'bg-slate-100'; }
   function etEstado(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
-  var metasSemanaGuardadas = {};
-  try { metasSemanaGuardadas = cliente.redes_metas_posteos_sem ? JSON.parse(cliente.redes_metas_posteos_sem) : {}; } catch (e) { metasSemanaGuardadas = {}; }
 %>
 
 <a href="/contenido" class="text-sm text-brand-600 hover:underline">&larr; Volver a Contenido</a>
@@ -60,16 +58,17 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs text-slate-500 mb-1">Meta de posteos por semana del mes (opcional)</label>
-          <div class="grid grid-cols-5 gap-2">
-            <% for (var _n = 1; _n <= 5; _n++) { %>
+          <label class="block text-xs text-slate-500 mb-1">Meta de posteos por semana de este mes (<%= fmt.nombreMes(periodo.mes) %>)</label>
+          <div class="grid gap-2" style="grid-template-columns: repeat(<%= periodo.totalSemanas %>, minmax(0,1fr))">
+            <% for (var _n = 1; _n <= periodo.totalSemanas; _n++) { %>
               <div>
                 <label class="block text-[10px] text-slate-400 mb-0.5 text-center">Semana <%= _n %></label>
-                <input name="meta_sem_<%= _n %>" type="number" min="0" value="<%= metasSemanaGuardadas[_n] || '' %>" placeholder="-"
+                <input name="meta_sem_<%= _n %>" type="number" min="0" value="<%= metasSemanaActual[_n] || '' %>" placeholder="-"
                        class="w-full rounded-lg border border-slate-300 px-2 py-2 text-sm text-center" />
               </div>
             <% } %>
           </div>
+          <p class="text-[11px] text-slate-400 mt-1">Se vacían solas cada mes nuevo: son la meta de las semanas de <%= fmt.nombreMes(periodo.mes) %>, no quedan para el mes siguiente.</p>
         </div>
         <div class="flex items-center gap-3">
           <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
