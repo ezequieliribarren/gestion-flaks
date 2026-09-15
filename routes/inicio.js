@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
     contenido,
     saldoSocios: cuentaCorrienteGlobal(),
     pagosPendientes: { total: pendientes.length, monto: pendientes.reduce((a, f) => a + f.monto, 0), filas: pendientes.slice(0, 6) },
-    facturadoMes: fact.totales.total,
+    facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
     nombreMes: fmt.nombreMes(mes),
     dolar,
     clima,
