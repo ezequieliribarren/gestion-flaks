@@ -1,12 +1,12 @@
 <%
   var _p = currentPath || '';
   var _grupos = {
-    tareas:  [['/tareas', 'Tareas'], ['/tareas/flaks', 'FLAKS']],
+    tareas:  [['/tareas', 'Tareas'], ['/tareas/flaks', 'FLAKS'], ['/documentos', 'Documentos']],
     clientes:[['/clientes', 'Clientes'], ['/contenido', 'Contenido'], ['/marketing', 'Marketing']],
     admin:   [['/facturacion', 'Facturación'], ['/gastos', 'Gastos'], ['/caja', 'Caja']],
   };
   var _tabs = null;
-  if (_p === '/tareas' || _p.indexOf('/tareas/flaks') === 0) _tabs = _grupos.tareas;
+  if (_p === '/tareas' || _p.indexOf('/tareas/flaks') === 0 || _p.indexOf('/documentos') === 0) _tabs = _grupos.tareas;
   else if (_p.indexOf('/clientes') === 0 || _p.indexOf('/contenido') === 0 || _p.indexOf('/marketing') === 0) _tabs = _grupos.clientes;
   else if (_p.indexOf('/facturacion') === 0 || _p.indexOf('/gastos') === 0 || _p.indexOf('/caja') === 0) _tabs = _grupos.admin;
 %>

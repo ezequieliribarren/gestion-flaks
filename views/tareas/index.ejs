@@ -17,10 +17,19 @@
 
 <%- include('../partials/subnav') %>
 
-<div class="flex items-center justify-between mb-4 gap-3">
+<div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
   <h1 class="text-2xl font-bold text-slate-800 tracking-tight"><%= flaks ? 'Tareas de FLAKS' : 'Tareas' %></h1>
-  <a href="<%= flaks ? '/tareas/nueva?flaks=1' : '/tareas/nueva' %>" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-sm whitespace-nowrap">+ Nueva tarea</a>
+  <div class="flex items-center gap-2">
+    <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card">
+      <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="tareas">Tareas</button>
+      <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="objetivos">🎯 Objetivos</button>
+    </div>
+    <a href="<%= flaks ? '/tareas/nueva?flaks=1' : '/tareas/nueva' %>" class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-sm whitespace-nowrap">+ Nueva tarea</a>
+  </div>
 </div>
+
+<!-- Panel: Tareas -->
+<div data-panel="tareas">
 
 <div class="flex flex-wrap items-center gap-2 mb-3">
   <% if (!flaks) { %>
@@ -121,3 +130,94 @@
     <% }); %>
   </div>
 <% } %>
+
+</div>
+<!-- /Panel: Tareas -->
+
+<!-- Panel: Objetivos -->
+<div data-panel="objetivos" hidden>
+  <p class="text-sm text-slate-500 mb-4">Objetivos del mes y a largo plazo del equipo. Aparecen también en Inicio hasta que se marcan cumplidos.</p>
+
+  <div class="grid sm:grid-cols-2 gap-4">
+    <!-- Mensuales -->
+    <div class="bg-white rounded-xl shadow-card p-4 sm:p-5">
+      <h2 class="font-semibold text-slate-800 mb-3">Objetivos de <%= fmt.nombreMes(Number(objetivos.periodo.slice(5,7))) %></h2>
+      <% if (!objetivos.mensuales.length) { %>
+        <p class="text-sm text-slate-400 mb-3">Todavía no hay objetivos cargados para este mes.</p>
+      <% } %>
+      <ul class="space-y-2 mb-3">
+        <% objetivos.mensuales.forEach(function(o){ %>
+          <li class="flex items-start gap-2">
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>" class="mt-0.5">
+              <input type="hidden" name="_accion" value="toggle" />
+              <button class="w-5 h-5 rounded border <%= o.cumplido ? 'bg-green-600 border-green-600 text-white' : 'border-slate-300' %> flex items-center justify-center text-xs shrink-0"><%= o.cumplido ? '✓' : '' %></button>
+            </form>
+            <span class="text-sm flex-1 <%= o.cumplido ? 'line-through text-slate-400' : 'text-slate-700' %>"><%= o.texto %></span>
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>" onsubmit="return confirm('¿Eliminar este objetivo?')">
+              <input type="hidden" name="_accion" value="eliminar" />
+              <button class="text-slate-300 hover:text-red-500 text-xs">✕</button>
+            </form>
+          </li>
+        <% }); %>
+      </ul>
+      <form method="POST" action="/tareas/objetivos" class="flex gap-2">
+        <input type="hidden" name="tipo" value="mensual" />
+        <input name="texto" required placeholder="Nuevo objetivo del mes…" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <button class="btn bg-brand-600 hover:bg-brand-700 text-white rounded-lg px-3 py-2 text-sm">+</button>
+      </form>
+    </div>
+
+    <!-- Largo plazo -->
+    <div class="bg-white rounded-xl shadow-card p-4 sm:p-5">
+      <h2 class="font-semibold text-slate-800 mb-3">Objetivos a largo plazo</h2>
+      <% if (!objetivos.largoPlazo.length) { %>
+        <p class="text-sm text-slate-400 mb-3">Todavía no hay objetivos de largo plazo cargados.</p>
+      <% } %>
+      <ul class="space-y-2 mb-3">
+        <% objetivos.largoPlazo.forEach(function(o){ %>
+          <li class="flex items-start gap-2">
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>" class="mt-0.5">
+              <input type="hidden" name="_accion" value="toggle" />
+              <button class="w-5 h-5 rounded border <%= o.cumplido ? 'bg-green-600 border-green-600 text-white' : 'border-slate-300' %> flex items-center justify-center text-xs shrink-0"><%= o.cumplido ? '✓' : '' %></button>
+            </form>
+            <span class="text-sm flex-1 <%= o.cumplido ? 'line-through text-slate-400' : 'text-slate-700' %>"><%= o.texto %></span>
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>" onsubmit="return confirm('¿Eliminar este objetivo?')">
+              <input type="hidden" name="_accion" value="eliminar" />
+              <button class="text-slate-300 hover:text-red-500 text-xs">✕</button>
+            </form>
+          </li>
+        <% }); %>
+      </ul>
+      <form method="POST" action="/tareas/objetivos" class="flex gap-2">
+        <input type="hidden" name="tipo" value="largo_plazo" />
+        <input name="texto" required placeholder="Nuevo objetivo a largo plazo…" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-2 text-sm">+</button>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- /Panel: Objetivos -->
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+    var panels = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+    function activar(nombre) {
+      tabs.forEach(function (b) {
+        var on = b.dataset.tab === nombre;
+        b.classList.toggle('bg-brand-600', on);
+        b.classList.toggle('text-white', on);
+        b.classList.toggle('text-slate-600', !on);
+        b.classList.toggle('hover:bg-slate-100', !on);
+      });
+      panels.forEach(function (p) { p.hidden = p.dataset.panel !== nombre; });
+    }
+    tabs.forEach(function (b) {
+      b.addEventListener('click', function () {
+        activar(b.dataset.tab);
+        history.replaceState(null, '', '#' + b.dataset.tab);
+      });
+    });
+    activar(location.hash.slice(1) === 'objetivos' ? 'objetivos' : 'tareas');
+  })();
+</script>

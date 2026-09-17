@@ -5,6 +5,7 @@ const db = require('../db');
 const audit = require('../lib/audit');
 const fmt = require('../lib/format');
 const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
+const { periodoActual, objetivosDelPeriodo } = require('../lib/objetivos');
 
 const router = express.Router();
 
@@ -79,11 +80,40 @@ function listarTareas(req, res, flaks) {
     filtros: { cliente: fCliente, prioridad: fPrioridad, estado: fEstado, asignado: fAsignado },
     PRIORIDADES,
     ESTADOS,
+    objetivos: objetivosDelPeriodo(periodoActual()),
   });
 }
 
 router.get('/', (req, res) => listarTareas(req, res, false));
 router.get('/flaks', (req, res) => listarTareas(req, res, true));
+
+// --- Objetivos (mensuales + largo plazo), viven como solapa dentro de Tareas ---
+router.post('/objetivos', (req, res) => {
+  const texto = String(req.body.texto || '').trim();
+  const tipo = req.body.tipo === 'largo_plazo' ? 'largo_plazo' : 'mensual';
+  if (!texto) { req.session.flash = { tipo: 'error', msg: 'Escribí el objetivo.' }; return res.redirect('/tareas#objetivos'); }
+  const info = db.prepare('INSERT INTO objetivos (texto, tipo, periodo, creado_por) VALUES (?, ?, ?, ?)')
+    .run(texto, tipo, tipo === 'mensual' ? periodoActual() : null, req.session.user.nombre);
+  audit.registrar(req, 'objetivos', info.lastInsertRowid, 'crear', `Nuevo objetivo (${tipo}): "${texto}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Objetivo agregado.' };
+  res.redirect('/tareas#objetivos');
+});
+
+router.post('/objetivos/:oid', (req, res) => {
+  const o = db.prepare('SELECT * FROM objetivos WHERE id = ?').get(req.params.oid);
+  const volver = (req.get('referer') && req.get('referer').indexOf('/inicio') >= 0) ? '/inicio' : '/tareas#objetivos';
+  if (!o) return res.redirect(volver);
+  if (req.body._accion === 'eliminar') {
+    db.prepare('DELETE FROM objetivos WHERE id = ?').run(o.id);
+    req.session.flash = { tipo: 'ok', msg: 'Objetivo eliminado.' };
+  } else if (req.body._accion === 'toggle') {
+    const nuevo = o.cumplido ? 0 : 1;
+    db.prepare('UPDATE objetivos SET cumplido = ?, cumplido_en = ? WHERE id = ?')
+      .run(nuevo, nuevo ? new Date().toISOString() : null, o.id);
+    req.session.flash = { tipo: 'ok', msg: nuevo ? '¡Objetivo cumplido! 🎉' : 'Objetivo reabierto.' };
+  }
+  res.redirect(volver);
+});
 
 function formData(req) {
   const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();

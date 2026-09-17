@@ -186,10 +186,9 @@
         // Grupos del menú. { href|null, label, icon, hijos:[[href,label,icon]] }
         const navGrupos = esAdmin ? [
           { href: '/inicio', label: 'Inicio', icon: 'home', hijos: [] },
-          { href: '/tareas', label: 'Tareas', icon: 'tasks', hijos: [['/tareas/flaks', 'FLAKS', 'building']] },
+          { href: null, label: 'Flaks', icon: 'building', hijos: [['/tareas', 'Tareas', 'tasks'], ['/tareas/flaks', 'FLAKS', 'building'], ['/documentos', 'Documentos', 'folder']] },
           { href: '/clientes', label: 'Clientes', icon: 'users', hijos: [['/contenido', 'Contenido', 'camera'], ['/marketing', 'Marketing', 'megaphone']] },
           { href: null, label: 'Administración', icon: 'chart', hijos: [['/facturacion', 'Facturación', 'receipt'], ['/gastos', 'Gastos', 'tag'], ['/caja', 'Caja', 'wallet']] },
-          { href: '/documentos', label: 'Documentos', icon: 'folder', hijos: [] },
         ] : [
           { href: '/contenido', label: 'Contenido', icon: 'camera', hijos: [] },
         ];

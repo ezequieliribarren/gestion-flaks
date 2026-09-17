@@ -9,6 +9,7 @@ const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
 const { dolarMEP, climaCaba } = require('../lib/externos');
 const { TARJETAS, saludo, ocultasDe, ocultar, mostrar } = require('../lib/inicio');
+const { objetivosVigentes } = require('../lib/objetivos');
 
 const router = express.Router();
 
@@ -63,16 +64,6 @@ function deudaAntigua(prefijoActual) {
     ORDER BY tu.fecha ASC
   `).all(prefijoActual);
   return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 3) };
-}
-
-// Objetivos vigentes (no cumplidos) del mes actual + los de largo plazo, para la
-// tarjeta de Inicio. La misma lógica que routes/marketing.js.
-function objetivosVigentes() {
-  const d = new Date();
-  const periodo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  const mensuales = db.prepare("SELECT * FROM objetivos WHERE tipo = 'mensual' AND periodo = ? AND cumplido = 0 ORDER BY id DESC").all(periodo);
-  const largoPlazo = db.prepare("SELECT * FROM objetivos WHERE tipo = 'largo_plazo' AND cumplido = 0 ORDER BY id DESC").all();
-  return { mensuales, largoPlazo, total: mensuales.length + largoPlazo.length };
 }
 
 // { anio, mes } del mes que está `delta` meses antes/después de (anio, mes).

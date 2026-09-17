@@ -157,7 +157,7 @@
       <ul class="text-sm text-slate-700 space-y-1.5 mt-2 mb-1.5">
         <% objetivos.mensuales.slice(0,3).forEach(function(o){ %>
           <li class="flex items-start gap-2">
-            <form method="POST" action="/marketing/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
               <button class="w-4 h-4 mt-0.5 rounded border border-slate-300 shrink-0"></button>
             </form>
             <span class="truncate"><%= o.texto %></span>
@@ -165,7 +165,7 @@
         <% }); %>
         <% objetivos.largoPlazo.slice(0,2).forEach(function(o){ %>
           <li class="flex items-start gap-2">
-            <form method="POST" action="/marketing/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
+            <form method="POST" action="/tareas/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
               <button class="w-4 h-4 mt-0.5 rounded border border-slate-300 shrink-0"></button>
             </form>
             <span class="truncate">🏔️ <%= o.texto %></span>
@@ -173,7 +173,7 @@
         <% }); %>
       </ul>
     <% } %>
-    <a href="/marketing#objetivos" class="text-sm text-brand-600 hover:underline">Ver Objetivos →</a>
+    <a href="/tareas#objetivos" class="text-sm text-brand-600 hover:underline">Ver Objetivos →</a>
   </div>
   <% } %>
 
