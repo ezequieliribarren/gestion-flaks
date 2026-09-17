@@ -14,13 +14,13 @@
           },
           colors: {
             brand: {
-              50: '#eef4ff', 100: '#d9e6ff', 200: '#bcd2ff', 300: '#8eb3ff',
-              400: '#598dfc', 500: '#3466f0', 600: '#204ddb', 700: '#1b3db5', 800: '#1c398f', 900: '#1c3475',
+              50: '#eefdf6', 100: '#d5fbe6', 200: '#a8f4cd', 300: '#71e8a8',
+              400: '#3ad683', 500: '#16c169', 600: '#0da057', 700: '#0a8047', 800: '#0c663a', 900: '#0b5330',
             },
           },
           boxShadow: {
             card: '0 0 0 1px rgb(15 23 42 / 0.04), 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.10)',
-            'card-hover': '0 0 0 1px rgb(32 77 219 / 0.10), 0 2px 6px 0 rgb(15 23 42 / 0.06), 0 16px 36px -10px rgb(15 23 42 / 0.20)',
+            'card-hover': '0 0 0 1px rgb(13 160 87 / 0.12), 0 2px 6px 0 rgb(15 23 42 / 0.06), 0 16px 36px -10px rgb(15 23 42 / 0.20)',
           },
         },
       },
@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+  <link rel="icon" href="/public/LOGO.png" />
   <style>
     :root { color-scheme: light; }
     body {
@@ -47,16 +47,17 @@
     }
     .nav-link { position: relative; transition: background-color .15s ease, color .15s ease; }
     .nav-link.is-active {
-      background: linear-gradient(90deg, rgba(52,102,240,.30), rgba(52,102,240,.08));
+      background: linear-gradient(90deg, rgba(22,193,105,.30), rgba(22,193,105,.08));
       color: #fff;
     }
     .nav-link.is-active::before {
       content: ''; position: absolute; left: -8px; top: 8px; bottom: 8px; width: 3px;
-      border-radius: 999px; background: #598dfc;
+      border-radius: 999px; background: #3ad683;
     }
+    .nav-link svg { width: 1.1rem; height: 1.1rem; }
     .brand-mark {
-      background: linear-gradient(135deg, #3466f0, #598dfc);
-      box-shadow: 0 6px 16px -4px rgba(52,102,240,.6);
+      box-shadow: 0 6px 16px -4px rgba(13,160,87,.5);
+      object-fit: cover;
     }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -107,14 +108,31 @@
     }
     input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
       outline: none;
-      border-color: #598dfc;
-      box-shadow: 0 0 0 3px rgba(52,102,240,.15);
+      border-color: #3ad683;
+      box-shadow: 0 0 0 3px rgba(22,193,105,.15);
     }
-    input[type="checkbox"], input[type="radio"] { accent-color: #3466f0; }
+    input[type="checkbox"], input[type="radio"] { accent-color: #0da057; }
 
     /* Filas de tablas "planas" (no .zebra, como las de la ficha de cliente): resalte suave al pasar el mouse. */
     table:not(.zebra) tbody tr { transition: background-color .12s ease; }
     table:not(.zebra) tbody tr:hover { background-color: #f8fafc; }
+
+    /* Edición inline en tablas: los campos no se ven como "cajas" hasta que se los toca,
+       para que la tabla se sienta más limpia y menos recargada. */
+    table:not(.zebra) input:not([type="checkbox"]), table:not(.zebra) select {
+      border-color: transparent; background-color: transparent;
+    }
+    table:not(.zebra) input:not([type="checkbox"]):hover, table:not(.zebra) select:hover {
+      border-color: #e2e8f0; background-color: #fff;
+    }
+    table:not(.zebra) input:not([type="checkbox"]):focus, table:not(.zebra) select:focus {
+      background-color: #fff;
+    }
+    /* Tabla + su contenedor con scroll: un solo marco prolijo en vez de sensación de "flotar". */
+    .overflow-x-auto:has(> table:not(.zebra)) {
+      border: 1px solid #e2e8f0; border-radius: .75rem;
+    }
+    table:not(.zebra) thead { background: #f8fafc; }
 
     /* Paneles: leve profundidad extra al pasar el mouse, sin moverlos (para no "saltar" en tablas grandes). */
     .shadow-card { transition: box-shadow .18s ease; }
@@ -134,41 +152,60 @@
     <!-- Sidebar -->
     <aside class="sidebar hidden md:flex md:flex-col w-60 text-slate-300 shrink-0">
       <div class="px-5 py-5 flex items-center gap-3">
-        <span class="brand-mark w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-lg">F</span>
+        <img src="/public/LOGO.png" alt="Flaks" class="brand-mark w-9 h-9 rounded-xl" />
         <div>
           <div class="text-base font-bold text-white tracking-tight leading-none">Flaks</div>
           <div class="text-[11px] text-slate-400 mt-0.5">Gestión interna</div>
         </div>
       </div>
       <%
+        // Íconos minimalistas (trazo, sin relleno) en vez de emoji.
+        function icono(name, size) {
+          var attrs = 'width="' + (size || 18) + '" height="' + (size || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+          var paths = {
+            bell: '<path d="M6 10a6 6 0 0 1 12 0c0 4 1.2 5.5 1.8 6.2a.8.8 0 0 1-.6 1.3H4.8a.8.8 0 0 1-.6-1.3C4.8 15.5 6 14 6 10Z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+            home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5a1 1 0 0 0 1-1v-4.5h3V19a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-9"/>',
+            tasks: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6h-8V4.5a1 1 0 0 1 1-1Z"/><path d="M8.5 12h7M8.5 15.5h5"/>',
+            building: '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h1.5M8 10.5h1.5M8 14h1.5M14.5 7H16M14.5 10.5H16M14.5 14H16"/><path d="M10 21v-3.5a2 2 0 0 1 4 0V21"/>',
+            users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14c2.6.3 4.7 2.4 4.9 5.1"/>',
+            camera: '<path d="M4 8.5a1.5 1.5 0 0 1 1.5-1.5h2l1-1.7A1 1 0 0 1 9.4 4.7h5.2a1 1 0 0 1 .9.6L16.5 7h2A1.5 1.5 0 0 1 20 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18Z"/><circle cx="12" cy="13" r="3.2"/>',
+            megaphone: '<path d="M3 10v4a1 1 0 0 0 1 1h2l1.5 4.5a1 1 0 0 0 1 .7H10V10"/><path d="M7 10 17 5.5a.7.7 0 0 1 1 .6v11.8a.7.7 0 0 1-1 .6L7 14"/><path d="M18 9.5c1 .6 1 4.4 0 5"/>',
+            chart: '<path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>',
+            receipt: '<path d="M6 4h12v16l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2Z"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>',
+            tag: '<path d="M11.5 4h5A1.5 1.5 0 0 1 18 5.5v5a1.5 1.5 0 0 1-.44 1.06l-8 8a1.5 1.5 0 0 1-2.12 0l-4-4a1.5 1.5 0 0 1 0-2.12l8-8A1.5 1.5 0 0 1 11.5 4Z"/><circle cx="14.5" cy="8.5" r="1.1"/>',
+            wallet: '<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M3.5 10h17"/><circle cx="16.5" cy="14" r="1"/>',
+            folder: '<path d="M4 6.5A1.5 1.5 0 0 1 5.5 5H10l1.6 2H18.5A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5Z"/>',
+          };
+          return '<svg ' + attrs + '>' + (paths[name] || '') + '</svg>';
+        }
         // Grupos del menú. { href|null, label, icon, hijos:[[href,label,icon]] }
         const navGrupos = esAdmin ? [
-          { href: '/inicio', label: 'Inicio', icon: '🏠', hijos: [] },
-          { href: '/tareas', label: 'Tareas', icon: '📝', hijos: [['/tareas/flaks', 'FLAKS', '🏢']] },
-          { href: '/clientes', label: 'Clientes', icon: '👥', hijos: [['/contenido', 'Contenido', '📸'], ['/marketing', 'Marketing', '📣']] },
-          { href: null, label: 'Administración', icon: '📊', hijos: [['/facturacion', 'Facturación', '💰'], ['/gastos', 'Gastos', '🧾'], ['/caja', 'Caja', '📊']] },
-          { href: '/documentos', label: 'Documentos', icon: '📁', hijos: [] },
+          { href: '/inicio', label: 'Inicio', icon: 'home', hijos: [] },
+          { href: '/tareas', label: 'Tareas', icon: 'tasks', hijos: [['/tareas/flaks', 'FLAKS', 'building']] },
+          { href: '/clientes', label: 'Clientes', icon: 'users', hijos: [['/contenido', 'Contenido', 'camera'], ['/marketing', 'Marketing', 'megaphone']] },
+          { href: null, label: 'Administración', icon: 'chart', hijos: [['/facturacion', 'Facturación', 'receipt'], ['/gastos', 'Gastos', 'tag'], ['/caja', 'Caja', 'wallet']] },
+          { href: '/documentos', label: 'Documentos', icon: 'folder', hijos: [] },
         ] : [
-          { href: '/contenido', label: 'Contenido', icon: '📸', hijos: [] },
+          { href: '/contenido', label: 'Contenido', icon: 'camera', hijos: [] },
         ];
         // lista plana para la barra inferior (mobile)
         const navFlat = esAdmin
-          ? [['/inicio', 'Inicio', '🏠'], ['/tareas', 'Tareas', '📝'], ['/clientes', 'Clientes', '👥'], ['/contenido', 'Contenido', '📸'], ['/facturacion', 'Admin', '📊'], ['/documentos', 'Docs', '📁']]
-          : [['/contenido', 'Contenido', '📸']];
+          ? [['/inicio', 'Inicio', 'home'], ['/tareas', 'Tareas', 'tasks'], ['/clientes', 'Clientes', 'users'], ['/contenido', 'Contenido', 'camera'], ['/facturacion', 'Admin', 'chart'], ['/documentos', 'Docs', 'folder']]
+          : [['/contenido', 'Contenido', 'camera']];
         function _act(h) { return h === '/tareas' ? currentPath === '/tareas' : currentPath.indexOf(h) === 0; }
       %>
       <nav class="flex-1 py-2 space-y-0.5 px-3 overflow-y-auto">
         <% navGrupos.forEach(function(g){ %>
           <% if (g.href) { %>
             <a href="<%= g.href %>" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm <%= _act(g.href) ? 'is-active' : 'hover:bg-white/5 hover:text-white' %>">
-              <span class="text-base leading-none"><%= g.icon %></span><span><%= g.label %></span>
+              <span class="leading-none shrink-0"><%- icono(g.icon) %></span><span><%= g.label %></span>
             </a>
           <% } else { %>
-            <div class="flex items-center gap-3 px-3 pt-3 pb-1 text-[11px] uppercase tracking-wide text-slate-500"><span><%= g.icon %></span><span><%= g.label %></span></div>
+            <div class="flex items-center gap-3 px-3 pt-3 pb-1 text-[11px] uppercase tracking-wide text-slate-500"><span class="leading-none shrink-0"><%- icono(g.icon) %></span><span><%= g.label %></span></div>
           <% } %>
           <% g.hijos.forEach(function(h){ %>
             <a href="<%= h[0] %>" class="nav-link flex items-center gap-3 pl-9 pr-3 py-2 rounded-xl text-sm <%= _act(h[0]) ? 'is-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
-              <span class="text-sm leading-none"><%= h[2] %></span><span><%= h[1] %></span>
+              <span class="leading-none shrink-0"><%- icono(h[2]) %></span><span><%= h[1] %></span>
             </a>
           <% }); %>
         <% }); %>
@@ -184,10 +221,10 @@
       <!-- Header móvil -->
       <header class="sidebar md:hidden text-white flex items-center justify-between px-4 py-3 sticky top-0 z-20">
         <span class="flex items-center gap-2 font-bold">
-          <span class="brand-mark w-7 h-7 rounded-lg flex items-center justify-center text-sm">F</span> Flaks
+          <img src="/public/LOGO.png" alt="Flaks" class="brand-mark w-7 h-7 rounded-lg" /> Flaks
         </span>
         <span class="text-xs text-slate-300 flex items-center gap-3">
-          <a href="/notificaciones" class="relative text-lg leading-none" aria-label="Notificaciones">🔔<% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %></a>
+          <a href="/notificaciones" class="relative leading-none" aria-label="Notificaciones"><%- icono('bell') %><% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %></a>
           <%= currentUser ? currentUser.nombre : '' %>
           <form method="POST" action="/logout"><button class="text-brand-300">Salir</button></form>
         </span>
@@ -195,8 +232,8 @@
 
       <!-- Barra superior (desktop) -->
       <div class="hidden md:flex items-center justify-end gap-4 px-8 pt-5">
-        <a href="/notificaciones" class="relative text-slate-500 hover:text-slate-800 text-xl leading-none" aria-label="Notificaciones">
-          🔔<% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %>
+        <a href="/notificaciones" class="relative text-slate-500 hover:text-slate-800 leading-none" aria-label="Notificaciones">
+          <%- icono('bell', 22) %><% if (notifCount > 0) { %><span class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center"><%= notifCount > 9 ? '9+' : notifCount %></span><% } %>
         </a>
       </div>
 
@@ -215,7 +252,7 @@
        style="grid-template-columns: repeat(<%= navFlat.length %>, minmax(0, 1fr));">
     <% navFlat.forEach(function(item){ const activo = _act(item[0]) || (item[0] === '/facturacion' && (currentPath.indexOf('/gastos') === 0 || currentPath.indexOf('/caja') === 0)); %>
       <a href="<%= item[0] %>" class="flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] <%= activo ? 'text-brand-600' : 'text-slate-400' %>">
-        <span class="text-lg leading-none"><%= item[2] %></span>
+        <span class="leading-none"><%- icono(item[2], 20) %></span>
         <span class="leading-none"><%= item[1] %></span>
       </a>
     <% }); %>

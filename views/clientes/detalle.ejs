@@ -24,6 +24,18 @@
       potencial: 'bg-amber-100 text-amber-700',
     }[e] || 'bg-slate-100 text-slate-600';
   }
+  // Íconos minimalistas de trazo (en vez de emoji) para esta ficha.
+  function ic(name){
+    var attrs = 'width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+    var paths = {
+      user: '<circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/>',
+      phone: '<path d="M5 4.5h3l1.3 4-1.9 1.4a10.5 10.5 0 0 0 5.7 5.7l1.4-1.9 4 1.3v3a1.5 1.5 0 0 1-1.6 1.5A15 15 0 0 1 3.5 6.1 1.5 1.5 0 0 1 5 4.5Z"/>',
+      mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="1.7"/><path d="m4.5 6.5 7.5 6 7.5-6"/>',
+      tag: '<path d="M11.5 4h5A1.5 1.5 0 0 1 18 5.5v5a1.5 1.5 0 0 1-.44 1.06l-8 8a1.5 1.5 0 0 1-2.12 0l-4-4a1.5 1.5 0 0 1 0-2.12l8-8A1.5 1.5 0 0 1 11.5 4Z"/><circle cx="14.5" cy="8.5" r="1.1"/>',
+      camera: '<path d="M4 8.5a1.5 1.5 0 0 1 1.5-1.5h2l1-1.7A1 1 0 0 1 9.4 4.7h5.2a1 1 0 0 1 .9.6L16.5 7h2A1.5 1.5 0 0 1 20 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18Z"/><circle cx="12" cy="13" r="3.2"/>',
+    };
+    return '<svg ' + attrs + ' class="inline-block align-[-2px]">' + (paths[name] || '') + '</svg>';
+  }
 %>
 
 <a href="/clientes" class="text-sm text-brand-600 hover:underline">&larr; Volver a clientes</a>
@@ -44,15 +56,15 @@
 <%- include('../partials/audit', { ultima: ultima }) %>
 
 <% if (cliente.redes) { %>
-  <a href="/contenido/<%= cliente.id %>" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand-600 hover:underline">📸 Este cliente hace redes — ver en Contenido →</a>
+  <a href="/contenido/<%= cliente.id %>" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand-600 hover:underline"><%- ic('camera') %> Este cliente hace redes — ver en Contenido →</a>
 <% } %>
 
 <% if (grupoDe) { %>
-  <div class="mt-2 text-sm text-slate-500">🏷️ Pertenece al grupo <a href="/clientes/<%= grupoDe.id %>" class="text-brand-600 hover:underline font-medium"><%= grupoDe.nombre %></a></div>
+  <div class="mt-2 text-sm text-slate-500"><%- ic('tag') %> Pertenece al grupo <a href="/clientes/<%= grupoDe.id %>" class="text-brand-600 hover:underline font-medium"><%= grupoDe.nombre %></a></div>
 <% } %>
 <% if (subclientes.length) { %>
   <div class="mt-2 text-sm text-slate-500">
-    🏷️ Grupo de:
+    <%- ic('tag') %> Grupo de:
     <% subclientes.forEach(function(s, i){ %><a href="/clientes/<%= s.id %>" class="text-brand-600 hover:underline"><%= s.nombre %></a><%= i < subclientes.length - 1 ? ', ' : '' %><% }); %>
   </div>
 <% } %>
@@ -60,12 +72,12 @@
 <% var _tel = String(cliente.contacto_telefono || '').replace(/[^\d+]/g, ''); %>
 <% if (cliente.contacto_nombre || cliente.contacto_telefono || cliente.contacto_email) { %>
   <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-slate-600">
-    <% if (cliente.contacto_nombre) { %><span>👤 <%= cliente.contacto_nombre %></span><% } %>
+    <% if (cliente.contacto_nombre) { %><span><%- ic('user') %> <%= cliente.contacto_nombre %></span><% } %>
     <% if (cliente.contacto_telefono) { %>
-      <span>📞 <a href="tel:<%= _tel %>" class="hover:underline"><%= cliente.contacto_telefono %></a>
+      <span><%- ic('phone') %> <a href="tel:<%= _tel %>" class="hover:underline"><%= cliente.contacto_telefono %></a>
         <a href="https://wa.me/<%= _tel.replace(/^\+/, '') %>" target="_blank" rel="noopener" class="text-green-600 hover:underline ml-1">WhatsApp</a></span>
     <% } %>
-    <% if (cliente.contacto_email) { %><span>✉️ <a href="mailto:<%= cliente.contacto_email %>" class="hover:underline"><%= cliente.contacto_email %></a></span><% } %>
+    <% if (cliente.contacto_email) { %><span><%- ic('mail') %> <a href="mailto:<%= cliente.contacto_email %>" class="hover:underline"><%= cliente.contacto_email %></a></span><% } %>
   </div>
 <% } %>
 
@@ -123,12 +135,7 @@
 <!-- Trabajos recurrentes -->
 <div id="recurrentes" class="bg-white rounded-xl shadow-card p-5">
   <h2 class="font-semibold text-slate-800 mb-1">Trabajos recurrentes (mensuales)</h2>
-  <p class="text-xs text-slate-400 mb-3">
-    <strong>Día</strong> = hasta qué día del mes tiene tiempo de pagar.
-    <strong>Desde</strong> = primer mes que factura (los meses anteriores no lo cuentan en Facturación, para no duplicar lo que ya estaba cargado como cobro).
-    <strong>¿Pagó?</strong> = fecha real de pago de <%= fmt.nombreMes(Number(periodoActual.slice(5,7))) %> <%= periodoActual.slice(0,4) %>
-    (se vacía sola el 1° de cada mes). Si está vacío, en Facturación figura <span class="text-amber-600">pendiente</span>.
-  </p>
+  <p class="text-xs text-slate-400 mb-3">El pago se reinicia solo cada 1° de mes; sin marcar, figura pendiente en Facturación.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
@@ -163,7 +170,7 @@
       </tbody>
     </table>
   </div>
-  <p class="text-xs text-slate-400 mt-2">Para editar montos o repartos, cambiá los valores y tocá <kbd class="text-[10px] bg-slate-100 px-1 rounded">Enter</kbd> en el campo.</p>
+  <p class="text-xs text-slate-400 mt-2">Cambiá un valor y tocá <kbd class="text-[10px] bg-slate-100 px-1 rounded">Enter</kbd> para guardar.</p>
 
   <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
     <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
@@ -179,7 +186,7 @@
 <!-- Trabajos (sin cobrar) -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-1">Trabajos</h2>
-  <p class="text-xs text-slate-400 mb-3">La <strong>fecha</strong> es el mes al que pertenece el trabajo (define el mes de Facturado). Un trabajo <strong>potencial</strong> es un presupuesto sin confirmar. Al cobrar un trabajo <strong>pendiente</strong> se le carga la fecha real de cobro y pasa a "Cobros realizados", abajo.</p>
+  <p class="text-xs text-slate-400 mb-3">Al cobrar, pasa a Cobros realizados con la fecha real de pago.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
@@ -240,7 +247,7 @@
 <!-- Cobros realizados -->
 <div id="cobros" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-1">Cobros realizados</h2>
-  <p class="text-xs text-slate-400 mb-3">Plata que ya entró. <strong>Fecha de cobro</strong> = cuándo se cobró de verdad (define el mes de Cobrado). <strong>Mes de facturación</strong> = a qué mes pertenece el trabajo (puede ser un mes distinto al del cobro).</p>
+  <p class="text-xs text-slate-400 mb-3">El mes de facturación puede ser distinto al mes en que se cobró.</p>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-slate-500 text-left border-b border-slate-200">
