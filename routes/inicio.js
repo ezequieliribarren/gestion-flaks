@@ -22,7 +22,7 @@ function tareasVencidas() {
     .map((t) => ({ ...t, v: fmt.estadoVencimiento(t.fecha_cierre, false) }))
     .filter((t) => t.v.vencida)
     .sort((a, b) => b.v.dias - a.v.dias);
-  return { total: vencidas.length, titulos: vencidas.slice(0, 6).map((t) => t.nombre) };
+  return { total: vencidas.length, titulos: vencidas.slice(0, 3).map((t) => t.nombre) };
 }
 
 // Para cada cliente con Sheet, compara lo publicado esta semana contra su meta de
@@ -62,7 +62,7 @@ function deudaAntigua(prefijoActual) {
     WHERE tu.estado = 'pendiente' AND substr(tu.fecha, 1, 7) < ?
     ORDER BY tu.fecha ASC
   `).all(prefijoActual);
-  return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 8) };
+  return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 3) };
 }
 
 // Objetivos vigentes (no cumplidos) del mes actual + los de largo plazo, para la
@@ -117,7 +117,7 @@ router.get('/', async (req, res) => {
     tareasVencidas: tareasVencidas(),
     contenido,
     saldoSocios: cuentaCorrienteGlobal(),
-    pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 8) },
+    pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 3) },
     deudaAntigua: deudaAntigua(prefijo),
     facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
     mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total },
