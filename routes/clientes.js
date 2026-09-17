@@ -7,6 +7,8 @@ const multer = require('multer');
 const db = require('../db');
 const audit = require('../lib/audit');
 const { STORAGE_DIR, UPLOADS_DIR } = require('../lib/paths');
+const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
+const { metasSemanaDe } = require('../lib/redes-metas');
 
 const router = express.Router();
 
@@ -149,12 +151,20 @@ router.post('/', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   if (!cliente) return res.status(404).render('error', { titulo: 'No encontrado', mensaje: 'El cliente no existe.' });
 
   const d = new Date();
   const mesPrefijo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+  const tareasActivas = db.prepare("SELECT COUNT(*) AS n FROM tareas WHERE cliente_id = ? AND estado <> 'completada'").get(cliente.id).n;
+
+  let avanceContenido = null;
+  if (cliente.redes && cliente.redes_sheet_url) {
+    const per = periodoActual();
+    try { avanceContenido = await resumenCliente(cliente, metasSemanaDe(cliente.id, per.periodo)); } catch (e) { avanceContenido = { ok: false, error: e.message }; }
+  }
 
   const recurrentes = db.prepare(`
     SELECT tr.*, pr.fecha_pago AS pago_fecha
@@ -191,13 +201,14 @@ router.get('/:id', (req, res) => {
     hoyISO: hoyISO(),
     mensualTotal,
     tareasMes,
+    tareasActivas,
+    avanceContenido,
     periodoActual: mesPrefijo,
     clientesLista,
     subclientes,
     grupoDe,
     gruposDisponibles,
     ESTADOS,
-    ultima: audit.ultimaModificacion('clientes', cliente.id),
     historial: audit.historial('clientes', cliente.id),
   });
 });

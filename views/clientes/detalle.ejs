@@ -6,10 +6,11 @@
       .filter(function(c){ return c.id !== cliente.id; })
       .map(function(c){ return '<option value="' + c.id + '">' + c.nombre + '</option>'; })
       .join('');
-    return '<form method="POST" action="/clientes/' + cliente.id + '/' + recurso + '/' + tid + '/pasar">'
+    return '<form method="POST" action="/clientes/' + cliente.id + '/' + recurso + '/' + tid + '/pasar" class="mt-3">'
+      + '<label class="block text-xs text-slate-500 mb-1">Pasar a otro cliente</label>'
       + '<select name="cliente_destino" onchange="if(this.value)this.form.submit()" '
-      + 'class="rounded border border-slate-200 px-2 py-1 text-xs max-w-[130px] text-slate-500">'
-      + '<option value="">Pasar a…</option>' + opts + '</select></form>';
+      + 'class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm text-slate-500">'
+      + '<option value="">Elegir…</option>' + opts + '</select></form>';
   }
   function estadoCliente(e){
     return {
@@ -25,16 +26,28 @@
     }[e] || 'bg-slate-100 text-slate-600';
   }
   // Íconos minimalistas de trazo (en vez de emoji) para esta ficha.
-  function ic(name){
-    var attrs = 'width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+  function ic(name, size){
+    var attrs = 'width="' + (size||15) + '" height="' + (size||15) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
     var paths = {
       user: '<circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/>',
       phone: '<path d="M5 4.5h3l1.3 4-1.9 1.4a10.5 10.5 0 0 0 5.7 5.7l1.4-1.9 4 1.3v3a1.5 1.5 0 0 1-1.6 1.5A15 15 0 0 1 3.5 6.1 1.5 1.5 0 0 1 5 4.5Z"/>',
       mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="1.7"/><path d="m4.5 6.5 7.5 6 7.5-6"/>',
       tag: '<path d="M11.5 4h5A1.5 1.5 0 0 1 18 5.5v5a1.5 1.5 0 0 1-.44 1.06l-8 8a1.5 1.5 0 0 1-2.12 0l-4-4a1.5 1.5 0 0 1 0-2.12l8-8A1.5 1.5 0 0 1 11.5 4Z"/><circle cx="14.5" cy="8.5" r="1.1"/>',
-      camera: '<path d="M4 8.5a1.5 1.5 0 0 1 1.5-1.5h2l1-1.7A1 1 0 0 1 9.4 4.7h5.2a1 1 0 0 1 .9.6L16.5 7h2A1.5 1.5 0 0 1 20 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18Z"/><circle cx="12" cy="13" r="3.2"/>',
+      pencil: '<path d="M15.5 5.5 19 9 9 19H5.5v-3.5Z"/><path d="M13.5 7.5 17 11"/>',
+      upload: '<path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+      plus: '<path d="M12 5v14M5 12h14"/>',
     };
-    return '<svg ' + attrs + ' class="inline-block align-[-2px]">' + (paths[name] || '') + '</svg>';
+    return '<svg ' + attrs + ' class="inline-block align-[-2px] shrink-0">' + (paths[name] || '') + '</svg>';
+  }
+  // Modal genérico: id + título + contenido HTML del <form>.
+  function modal(id, titulo, formHtml){
+    return '<div id="' + id + '" hidden class="fixed inset-0 z-50 flex items-center justify-center p-4">'
+      + '<div class="absolute inset-0 bg-slate-900/40" onclick="document.getElementById(\'' + id + '\').hidden=true"></div>'
+      + '<div class="relative bg-white rounded-xl shadow-card-hover w-full max-w-md p-5 max-h-[85vh] overflow-y-auto">'
+      + '<button type="button" onclick="document.getElementById(\'' + id + '\').hidden=true" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>'
+      + '<h3 class="font-semibold text-slate-800 mb-3">' + titulo + '</h3>'
+      + formHtml
+      + '</div></div>';
   }
 %>
 
@@ -53,11 +66,6 @@
     <% if (estadoEfec !== cliente.estado) { %><span class="text-xs text-amber-600">(inactivo con presupuesto pendiente)</span><% } %>
   </div>
 </div>
-<%- include('../partials/audit', { ultima: ultima }) %>
-
-<% if (cliente.redes) { %>
-  <a href="/contenido/<%= cliente.id %>" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand-600 hover:underline"><%- ic('camera') %> Este cliente hace redes — ver en Contenido →</a>
-<% } %>
 
 <% if (grupoDe) { %>
   <div class="mt-2 text-sm text-slate-500"><%- ic('tag') %> Pertenece al grupo <a href="/clientes/<%= grupoDe.id %>" class="text-brand-600 hover:underline font-medium"><%= grupoDe.nombre %></a></div>
@@ -81,7 +89,6 @@
   </div>
 <% } %>
 
-
 <!-- Solapas -->
 <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card w-fit mt-4 mb-4">
   <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="resumen">Resumen</button>
@@ -91,17 +98,37 @@
 
 <!-- Panel: Resumen -->
 <div data-panel="resumen">
-  <div class="grid sm:grid-cols-2 gap-4">
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <div class="bg-white rounded-xl shadow-card p-5">
       <div class="text-xs text-slate-500 uppercase tracking-wide">Se le cobra por mes</div>
       <div class="text-3xl font-bold text-slate-800 mt-1"><%= fmt.formatARS(mensualTotal) %></div>
-      <div class="text-xs text-slate-400 mt-1">Suma de trabajos recurrentes activos</div>
     </div>
     <div class="bg-white rounded-xl shadow-card p-5">
-      <div class="text-xs text-slate-500 uppercase tracking-wide">Tareas de este mes</div>
-      <div class="text-3xl font-bold text-slate-800 mt-1"><%= tareasMes.filter(function(t){return t.estado==='completada';}).length %>/<%= tareasMes.length %></div>
-      <div class="text-xs text-slate-400 mt-1">Completadas / totales del mes</div>
+      <div class="text-xs text-slate-500 uppercase tracking-wide">Tareas activas</div>
+      <div class="text-3xl font-bold text-slate-800 mt-1"><%= tareasActivas %></div>
     </div>
+    <% if (cliente.redes) { %>
+      <div class="bg-white rounded-xl shadow-card p-5">
+        <div class="text-xs text-slate-500 uppercase tracking-wide">Contenido</div>
+        <% if (!cliente.redes_sheet_url) { %>
+          <div class="text-sm text-slate-400 mt-2">Sin Sheet cargado</div>
+        <% } else if (!avanceContenido || !avanceContenido.ok) { %>
+          <div class="text-sm text-slate-400 mt-2">No se pudo leer el Sheet</div>
+        <% } else { %>
+          <%
+            var semAct = avanceContenido.posteos.semanas.find(function(s){ return s.n === avanceContenido.posteos.semana_actual; });
+            var falta = semAct ? Math.max(0, semAct.meta - semAct.cantidad) : 0;
+          %>
+          <% if (!falta) { %>
+            <div class="text-2xl font-bold text-green-600 mt-1">Al día</div>
+          <% } else { %>
+            <div class="text-3xl font-bold text-amber-500 mt-1"><%= falta %></div>
+            <div class="text-xs text-slate-400">pendiente<%= falta === 1 ? '' : 's' %> esta semana</div>
+          <% } %>
+        <% } %>
+        <a href="/contenido/<%= cliente.id %>" class="text-xs text-brand-600 hover:underline mt-2 inline-block">Ver Contenido →</a>
+      </div>
+    <% } %>
   </div>
 
   <!-- Tareas del mes -->
@@ -134,155 +161,168 @@
 
 <!-- Trabajos recurrentes -->
 <div id="recurrentes" class="bg-white rounded-xl shadow-card p-5">
-  <h2 class="font-semibold text-slate-800 mb-1">Trabajos recurrentes (mensuales)</h2>
-  <p class="text-xs text-slate-400 mb-3">El pago se reinicia solo cada 1° de mes; sin marcar, figura pendiente en Facturación.</p>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto/mes</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2 text-center">Día</th><th class="py-2 px-2">Desde</th><th class="py-2 px-2 text-center">Activo</th><th></th><th class="py-2 px-2">¿Pagó? (<%= fmt.nombreMes(Number(periodoActual.slice(5,7))).slice(0,3) %>)</th><th class="py-2 px-2">Pasar</th></tr>
-      </thead>
-      <tbody>
-        <% recurrentes.forEach(function(r){ %>
-          <tr class="border-b border-slate-100">
-            <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>">
-              <td class="py-2 pr-2"><input name="nombre" value="<%= r.nombre %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2"><input name="monto_mensual" type="number" step="0.01" value="<%= r.monto_mensual %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" step="1" value="<%= r.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" step="1" value="<%= r.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2 text-center"><input name="dia_de_cobro" type="number" min="1" max="28" value="<%= r.dia_de_cobro || '' %>" class="w-14 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2"><input name="desde" type="month" value="<%= r.desde || '' %>" class="rounded border border-slate-200 px-2 py-1 text-xs w-28" /></td>
-              <td class="py-2 px-2 text-center"><input name="activo" type="checkbox" value="1" <%= r.activo ? 'checked' : '' %> /></td>
-              <td class="py-2 px-2 whitespace-nowrap">
-                <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
-                <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo recurrente?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
-              </td>
-            </form>
-            <td class="py-2 px-2">
-              <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago">
-                <input type="hidden" name="periodo" value="<%= periodoActual %>" />
-                <input type="date" name="fecha" value="<%= r.pago_fecha ? String(r.pago_fecha).slice(0,10) : '' %>" onchange="this.form.submit()"
-                       class="rounded border <%= r.pago_fecha ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs" />
-              </form>
-            </td>
-            <td class="py-2 px-2"><%- pasarSelect('recurrentes', r.id) %></td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
+  <div class="flex items-center justify-between mb-1">
+    <h2 class="font-semibold text-slate-800">Trabajos recurrentes (mensuales)</h2>
+    <button type="button" onclick="document.getElementById('add-recurrente').hidden=!document.getElementById('add-recurrente').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
-  <p class="text-xs text-slate-400 mt-2">Cambiá un valor y tocá <kbd class="text-[10px] bg-slate-100 px-1 rounded">Enter</kbd> para guardar.</p>
+  <p class="text-xs text-slate-400 mb-3">El pago se reinicia solo cada 1° de mes.</p>
 
-  <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
-    <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Monto/mes</label><input name="monto_mensual" type="number" step="0.01" value="0" class="w-28 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Día cobro</label><input name="dia_de_cobro" type="number" min="1" max="28" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Desde</label><input name="desde" type="month" value="<%= periodoActual %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm w-28" /></div>
-    <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar</button>
+  <% if (!recurrentes.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay trabajos recurrentes.</p><% } %>
+  <div class="divide-y divide-slate-100">
+    <% recurrentes.forEach(function(r){ %>
+      <div class="flex flex-wrap items-center gap-3 py-3">
+        <div class="flex-1 min-w-[140px]">
+          <div class="flex items-center gap-2">
+            <span class="font-medium text-slate-800 truncate"><%= r.nombre %></span>
+            <% if (!r.activo) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">Inactivo</span><% } %>
+          </div>
+          <div class="text-xs text-slate-400">Día <%= r.dia_de_cobro || '—' %> · Desde <%= r.desde || '—' %></div>
+        </div>
+        <div class="font-semibold text-slate-800 text-right shrink-0"><%= fmt.formatARS(r.monto_mensual) %></div>
+        <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago" class="shrink-0">
+          <input type="hidden" name="periodo" value="<%= periodoActual %>" />
+          <input type="date" name="fecha" value="<%= r.pago_fecha ? String(r.pago_fecha).slice(0,10) : '' %>" onchange="this.form.submit()"
+                 class="rounded border <%= r.pago_fecha ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs w-32" />
+        </form>
+        <button type="button" onclick="document.getElementById('m-rec-<%= r.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+      </div>
+      <%- modal('m-rec-' + r.id, 'Editar trabajo recurrente',
+        '<form method="POST" action="/clientes/' + cliente.id + '/recurrentes/' + r.id + '" class="space-y-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="' + r.nombre.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="grid grid-cols-2 gap-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Monto/mes</label><input name="monto_mensual" type="number" step="0.01" value="' + r.monto_mensual + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Día de cobro</label><input name="dia_de_cobro" type="number" min="1" max="28" value="' + (r.dia_de_cobro || '') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="' + r.reparto_german + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="' + r.reparto_ezequiel + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Desde</label><input name="desde" type="month" value="' + (r.desde || '') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="flex items-center gap-2 mt-5"><input type="checkbox" name="activo" value="1" id="act-' + r.id + '" ' + (r.activo ? 'checked' : '') + ' /><label for="act-' + r.id + '" class="text-sm text-slate-600">Activo</label></div>'
+        + '</div>'
+        + '<div class="flex items-center justify-between pt-2">'
+        + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>'
+        + '<button name="_accion" value="eliminar" onclick="return confirm(\'¿Eliminar este trabajo recurrente?\')" class="text-sm text-red-600 hover:underline">Eliminar</button>'
+        + '</div></form>') %>
+    <% }); %>
+  </div>
+
+  <form id="add-recurrente" hidden method="POST" action="/clientes/<%= cliente.id %>/recurrentes" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+    <input name="nombre" required placeholder="Nombre" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
+    <input name="monto_mensual" type="number" step="0.01" value="0" placeholder="Monto/mes" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="reparto_german" type="number" value="50" placeholder="German %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="reparto_ezequiel" type="number" value="50" placeholder="Ezequiel %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="dia_de_cobro" type="number" min="1" max="28" placeholder="Día de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="desde" type="month" value="<%= periodoActual %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
   </form>
 </div>
 
 <!-- Trabajos (sin cobrar) -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
-  <h2 class="font-semibold text-slate-800 mb-1">Trabajos</h2>
-  <p class="text-xs text-slate-400 mb-3">Al cobrar, pasa a Cobros realizados con la fecha real de pago.</p>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Nombre</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Mes (fecha)</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th class="py-2 px-2">Estado</th><th></th><th class="py-2 px-2">Cobrar</th><th class="py-2 px-2">Pasar</th></tr>
-      </thead>
-      <tbody>
-        <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
-          <tr class="border-b border-slate-100 <%= pot ? 'bg-amber-50/60' : 'bg-red-50/60' %>">
-            <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>">
-              <td class="py-2 pr-2"><input name="nombre" value="<%= u.nombre %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= u.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
-              <td class="py-2 px-2"><input name="fecha" type="date" value="<%= String(u.fecha).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" value="<%= u.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= u.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2">
-                <select name="estado" onchange="this.form.submit()" class="text-[11px] font-medium rounded-full px-2 py-1 border-0 cursor-pointer <%= estadoTrabajoClase(u.estado) %>">
-                  <option value="potencial" <%= pot ? 'selected' : '' %>>Potencial</option>
-                  <option value="pendiente" <%= !pot ? 'selected' : '' %>>Pendiente de cobro</option>
-                </select>
-              </td>
-              <td class="py-2 px-2 whitespace-nowrap">
-                <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
-                <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este trabajo?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
-              </td>
-            </form>
-            <td class="py-2 px-2">
-              <% if (!pot) { %>
-                <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/cobrar" class="flex items-center gap-1">
-                  <input type="date" name="fecha" value="<%= hoyISO %>" class="rounded border border-slate-200 px-1.5 py-1 text-xs w-32" />
-                  <button class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded px-2 py-1 whitespace-nowrap">Cobrar</button>
-                </form>
-              <% } %>
-            </td>
-            <td class="py-2 px-2"><%- pasarSelect('unicos', u.id) %></td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
+  <div class="flex items-center justify-between mb-1">
+    <h2 class="font-semibold text-slate-800">Trabajos</h2>
+    <button type="button" onclick="document.getElementById('add-trabajo').hidden=!document.getElementById('add-trabajo').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+  </div>
+  <p class="text-xs text-slate-400 mb-3">Al cobrar, pasa a Cobros realizados.</p>
+
+  <% if (!unicos.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay trabajos cargados.</p><% } %>
+  <div class="divide-y divide-slate-100">
+    <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
+      <div class="flex flex-wrap items-center gap-3 py-3">
+        <div class="flex-1 min-w-[140px]">
+          <div class="flex items-center gap-2">
+            <span class="font-medium text-slate-800 truncate"><%= u.nombre %></span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full <%= estadoTrabajoClase(u.estado) %>"><%= pot ? 'Potencial' : 'Pendiente' %></span>
+          </div>
+          <div class="text-xs text-slate-400"><%= fmt.formatFecha(u.fecha) %></div>
+        </div>
+        <div class="font-semibold text-slate-800 text-right shrink-0"><%= fmt.formatARS(u.monto) %></div>
+        <% if (!pot) { %>
+          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/cobrar" class="flex items-center gap-1 shrink-0">
+            <input type="date" name="fecha" value="<%= hoyISO %>" class="rounded border border-slate-200 px-1.5 py-1 text-xs w-32" />
+            <button class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded-lg px-2 py-1.5 whitespace-nowrap">Cobrar</button>
+          </form>
+        <% } %>
+        <button type="button" onclick="document.getElementById('m-uni-<%= u.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+      </div>
+      <%- modal('m-uni-' + u.id, 'Editar trabajo',
+        '<form method="POST" action="/clientes/' + cliente.id + '/unicos/' + u.id + '" class="space-y-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="' + u.nombre.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="grid grid-cols-2 gap-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="' + u.monto + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Mes (fecha)</label><input name="fecha" type="date" value="' + String(u.fecha).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="' + u.reparto_german + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="' + u.reparto_ezequiel + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '</div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Estado</label><select name="estado" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm">'
+        + '<option value="pendiente"' + (!pot ? ' selected' : '') + '>Pendiente de cobro</option>'
+        + '<option value="potencial"' + (pot ? ' selected' : '') + '>Potencial (presupuesto)</option>'
+        + '</select></div>'
+        + '<div class="flex items-center justify-between pt-2">'
+        + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>'
+        + '<button name="_accion" value="eliminar" onclick="return confirm(\'¿Eliminar este trabajo?\')" class="text-sm text-red-600 hover:underline">Eliminar</button>'
+        + '</div></form>'
+        + '<div class="border-t border-slate-100 mt-3 pt-3">' + pasarSelect('unicos', u.id) + '</div>') %>
+    <% }); %>
   </div>
 
-  <form method="POST" action="/clientes/<%= cliente.id %>/unicos" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
-    <div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" class="w-28 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Mes (fecha)</label><input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div>
-      <label class="block text-xs text-slate-500 mb-1">Estado</label>
-      <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
-        <option value="pendiente">Pendiente de cobro</option>
-        <option value="potencial">Potencial (presupuesto)</option>
-      </select>
-    </div>
-    <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar</button>
+  <form id="add-trabajo" hidden method="POST" action="/clientes/<%= cliente.id %>/unicos" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+    <input name="nombre" required placeholder="Nombre" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
+    <input name="monto" type="number" step="0.01" value="0" placeholder="Monto" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
+      <option value="pendiente">Pendiente de cobro</option>
+      <option value="potencial">Potencial (presupuesto)</option>
+    </select>
+    <input name="reparto_german" type="number" value="50" placeholder="German %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="reparto_ezequiel" type="number" value="50" placeholder="Ezequiel %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
   </form>
 </div>
 
 <!-- Cobros realizados -->
 <div id="cobros" class="bg-white rounded-xl shadow-card p-5 mt-4">
-  <h2 class="font-semibold text-slate-800 mb-1">Cobros realizados</h2>
+  <div class="flex items-center justify-between mb-1">
+    <h2 class="font-semibold text-slate-800">Cobros realizados</h2>
+    <button type="button" onclick="document.getElementById('add-cobro').hidden=!document.getElementById('add-cobro').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+  </div>
   <p class="text-xs text-slate-400 mb-3">El mes de facturación puede ser distinto al mes en que se cobró.</p>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="text-slate-500 text-left border-b border-slate-200">
-        <tr><th class="py-2 pr-2">Concepto</th><th class="py-2 px-2 text-right">Monto</th><th class="py-2 px-2">Mes de facturación</th><th class="py-2 px-2">Fecha de cobro</th><th class="py-2 px-2 text-center">German %</th><th class="py-2 px-2 text-center">Ezequiel %</th><th></th></tr>
-      </thead>
-      <tbody>
-        <% cobros.forEach(function(co){ %>
-          <tr class="border-b border-slate-100 bg-green-50/40">
-            <form method="POST" action="/clientes/<%= cliente.id %>/cobros/<%= co.id %>">
-              <td class="py-2 pr-2"><input name="nombre" value="<%= co.concepto %>" class="w-full rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2"><input name="monto" type="number" step="0.01" value="<%= co.monto %>" class="w-28 rounded border border-slate-200 px-2 py-1 text-right" /></td>
-              <td class="py-2 px-2"><input name="fecha_trabajo" type="date" value="<%= String(co.fecha_trabajo).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2"><input name="fecha" type="date" value="<%= String(co.fecha).slice(0,10) %>" class="rounded border border-slate-200 px-2 py-1" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_german" type="number" value="<%= co.reparto_german %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2 text-center"><input name="reparto_ezequiel" type="number" value="<%= co.reparto_ezequiel %>" class="w-16 rounded border border-slate-200 px-2 py-1 text-center" /></td>
-              <td class="py-2 px-2 whitespace-nowrap">
-                <button class="text-xs btn bg-brand-600 hover:bg-brand-700 text-white rounded px-2 py-1">Guardar</button>
-                <button name="_accion" value="eliminar" onclick="return confirm('¿Eliminar este cobro?')" class="text-xs text-red-600 hover:underline ml-1">Eliminar</button>
-              </td>
-            </form>
-          </tr>
-        <% }); %>
-        <% if (!cobros.length) { %><tr><td colspan="7" class="py-4 text-center text-slate-400">Todavía no hay cobros cargados.</td></tr><% } %>
-      </tbody>
-    </table>
+
+  <% if (!cobros.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay cobros cargados.</p><% } %>
+  <div class="divide-y divide-slate-100">
+    <% cobros.forEach(function(co){ %>
+      <div class="flex flex-wrap items-center gap-3 py-3">
+        <div class="flex-1 min-w-[140px]">
+          <div class="font-medium text-slate-800 truncate"><%= co.concepto %></div>
+          <div class="text-xs text-slate-400">Facturado <%= fmt.formatFecha(co.fecha_trabajo) %> · Cobrado <%= fmt.formatFecha(co.fecha) %></div>
+        </div>
+        <div class="font-semibold text-green-700 text-right shrink-0"><%= fmt.formatARS(co.monto) %></div>
+        <button type="button" onclick="document.getElementById('m-cob-<%= co.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+      </div>
+      <%- modal('m-cob-' + co.id, 'Editar cobro',
+        '<form method="POST" action="/clientes/' + cliente.id + '/cobros/' + co.id + '" class="space-y-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Concepto</label><input name="nombre" value="' + co.concepto.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="grid grid-cols-2 gap-3">'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="' + co.monto + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Mes de facturación</label><input name="fecha_trabajo" type="date" value="' + String(co.fecha_trabajo).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" value="' + String(co.fecha).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="' + co.reparto_german + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="' + co.reparto_ezequiel + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '</div>'
+        + '<div class="flex items-center justify-between pt-2">'
+        + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>'
+        + '<button name="_accion" value="eliminar" onclick="return confirm(\'¿Eliminar este cobro?\')" class="text-sm text-red-600 hover:underline">Eliminar</button>'
+        + '</div></form>') %>
+    <% }); %>
   </div>
 
-  <form method="POST" action="/clientes/<%= cliente.id %>/cobros" class="mt-4 flex flex-wrap gap-2 items-end border-t border-slate-200 pt-4">
-    <div><label class="block text-xs text-slate-500 mb-1">Concepto</label><input name="nombre" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" class="w-28 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Mes de facturación (opcional)</label><input name="fecha_trabajo" type="date" placeholder="= fecha de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">German %</label><input name="reparto_german" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <div><label class="block text-xs text-slate-500 mb-1">Ezequiel %</label><input name="reparto_ezequiel" type="number" value="50" class="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>
-    <button class="text-sm btn bg-slate-800 hover:bg-slate-900 text-white rounded px-3 py-1.5">+ Agregar cobro</button>
+  <form id="add-cobro" hidden method="POST" action="/clientes/<%= cliente.id %>/cobros" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+    <input name="nombre" required placeholder="Concepto" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
+    <input name="monto" type="number" step="0.01" value="0" placeholder="Monto" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="fecha" type="date" required value="<%= hoyISO %>" placeholder="Fecha de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="fecha_trabajo" type="date" placeholder="Mes de facturación (opcional)" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="reparto_german" type="number" value="50" placeholder="German %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <input name="reparto_ezequiel" type="number" value="50" placeholder="Ezequiel %" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
   </form>
 </div>
 
@@ -292,27 +332,16 @@
 <!-- Panel: Datos -->
 <div data-panel="datos" hidden>
 
-<!-- Anotaciones -->
 <div class="bg-white rounded-xl shadow-card p-5">
-  <h2 class="font-semibold text-slate-800 mb-3">Anotaciones importantes</h2>
-  <form method="POST" action="/clientes/<%= cliente.id %>/notas">
-    <textarea name="notas" rows="5" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Información relevante del cliente..."><%= cliente.notas %></textarea>
-    <button class="mt-2 text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-3 py-1.5">Guardar anotaciones</button>
-  </form>
-</div>
-
-<!-- Editar / eliminar cliente -->
-<div class="bg-white rounded-xl shadow-card p-5 mt-4">
   <h2 class="font-semibold text-slate-800 mb-3">Datos del cliente</h2>
 
-  <div class="flex items-start gap-4 mb-4">
+  <div class="flex items-start gap-4 mb-5">
     <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 56 }) %>
-    <form method="POST" action="/clientes/<%= cliente.id %>" enctype="multipart/form-data" class="flex flex-wrap gap-3 items-end">
-      <div>
-        <label class="block text-xs text-slate-500 mb-1"><%= cliente.logo ? 'Cambiar logo' : 'Subir logo' %></label>
-        <input type="file" name="logo" accept="image/*" class="text-sm" />
-      </div>
-      <button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-3 py-1.5">Guardar logo</button>
+    <form method="POST" action="/clientes/<%= cliente.id %>" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">
+      <label class="btn inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg px-3 py-2 cursor-pointer">
+        <%- ic('upload', 16) %> <%= cliente.logo ? 'Cambiar logo' : 'Subir logo' %>
+        <input type="file" name="logo" accept="image/*" class="hidden" onchange="this.form.submit()" />
+      </label>
       <% if (cliente.logo) { %>
         <button type="submit" formaction="/clientes/<%= cliente.id %>/logo/eliminar" formenctype="application/x-www-form-urlencoded" class="text-sm text-red-600 hover:underline">Quitar logo</button>
       <% } %>
@@ -338,11 +367,9 @@
       </select>
       <% if (subclientes.length) { %>
         <p class="text-[11px] text-amber-600 mt-1">Ya es grupo de otros clientes, no puede pasar a depender de otro.</p>
-      <% } else { %>
-        <p class="text-[11px] text-slate-400 mt-1">Ej: "Senko" puede pertenecer al grupo "Sistema Continuo". Sirve para elegirlo como sub-marca en Contenido.</p>
       <% } %>
     </div>
-    <div class="sm:col-span-2"><button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded px-4 py-1.5">Guardar</button></div>
+    <div class="sm:col-span-2"><button class="text-sm btn bg-brand-600 hover:bg-brand-700 text-white rounded-lg px-4 py-1.5">Guardar</button></div>
   </form>
 
   <%- include('../partials/historial', { historial: historial }) %>
@@ -384,5 +411,12 @@
     var seccionAPanel = { recurrentes: 'servicios', unicos: 'servicios', cobros: 'servicios', servicios: 'servicios', datos: 'datos', resumen: 'resumen' };
     var inicial = seccionAPanel[hash] || 'resumen';
     activar(inicial, ['recurrentes', 'unicos', 'cobros'].indexOf(hash) >= 0 ? hash : null);
+
+    // Cerrar modales con Escape.
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('[id^="m-rec-"], [id^="m-uni-"], [id^="m-cob-"]').forEach(function (m) { m.hidden = true; });
+      }
+    });
   })();
 </script>
