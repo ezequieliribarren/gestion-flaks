@@ -186,7 +186,8 @@
         // Grupos del menú. { href|null, label, icon, hijos:[[href,label,icon]] }
         const navGrupos = esAdmin ? [
           { href: '/inicio', label: 'Inicio', icon: 'home', hijos: [] },
-          { href: null, label: 'Flaks', icon: 'building', hijos: [['/tareas', 'Tareas', 'tasks'], ['/tareas/flaks', 'FLAKS', 'building'], ['/documentos', 'Documentos', 'folder']] },
+          { href: '/tareas', label: 'Tareas', icon: 'tasks', hijos: [] },
+          { href: '/tareas/flaks', label: 'Flaks', icon: 'building', hijos: [] },
           { href: '/clientes', label: 'Clientes', icon: 'users', hijos: [['/contenido', 'Contenido', 'camera'], ['/marketing', 'Marketing', 'megaphone']] },
           { href: null, label: 'Administración', icon: 'chart', hijos: [['/facturacion', 'Facturación', 'receipt'], ['/gastos', 'Gastos', 'tag'], ['/caja', 'Caja', 'wallet']] },
         ] : [
@@ -194,7 +195,7 @@
         ];
         // lista plana para la barra inferior (mobile)
         const navFlat = esAdmin
-          ? [['/inicio', 'Inicio', 'home'], ['/tareas', 'Tareas', 'tasks'], ['/clientes', 'Clientes', 'users'], ['/contenido', 'Contenido', 'camera'], ['/facturacion', 'Admin', 'chart'], ['/documentos', 'Docs', 'folder']]
+          ? [['/inicio', 'Inicio', 'home'], ['/tareas', 'Tareas', 'tasks'], ['/tareas/flaks', 'Flaks', 'building'], ['/clientes', 'Clientes', 'users'], ['/facturacion', 'Admin', 'chart']]
           : [['/contenido', 'Contenido', 'camera']];
         function _act(h) { return h === '/tareas' ? currentPath === '/tareas' : currentPath.indexOf(h) === 0; }
       %>

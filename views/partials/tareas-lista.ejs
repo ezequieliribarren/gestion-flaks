@@ -1,0 +1,116 @@
+<%
+  function badgePrioridad(p){
+    return { alta:'bg-red-100 text-red-700', media:'bg-amber-100 text-amber-700', baja:'bg-slate-100 text-slate-600' }[p] || 'bg-slate-100';
+  }
+  function etiquetaEstado(e){ return { pendiente:'Pendiente', en_progreso:'En progreso', completada:'Completada' }[e] || e; }
+  var rutaBase = flaks ? '/tareas/flaks' : '/tareas';
+  function qs(extra){
+    const base = { vista: vista, modo: modo };
+    if (filtros.cliente) base.cliente = filtros.cliente;
+    if (filtros.prioridad) base.prioridad = filtros.prioridad;
+    if (filtros.estado) base.estado = filtros.estado;
+    if (filtros.asignado) base.asignado = filtros.asignado;
+    return new URLSearchParams(Object.assign(base, extra)).toString();
+  }
+  function iniciales(n){ return String(n||'?').trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+%>
+
+<div class="flex flex-wrap items-center gap-2 mb-3">
+  <% if (!flaks) { %>
+  <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card">
+    <% [['hoy','Hoy'],['mes','Este mes'],['todas','Todas']].forEach(function(v){ %>
+      <a href="<%= rutaBase %>?<%= qs({ vista: v[0] }) %>" class="btn px-3.5 py-1.5 text-sm rounded-lg <%= vista === v[0] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>"><%= v[1] %></a>
+    <% }); %>
+  </div>
+  <% } %>
+  <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card">
+    <a href="<%= rutaBase %>?<%= qs({ modo: 'cards' }) %>" class="btn px-3 py-1.5 text-sm rounded-lg <%= modo === 'cards' ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>">Cards</a>
+    <a href="<%= rutaBase %>?<%= qs({ modo: 'lista' }) %>" class="btn px-3 py-1.5 text-sm rounded-lg <%= modo === 'lista' ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' %>">Lista</a>
+  </div>
+</div>
+
+<!-- Filtros en una sola fila -->
+<form method="GET" action="<%= rutaBase %>" class="bg-white rounded-xl shadow-card p-3 mb-4 flex flex-nowrap gap-2 items-center overflow-x-auto text-sm">
+  <input type="hidden" name="vista" value="<%= vista %>" /><input type="hidden" name="modo" value="<%= modo %>" />
+  <select name="asignado" onchange="this.form.submit()" class="shrink-0 rounded-lg border border-slate-300 px-2.5 py-2">
+    <option value="">Quién</option>
+    <% users.forEach(function(u){ %><option value="<%= u.id %>" <%= String(filtros.asignado) === String(u.id) ? 'selected' : '' %>><%= u.nombre %></option><% }); %>
+  </select>
+  <% if (!flaks) { %>
+  <select name="cliente" onchange="this.form.submit()" class="shrink-0 rounded-lg border border-slate-300 px-2.5 py-2">
+    <option value="">Cliente</option>
+    <option value="sin" <%= filtros.cliente === 'sin' ? 'selected' : '' %>>Sin cliente</option>
+    <% clientes.forEach(function(c){ %><option value="<%= c.id %>" <%= String(filtros.cliente) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }); %>
+  </select>
+  <% } %>
+  <select name="prioridad" onchange="this.form.submit()" class="shrink-0 rounded-lg border border-slate-300 px-2.5 py-2">
+    <option value="">Prioridad</option>
+    <% PRIORIDADES.forEach(function(p){ %><option value="<%= p %>" <%= filtros.prioridad === p ? 'selected' : '' %>><%= p.charAt(0).toUpperCase()+p.slice(1) %></option><% }); %>
+  </select>
+  <select name="estado" onchange="this.form.submit()" class="shrink-0 rounded-lg border border-slate-300 px-2.5 py-2">
+    <option value="">Estado</option>
+    <% ESTADOS.forEach(function(e){ %><option value="<%= e %>" <%= filtros.estado === e ? 'selected' : '' %>><%= etiquetaEstado(e) %></option><% }); %>
+  </select>
+  <% if (filtros.cliente || filtros.prioridad || filtros.estado || filtros.asignado) { %>
+    <a href="<%= rutaBase %>?<%= new URLSearchParams({ vista: vista, modo: modo }).toString() %>" class="shrink-0 text-brand-600 hover:underline whitespace-nowrap">Limpiar</a>
+  <% } %>
+</form>
+
+<% if (!tareas.length) { %>
+  <div class="bg-white rounded-xl shadow-card p-8 text-center text-slate-500">No hay tareas para esta vista.</div>
+<% } %>
+
+<%
+  function estadoControl(t){ %><div class="flex rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm text-[10px] font-medium shrink-0">
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="pendiente" />
+        <button title="Pendiente" class="px-2 py-1 <%= t.estado === 'pendiente' ? 'bg-slate-200 text-slate-700' : 'text-slate-400 hover:bg-slate-50' %>">Pend</button></form>
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="en_progreso" />
+        <button title="En progreso" class="px-2 py-1 border-l border-slate-200 <%= t.estado === 'en_progreso' ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:bg-slate-50' %>">Prog</button></form>
+      <form method="POST" action="/tareas/<%= t.id %>/estado" style="display:contents"><input type="hidden" name="estado" value="completada" />
+        <button title="Completada" class="px-2 py-1 border-l border-slate-200 <%= t.estado === 'completada' ? 'bg-green-100 text-green-700' : 'text-slate-400 hover:bg-slate-50' %>">✓</button></form>
+    </div><% }
+
+  function fila(t){ %>
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="font-semibold text-slate-800 <%= t.estado === 'completada' ? 'line-through text-slate-400' : '' %>"><%= t.nombre %></span>
+      <span class="text-[11px] px-2 py-0.5 rounded-full <%= badgePrioridad(t.prioridad) %>"><%= t.prioridad %></span>
+      <% if (t.interna) { %>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-white">FLAKS · interna</span>
+      <% } else if (t.cliente_nombre) { %>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 inline-flex items-center gap-1.5">
+          <%- include('../partials/cliente-avatar', { id: t.cliente_id, nombre: t.cliente_nombre, logo: t.cliente_logo, size: 15 }) %><%= t.cliente_nombre %>
+        </span>
+      <% } %>
+      <% if (t.texto_vencida) { %>
+        <span class="text-[11px] px-2 py-0.5 rounded-full <%= t.vencida ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-700' %>"><%= t.texto_vencida %></span>
+      <% } %>
+      <% if (t.partes_total > 0) { %><span class="text-[11px] text-slate-400"><%= t.partes_hechas %>/<%= t.partes_total %> partes</span><% } %>
+    </div>
+    <% if (t.asignados.length) { %>
+      <div class="flex items-center gap-1 mt-1.5">
+        <% t.asignados.forEach(function(a){ %>
+          <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[9px] font-bold flex items-center justify-center" title="<%= a.nombre %>"><%= iniciales(a.nombre) %></span>
+        <% }); %>
+      </div>
+    <% } %>
+<% } %>
+
+<% if (modo === 'lista') { %>
+  <div class="bg-white rounded-xl shadow-card divide-y divide-slate-100 overflow-hidden">
+    <% tareas.forEach(function(t){ %>
+      <div class="relative <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'border-l-2 border-red-400' : '' %>">
+        <a href="/tareas/<%= t.id %>" class="block px-4 py-3 pr-32 hover:bg-slate-50"><%- fila(t) %></a>
+        <div class="absolute top-1/2 -translate-y-1/2 right-3"><%- estadoControl(t) %></div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <% tareas.forEach(function(t){ %>
+      <div class="lift relative bg-white rounded-xl shadow-card hover:shadow-card-hover <%= t.estado === 'completada' ? 'opacity-60' : '' %> <%= t.vencida ? 'ring-1 ring-red-200' : '' %>">
+        <a href="/tareas/<%= t.id %>" class="block p-4 pr-28"><%- fila(t) %></a>
+        <div class="absolute top-3 right-3"><%- estadoControl(t) %></div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

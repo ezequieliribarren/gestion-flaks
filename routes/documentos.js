@@ -12,6 +12,12 @@ const router = express.Router();
 
 const CATEGORIAS = ['presupuesto', 'tutorial', 'otro'];
 
+// Si el pedido vino desde la solapa de Documentos dentro de Flaks, vuelve ahí; si no, a /documentos.
+function volver(req) {
+  const ref = req.get('referer') || '';
+  return ref.indexOf('/tareas/flaks') >= 0 ? '/tareas/flaks#documentos' : '/documentos';
+}
+
 const EXT_PERMITIDAS = ['.pdf', '.doc', '.docx', '.txt'];
 
 const storage = multer.diskStorage({
@@ -63,8 +69,8 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   upload.single('archivo')(req, res, (err) => {
-    if (err) { req.session.flash = { tipo: 'error', msg: err.message }; return res.redirect('/documentos'); }
-    if (!req.file) { req.session.flash = { tipo: 'error', msg: 'Seleccioná un archivo.' }; return res.redirect('/documentos'); }
+    if (err) { req.session.flash = { tipo: 'error', msg: err.message }; return res.redirect(volver(req)); }
+    if (!req.file) { req.session.flash = { tipo: 'error', msg: 'Seleccioná un archivo.' }; return res.redirect(volver(req)); }
     const categoria = CATEGORIAS.includes(req.body.categoria) ? req.body.categoria : 'otro';
     const cliente_id = req.body.cliente_id ? Number(req.body.cliente_id) : null;
     const rel = path.relative(STORAGE_DIR, req.file.path).replace(/\\/g, '/');
@@ -74,7 +80,7 @@ router.post('/', (req, res) => {
     `).run(req.file.originalname, rel, categoria, cliente_id, req.session.user.nombre);
     audit.registrar(req, 'documentos', info.lastInsertRowid, 'crear', `Subió "${req.file.originalname}"`);
     req.session.flash = { tipo: 'ok', msg: 'Documento subido.' };
-    res.redirect('/documentos');
+    res.redirect(volver(req));
   });
 });
 
@@ -90,13 +96,13 @@ router.get('/:id/descargar', (req, res) => {
 
 router.post('/:id/eliminar', (req, res) => {
   const doc = db.prepare('SELECT * FROM documentos WHERE id = ?').get(req.params.id);
-  if (!doc) return res.redirect('/documentos');
+  if (!doc) return res.redirect(volver(req));
   const abs = path.join(STORAGE_DIR, doc.ruta_archivo);
   try { if (abs.startsWith(STORAGE_DIR) && fs.existsSync(abs)) fs.unlinkSync(abs); } catch (e) { /* noop */ }
   db.prepare('DELETE FROM documentos WHERE id = ?').run(doc.id);
   audit.registrar(req, 'documentos', doc.id, 'eliminar', `Eliminó "${doc.nombre_original}"`);
   req.session.flash = { tipo: 'ok', msg: 'Documento eliminado.' };
-  res.redirect('/documentos');
+  res.redirect(volver(req));
 });
 
 module.exports = router;

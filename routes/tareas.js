@@ -68,40 +68,56 @@ function listarTareas(req, res, flaks) {
     ...conVencimiento(t),
     asignados: asignadosDe('tarea', t.id),
   }));
-
-  res.render('tareas/index', {
-    titulo: flaks ? 'Tareas de FLAKS' : 'Tareas',
+  const clientes = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all();
+  const datosComunes = {
     tareas,
-    clientes: db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre').all(),
+    clientes,
     users: usuarios(),
     vista,
     modo,
-    flaks: !!flaks,
     filtros: { cliente: fCliente, prioridad: fPrioridad, estado: fEstado, asignado: fAsignado },
     PRIORIDADES,
     ESTADOS,
+  };
+
+  if (!flaks) {
+    return res.render('tareas/index', { titulo: 'Tareas', ...datosComunes });
+  }
+
+  // Flaks: una sola vista con solapas (Tareas internas / Objetivos / Documentos).
+  const docs = db.prepare(`
+    SELECT d.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
+    FROM documentos d LEFT JOIN clientes c ON c.id = d.cliente_id
+    ORDER BY d.subido_en DESC
+  `).all();
+  res.render('tareas/flaks', {
+    titulo: 'Flaks',
+    flaks: true,
+    ...datosComunes,
     objetivos: objetivosDelPeriodo(periodoActual()),
+    docs,
+    CATEGORIAS: ['presupuesto', 'tutorial', 'otro'],
   });
 }
 
 router.get('/', (req, res) => listarTareas(req, res, false));
 router.get('/flaks', (req, res) => listarTareas(req, res, true));
 
-// --- Objetivos (mensuales + largo plazo), viven como solapa dentro de Tareas ---
+// --- Objetivos (mensuales + largo plazo), viven como solapa dentro de Flaks ---
 router.post('/objetivos', (req, res) => {
   const texto = String(req.body.texto || '').trim();
   const tipo = req.body.tipo === 'largo_plazo' ? 'largo_plazo' : 'mensual';
-  if (!texto) { req.session.flash = { tipo: 'error', msg: 'Escribí el objetivo.' }; return res.redirect('/tareas#objetivos'); }
+  if (!texto) { req.session.flash = { tipo: 'error', msg: 'Escribí el objetivo.' }; return res.redirect('/tareas/flaks#objetivos'); }
   const info = db.prepare('INSERT INTO objetivos (texto, tipo, periodo, creado_por) VALUES (?, ?, ?, ?)')
     .run(texto, tipo, tipo === 'mensual' ? periodoActual() : null, req.session.user.nombre);
   audit.registrar(req, 'objetivos', info.lastInsertRowid, 'crear', `Nuevo objetivo (${tipo}): "${texto}"`);
   req.session.flash = { tipo: 'ok', msg: 'Objetivo agregado.' };
-  res.redirect('/tareas#objetivos');
+  res.redirect('/tareas/flaks#objetivos');
 });
 
 router.post('/objetivos/:oid', (req, res) => {
   const o = db.prepare('SELECT * FROM objetivos WHERE id = ?').get(req.params.oid);
-  const volver = (req.get('referer') && req.get('referer').indexOf('/inicio') >= 0) ? '/inicio' : '/tareas#objetivos';
+  const volver = (req.get('referer') && req.get('referer').indexOf('/inicio') >= 0) ? '/inicio' : '/tareas/flaks#objetivos';
   if (!o) return res.redirect(volver);
   if (req.body._accion === 'eliminar') {
     db.prepare('DELETE FROM objetivos WHERE id = ?').run(o.id);
