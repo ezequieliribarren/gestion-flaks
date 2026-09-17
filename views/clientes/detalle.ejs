@@ -69,46 +69,59 @@
   </div>
 <% } %>
 
-<!-- Resumen -->
-<div class="grid sm:grid-cols-2 gap-4 mt-4">
-  <div class="bg-white rounded-xl shadow-card p-5">
-    <div class="text-xs text-slate-500 uppercase tracking-wide">Se le cobra por mes</div>
-    <div class="text-3xl font-bold text-slate-800 mt-1"><%= fmt.formatARS(mensualTotal) %></div>
-    <div class="text-xs text-slate-400 mt-1">Suma de trabajos recurrentes activos</div>
+
+<!-- Solapas -->
+<div class="flex gap-1 bg-white rounded-xl p-1 shadow-card w-fit mt-4 mb-4">
+  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="resumen">Resumen</button>
+  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="servicios">Servicios</button>
+  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="datos">Datos</button>
+</div>
+
+<!-- Panel: Resumen -->
+<div data-panel="resumen">
+  <div class="grid sm:grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl shadow-card p-5">
+      <div class="text-xs text-slate-500 uppercase tracking-wide">Se le cobra por mes</div>
+      <div class="text-3xl font-bold text-slate-800 mt-1"><%= fmt.formatARS(mensualTotal) %></div>
+      <div class="text-xs text-slate-400 mt-1">Suma de trabajos recurrentes activos</div>
+    </div>
+    <div class="bg-white rounded-xl shadow-card p-5">
+      <div class="text-xs text-slate-500 uppercase tracking-wide">Tareas de este mes</div>
+      <div class="text-3xl font-bold text-slate-800 mt-1"><%= tareasMes.filter(function(t){return t.estado==='completada';}).length %>/<%= tareasMes.length %></div>
+      <div class="text-xs text-slate-400 mt-1">Completadas / totales del mes</div>
+    </div>
   </div>
-  <div class="bg-white rounded-xl shadow-card p-5">
-    <div class="text-xs text-slate-500 uppercase tracking-wide">Tareas de este mes</div>
-    <div class="text-3xl font-bold text-slate-800 mt-1"><%= tareasMes.filter(function(t){return t.estado==='completada';}).length %>/<%= tareasMes.length %></div>
-    <div class="text-xs text-slate-400 mt-1">Completadas / totales del mes</div>
+
+  <!-- Tareas del mes -->
+  <div class="bg-white rounded-xl shadow-card p-5 mt-4">
+    <h2 class="font-semibold text-slate-800 mb-3">Checklist de tareas del mes</h2>
+    <% if (!tareasMes.length) { %>
+      <p class="text-sm text-slate-500">No hay tareas de este cliente con vencimiento este mes.</p>
+    <% } %>
+    <ul class="space-y-2">
+      <% tareasMes.forEach(function(t){ %>
+        <li class="flex items-center gap-3">
+          <form method="POST" action="/tareas/<%= t.id %>/estado" class="flex items-center">
+            <input type="hidden" name="estado" value="<%= t.estado === 'completada' ? 'pendiente' : 'completada' %>" />
+            <button type="submit" class="w-5 h-5 rounded border <%= t.estado === 'completada' ? 'bg-green-600 border-green-600 text-white' : 'border-slate-300' %> flex items-center justify-center text-xs">
+              <%= t.estado === 'completada' ? '✓' : '' %>
+            </button>
+          </form>
+          <a href="/tareas/<%= t.id %>" class="text-sm <%= t.estado === 'completada' ? 'line-through text-slate-400' : 'text-slate-700' %> hover:text-brand-600">
+            <%= t.nombre %>
+          </a>
+          <span class="text-xs text-slate-400">· vence <%= fmt.formatFecha(t.fecha_cierre) %> · <%= etiquetaEstadoT(t.estado) %></span>
+        </li>
+      <% }); %>
+    </ul>
   </div>
 </div>
 
-<!-- Tareas del mes -->
-<div class="bg-white rounded-xl shadow-card p-5 mt-4">
-  <h2 class="font-semibold text-slate-800 mb-3">Checklist de tareas del mes</h2>
-  <% if (!tareasMes.length) { %>
-    <p class="text-sm text-slate-500">No hay tareas de este cliente con vencimiento este mes.</p>
-  <% } %>
-  <ul class="space-y-2">
-    <% tareasMes.forEach(function(t){ %>
-      <li class="flex items-center gap-3">
-        <form method="POST" action="/tareas/<%= t.id %>/estado" class="flex items-center">
-          <input type="hidden" name="estado" value="<%= t.estado === 'completada' ? 'pendiente' : 'completada' %>" />
-          <button type="submit" class="w-5 h-5 rounded border <%= t.estado === 'completada' ? 'bg-green-600 border-green-600 text-white' : 'border-slate-300' %> flex items-center justify-center text-xs">
-            <%= t.estado === 'completada' ? '✓' : '' %>
-          </button>
-        </form>
-        <a href="/tareas/<%= t.id %>" class="text-sm <%= t.estado === 'completada' ? 'line-through text-slate-400' : 'text-slate-700' %> hover:text-brand-600">
-          <%= t.nombre %>
-        </a>
-        <span class="text-xs text-slate-400">· vence <%= fmt.formatFecha(t.fecha_cierre) %> · <%= etiquetaEstadoT(t.estado) %></span>
-      </li>
-    <% }); %>
-  </ul>
-</div>
+<!-- Panel: Servicios -->
+<div data-panel="servicios" hidden>
 
 <!-- Trabajos recurrentes -->
-<div id="recurrentes" class="bg-white rounded-xl shadow-card p-5 mt-4">
+<div id="recurrentes" class="bg-white rounded-xl shadow-card p-5">
   <h2 class="font-semibold text-slate-800 mb-1">Trabajos recurrentes (mensuales)</h2>
   <p class="text-xs text-slate-400 mb-3">
     <strong>Día</strong> = hasta qué día del mes tiene tiempo de pagar.
@@ -266,8 +279,14 @@
   </form>
 </div>
 
+</div>
+<!-- /Panel: Servicios -->
+
+<!-- Panel: Datos -->
+<div data-panel="datos" hidden>
+
 <!-- Anotaciones -->
-<div class="bg-white rounded-xl shadow-card p-5 mt-4">
+<div class="bg-white rounded-xl shadow-card p-5">
   <h2 class="font-semibold text-slate-800 mb-3">Anotaciones importantes</h2>
   <form method="POST" action="/clientes/<%= cliente.id %>/notas">
     <textarea name="notas" rows="5" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Información relevante del cliente..."><%= cliente.notas %></textarea>
@@ -325,3 +344,38 @@
     <button class="text-sm text-red-600 hover:underline">Eliminar cliente</button>
   </form>
 </div>
+
+</div>
+<!-- /Panel: Datos -->
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+    var panels = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+    function activar(nombre, scrollId) {
+      tabs.forEach(function (b) {
+        var on = b.dataset.tab === nombre;
+        b.classList.toggle('bg-brand-600', on);
+        b.classList.toggle('text-white', on);
+        b.classList.toggle('text-slate-600', !on);
+        b.classList.toggle('hover:bg-slate-100', !on);
+      });
+      panels.forEach(function (p) { p.hidden = p.dataset.panel !== nombre; });
+      if (scrollId) {
+        var el = document.getElementById(scrollId);
+        if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+      }
+    }
+    tabs.forEach(function (b) {
+      b.addEventListener('click', function () {
+        activar(b.dataset.tab);
+        history.replaceState(null, '', '#' + b.dataset.tab);
+      });
+    });
+
+    var hash = location.hash.slice(1);
+    var seccionAPanel = { recurrentes: 'servicios', unicos: 'servicios', cobros: 'servicios', servicios: 'servicios', datos: 'datos', resumen: 'resumen' };
+    var inicial = seccionAPanel[hash] || 'resumen';
+    activar(inicial, ['recurrentes', 'unicos', 'cobros'].indexOf(hash) >= 0 ? hash : null);
+  })();
+</script>

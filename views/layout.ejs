@@ -91,6 +91,34 @@
 
     .nav-link { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
 
+    /* --- Toques "menos cuadrado": esquinas más suaves, feedback al clickear, foco moderno --- */
+    /* Sube el radio por default de los botones/inputs sueltos que sólo usan la clase base
+       "rounded" de Tailwind (0.25rem), sin tocar los que ya piden un radio explícito mayor. */
+    .rounded { border-radius: .5rem !important; }
+
+    button, .btn, a.btn, select, input[type="button"], input[type="submit"] {
+      transition: transform .12s ease, background-color .15s ease, box-shadow .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    button:active:not(:disabled), .btn:active, a.btn:active { transform: scale(.96); }
+    button:disabled { cursor: not-allowed; opacity: .6; }
+
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #598dfc;
+      box-shadow: 0 0 0 3px rgba(52,102,240,.15);
+    }
+    input[type="checkbox"], input[type="radio"] { accent-color: #3466f0; }
+
+    /* Filas de tablas "planas" (no .zebra, como las de la ficha de cliente): resalte suave al pasar el mouse. */
+    table:not(.zebra) tbody tr { transition: background-color .12s ease; }
+    table:not(.zebra) tbody tr:hover { background-color: #f8fafc; }
+
+    /* Paneles: leve profundidad extra al pasar el mouse, sin moverlos (para no "saltar" en tablas grandes). */
+    .shadow-card { transition: box-shadow .18s ease; }
+
     @media (max-width: 640px) {
       h1 { font-size: 1.35rem; line-height: 1.9rem; }
       input:not([type="checkbox"]):not([type="radio"]), textarea { font-size: 16px; } /* evita el zoom de iOS al enfocar */
