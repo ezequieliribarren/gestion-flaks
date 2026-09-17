@@ -137,6 +137,11 @@
     /* Paneles: leve profundidad extra al pasar el mouse, sin moverlos (para no "saltar" en tablas grandes). */
     .shadow-card { transition: box-shadow .18s ease; }
 
+    /* El atributo hidden tiene que ganarle siempre a clases como .flex/.grid en el
+       mismo elemento (modales, formularios colapsables), si no queda "hidden" pero
+       visible igual porque la clase de Tailwind define su propio display. */
+    [hidden] { display: none !important; }
+
     @media (max-width: 640px) {
       h1 { font-size: 1.35rem; line-height: 1.9rem; }
       input:not([type="checkbox"]):not([type="radio"]), textarea { font-size: 16px; } /* evita el zoom de iOS al enfocar */
