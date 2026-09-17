@@ -243,6 +243,20 @@ CREATE TABLE IF NOT EXISTS remarketing_recordatorios (
 );
 CREATE INDEX IF NOT EXISTS idx_remk_pendientes ON remarketing_recordatorios(notificado, fecha);
 
+-- Objetivos de Marketing: mensuales (atados a un período 'YYYY-MM') o a largo plazo
+-- (periodo = NULL, quedan visibles hasta marcarlos cumplidos).
+CREATE TABLE IF NOT EXISTS objetivos (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  texto       TEXT NOT NULL,
+  tipo        TEXT NOT NULL DEFAULT 'mensual',   -- mensual | largo_plazo
+  periodo     TEXT,                              -- 'YYYY-MM' (sólo tipo='mensual')
+  cumplido    INTEGER NOT NULL DEFAULT 0,
+  creado_por  TEXT,
+  creado_en   TEXT NOT NULL DEFAULT (datetime('now')),
+  cumplido_en TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_objetivos_periodo ON objetivos(periodo);
+
 -- Meta de posteos por semana, propia de cada cliente y cada mes ('periodo' YYYY-MM).
 -- No tiene default: si no hay fila para una semana, se usa clientes.redes_meta_posteos_sem.
 -- Al no llevar nada del mes anterior, arranca "vacío" en cada mes nuevo.

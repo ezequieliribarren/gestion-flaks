@@ -30,6 +30,39 @@
   </div>
   <% } %>
 
+  <!-- Objetivos a la vista -->
+  <% if (!ocultas.has('objetivos')) { %>
+  <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <form method="POST" action="/inicio/tarjetas/objetivos/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">🎯 Objetivos a la vista</div>
+    <% if (!objetivos.total) { %>
+      <p class="text-sm text-slate-400 mt-2 mb-2">Todavía no hay objetivos cargados.</p>
+    <% } else { %>
+      <ul class="text-sm text-slate-700 space-y-1.5 mt-2 mb-2">
+        <% objetivos.mensuales.forEach(function(o){ %>
+          <li class="flex items-start gap-2">
+            <form method="POST" action="/marketing/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
+              <button class="w-4 h-4 mt-0.5 rounded border border-slate-300 shrink-0"></button>
+            </form>
+            <span class="truncate"><%= o.texto %></span>
+          </li>
+        <% }); %>
+        <% objetivos.largoPlazo.forEach(function(o){ %>
+          <li class="flex items-start gap-2">
+            <form method="POST" action="/marketing/objetivos/<%= o.id %>"><input type="hidden" name="_accion" value="toggle" />
+              <button class="w-4 h-4 mt-0.5 rounded border border-indigo-300 shrink-0"></button>
+            </form>
+            <span class="truncate">🏔️ <%= o.texto %></span>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+    <a href="/marketing#objetivos" class="text-sm text-brand-600 hover:underline">Ver Objetivos →</a>
+  </div>
+  <% } %>
+
   <!-- Contenido de la semana -->
   <% if (!ocultas.has('contenido_semana')) { %>
   <div class="relative break-inside-avoid mb-4 bg-white rounded-xl shadow-card p-4 sm:p-5">

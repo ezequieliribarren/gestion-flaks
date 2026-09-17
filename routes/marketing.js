@@ -54,6 +54,19 @@ function recordatoriosDe(cid) {
   return db.prepare('SELECT * FROM remarketing_recordatorios WHERE cliente_id = ? ORDER BY fecha').all(cid);
 }
 
+function periodoActualISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Objetivos vigentes: los mensuales del período actual + los de largo plazo, no cumplidos primero.
+function objetivosVigentes() {
+  const periodo = periodoActualISO();
+  const mensuales = db.prepare('SELECT * FROM objetivos WHERE tipo = ? AND periodo = ? ORDER BY cumplido ASC, id DESC').all('mensual', periodo);
+  const largoPlazo = db.prepare('SELECT * FROM objetivos WHERE tipo = ? ORDER BY cumplido ASC, id DESC').all('largo_plazo');
+  return { periodo, mensuales, largoPlazo };
+}
+
 router.get('/', (req, res) => {
   revisarRemarketing();
 
@@ -131,7 +144,35 @@ router.get('/', (req, res) => {
   res.render('marketing/index', {
     titulo: 'Marketing', leads, excluidos, modo,
     SERVICIOS, RESULTADOS, MAX_RECORDATORIOS, etiquetaServicio, hoyISO: hoyISO(),
+    objetivos: objetivosVigentes(),
   });
+});
+
+// --- Objetivos ---
+router.post('/objetivos', (req, res) => {
+  const texto = String(req.body.texto || '').trim();
+  const tipo = req.body.tipo === 'largo_plazo' ? 'largo_plazo' : 'mensual';
+  if (!texto) { req.session.flash = { tipo: 'error', msg: 'Escribí el objetivo.' }; return res.redirect('/marketing#objetivos'); }
+  const info = db.prepare('INSERT INTO objetivos (texto, tipo, periodo, creado_por) VALUES (?, ?, ?, ?)')
+    .run(texto, tipo, tipo === 'mensual' ? periodoActualISO() : null, req.session.user.nombre);
+  audit.registrar(req, 'objetivos', info.lastInsertRowid, 'crear', `Nuevo objetivo (${tipo}): "${texto}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Objetivo agregado.' };
+  res.redirect('/marketing#objetivos');
+});
+
+router.post('/objetivos/:id', (req, res) => {
+  const o = db.prepare('SELECT * FROM objetivos WHERE id = ?').get(req.params.id);
+  if (!o) return res.redirect('/marketing#objetivos');
+  if (req.body._accion === 'eliminar') {
+    db.prepare('DELETE FROM objetivos WHERE id = ?').run(o.id);
+    req.session.flash = { tipo: 'ok', msg: 'Objetivo eliminado.' };
+  } else if (req.body._accion === 'toggle') {
+    const nuevo = o.cumplido ? 0 : 1;
+    db.prepare('UPDATE objetivos SET cumplido = ?, cumplido_en = ? WHERE id = ?')
+      .run(nuevo, nuevo ? new Date().toISOString() : null, o.id);
+    req.session.flash = { tipo: 'ok', msg: nuevo ? '¡Objetivo cumplido! 🎉' : 'Objetivo reabierto.' };
+  }
+  res.redirect(req.get('referer') && req.get('referer').indexOf('/inicio') >= 0 ? '/inicio' : '/marketing#objetivos');
 });
 
 // --- Alta de prospecto (todavía no está en Clientes) ---

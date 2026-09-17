@@ -65,6 +65,16 @@ function deudaAntigua(prefijoActual) {
   return { total: filas.length, monto: filas.reduce((a, f) => a + f.monto, 0), filas: filas.slice(0, 8) };
 }
 
+// Objetivos vigentes (no cumplidos) del mes actual + los de largo plazo, para la
+// tarjeta de Inicio. La misma lógica que routes/marketing.js.
+function objetivosVigentes() {
+  const d = new Date();
+  const periodo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const mensuales = db.prepare("SELECT * FROM objetivos WHERE tipo = 'mensual' AND periodo = ? AND cumplido = 0 ORDER BY id DESC").all(periodo);
+  const largoPlazo = db.prepare("SELECT * FROM objetivos WHERE tipo = 'largo_plazo' AND cumplido = 0 ORDER BY id DESC").all();
+  return { mensuales, largoPlazo, total: mensuales.length + largoPlazo.length };
+}
+
 // { anio, mes } del mes que está `delta` meses antes/después de (anio, mes).
 function mesAdyacente(anio, mes, delta) {
   let m = mes + delta;
@@ -112,6 +122,7 @@ router.get('/', async (req, res) => {
     facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
     mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total },
     mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total },
+    objetivos: objetivosVigentes(),
     nombreMes: fmt.nombreMes(mes),
     dolar,
     clima,
