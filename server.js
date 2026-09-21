@@ -50,6 +50,13 @@ try {
   console.error('Error vinculando grupo Sistema Continuo:', e);
 }
 
+// Habilita (una sola vez) Contenido para los sub-clientes de Sistema Continuo (solapas).
+try {
+  require('./db/habilitar-contenido-grupo').habilitarContenidoGrupoSistemaContinuo();
+} catch (e) {
+  console.error('Error habilitando Contenido del grupo Sistema Continuo:', e);
+}
+
 // Migra (una sola vez) trabajos_unicos "realizado"/"adeuda" al modelo Trabajos/Cobros.
 try {
   require('./db/migrar-cobros').migrarCobros();
@@ -99,9 +106,16 @@ try { revisarRemarketing(); } catch (e) { console.error('remarketing inicial:', 
 setInterval(() => { try { revisarRemarketing(); } catch (e) { /* noop */ } }, 15 * 60 * 1000).unref();
 
 // Revisión de avance de contenido (Sheets) en la última semana del mes: al arrancar y cada 1 hora.
-const { revisar: revisarRedes, revisarThrottled: revisarRedesThrottled } = require('./lib/redes-alertas');
+const {
+  revisar: revisarRedes, revisarThrottled: revisarRedesThrottled,
+  revisarPublicacionesSemana, revisarPublicacionesSemanaThrottled,
+} = require('./lib/redes-alertas');
 revisarRedes().catch((e) => console.error('redes-alertas inicial:', e.message));
 setInterval(() => { revisarRedes().catch(() => {}); }, 60 * 60 * 1000).unref();
+
+// Los lunes: tarea automática "Publicación - cliente" si la semana anterior quedó corta de posteos.
+revisarPublicacionesSemana().catch((e) => console.error('publicaciones-semana inicial:', e.message));
+setInterval(() => { revisarPublicacionesSemana().catch(() => {}); }, 60 * 60 * 1000).unref();
 
 // Helpers disponibles en todas las vistas.
 const { esAdmin } = require('./middleware/auth');
@@ -109,6 +123,7 @@ const { contarNoLeidas } = require('./lib/participacion');
 app.use((req, res, next) => {
   revisarThrottled();
   revisarRedesThrottled();
+  revisarPublicacionesSemanaThrottled();
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;

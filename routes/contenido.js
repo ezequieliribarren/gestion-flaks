@@ -17,6 +17,17 @@ function miembrosDelGrupo(cliente) {
   `).all(raiz, raiz, cliente.id).map((r) => r.nombre);
 }
 
+// Solapas de un cliente agrupado (él + sus hermanos de Contenido), raíz primero.
+// Si el cliente no pertenece a ningún grupo (o está solo), devuelve [] y no se muestran solapas.
+function tabsDelGrupo(cliente) {
+  const raiz = cliente.grupo_id || cliente.id;
+  const tabs = db.prepare(`
+    SELECT id, nombre, logo FROM clientes WHERE (id = ? OR grupo_id = ?) AND redes = 1
+    ORDER BY (id = ?) DESC, nombre COLLATE NOCASE
+  `).all(raiz, raiz, raiz);
+  return tabs.length > 1 ? tabs : [];
+}
+
 const router = express.Router();
 
 function hoyISO() {
@@ -39,14 +50,16 @@ function tocarTarea(req, id) {
 // --- Lista de clientes de contenido ---
 router.get('/', (req, res) => {
   const q = String(req.query.q || '').trim();
-  const where = ['c.redes = 1'];
+  // Los clientes agrupados (grupo_id IS NOT NULL, ej. SENKO/ARTANIUM/SISTEMA CONTINUO GF)
+  // no aparecen como tarjeta propia: se acceden como solapas dentro de su cliente raíz.
+  const where = ['c.redes = 1', 'c.grupo_id IS NULL'];
   const params = [];
   if (q) { where.push('LOWER(c.nombre) LIKE LOWER(?)'); params.push('%' + q + '%'); }
 
   const clientes = db.prepare(`
     SELECT c.id, c.nombre, c.logo, c.redes_plan, c.redes_sheet_url,
-      (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id = c.id AND estado <> 'completada') AS tareas_abiertas,
-      (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id = c.id) AS tareas_total
+      (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id IN (SELECT id FROM clientes WHERE id = c.id OR grupo_id = c.id) AND estado <> 'completada') AS tareas_abiertas,
+      (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id IN (SELECT id FROM clientes WHERE id = c.id OR grupo_id = c.id)) AS tareas_total
     FROM clientes c
     WHERE ${where.join(' AND ')}
     ORDER BY c.nombre COLLATE NOCASE
@@ -106,6 +119,7 @@ router.get('/:id', async (req, res) => {
   res.render('contenido/cliente', {
     titulo: cliente.nombre + ' · Contenido', cliente, tareas, TIPOS, users: usuarios(), hoyISO: hoyISO(),
     avance, periodo, metasSemanaActual, DEFAULT_META_POSTEOS_SEM, DEFAULT_META_HISTORIAS_MES,
+    grupoTabs: tabsDelGrupo(cliente),
   });
 });
 
