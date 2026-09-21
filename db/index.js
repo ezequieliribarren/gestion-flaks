@@ -88,6 +88,7 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   const colsTareas = raw.all('PRAGMA table_info(tareas)').map((c) => c.name);
   if (!colsTareas.includes('interna')) raw.exec('ALTER TABLE tareas ADD COLUMN interna INTEGER NOT NULL DEFAULT 0');
   if (!colsTareas.includes('links')) raw.exec("ALTER TABLE tareas ADD COLUMN links TEXT NOT NULL DEFAULT ''");
+  if (!colsTareas.includes('origen')) raw.exec('ALTER TABLE tareas ADD COLUMN origen TEXT');
 
   const tieneLinks = raw.all("SELECT name FROM sqlite_master WHERE type='table' AND name='contenido_links'").length;
   if (tieneLinks) {

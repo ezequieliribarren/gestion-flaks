@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS tareas (
   cliente_id            INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
   interna               INTEGER NOT NULL DEFAULT 0, -- 1 = tarea interna de FLAKS (sin cliente)
   estado                TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente','en_progreso','completada')),
+  origen                TEXT,                        -- ej. 'contenido' = generada sola por falta de publicaciones
   creado_por            TEXT,
   ultima_modificacion_por TEXT,
   ultima_modificacion_en  TEXT
