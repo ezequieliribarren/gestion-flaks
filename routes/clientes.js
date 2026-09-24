@@ -53,11 +53,16 @@ function borrarLogoArchivo(rel) {
   } catch (e) { /* noop */ }
 }
 
-function repartoValido(g, e) {
-  const rg = Number(g);
-  const re = Number(e);
-  if (isNaN(rg) || isNaN(re) || rg < 0 || re < 0) return null;
-  return { rg, re };
+// El reparto se carga en $ (cuánto se lleva cada socio), no en %: acá se convierte a
+// los % que se guardan en la base (reparto_german/reparto_ezequiel), para no tener
+// que tocar el resto del sistema (Facturación, Caja, etc. ya trabajan con %).
+function repartoValido(parteGerman, parteEzequiel, montoTotal) {
+  const pg = Number(parteGerman);
+  const pe = Number(parteEzequiel);
+  if (isNaN(pg) || isNaN(pe) || pg < 0 || pe < 0) return null;
+  const total = Number(montoTotal) || 0;
+  if (total <= 0) return { rg: 50, re: 50 };
+  return { rg: (pg / total) * 100, re: (pe / total) * 100 };
 }
 
 // estado_efectivo: un cliente inactivo con un trabajo único "potencial" figura como potencial.
@@ -342,7 +347,7 @@ router.post('/:id/recurrentes', (req, res) => {
   if (!cliente) return res.redirect('/clientes');
   const nombre = String(req.body.nombre || '').trim();
   const monto = Number(req.body.monto_mensual || 0);
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto);
   const dia = req.body.dia_de_cobro ? Math.min(28, Math.max(1, Number(req.body.dia_de_cobro))) : null;
   const desde = /^\d{4}-\d{2}$/.test(req.body.desde) ? req.body.desde : new Date().toISOString().slice(0, 7);
   if (!nombre || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo recurrente inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
@@ -367,7 +372,7 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
   }
   const nombre = String(req.body.nombre || '').trim() || t.nombre;
   const monto = req.body.monto_mensual != null ? Number(req.body.monto_mensual) : t.monto_mensual;
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: t.reparto_german, re: t.reparto_ezequiel };
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto) || { rg: t.reparto_german, re: t.reparto_ezequiel };
   const activo = req.body.activo === '1' || req.body.activo === 'on' ? 1 : 0;
   const dia = req.body.dia_de_cobro ? Math.min(28, Math.max(1, Number(req.body.dia_de_cobro))) : null;
   const desde = /^\d{4}-\d{2}$/.test(req.body.desde) ? req.body.desde : t.desde;
@@ -459,7 +464,7 @@ router.post('/:id/unicos', (req, res) => {
   const nombre = String(req.body.nombre || '').trim();
   const monto = Number(req.body.monto || 0);
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto);
   const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : 'pendiente';
   if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del trabajo inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
   db.prepare(`
@@ -486,7 +491,7 @@ router.post('/:id/unicos/:tid', (req, res) => {
   const nombre = String(req.body.nombre || '').trim() || t.nombre;
   const monto = req.body.monto != null ? Number(req.body.monto) : t.monto;
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : t.fecha;
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: t.reparto_german, re: t.reparto_ezequiel };
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto) || { rg: t.reparto_german, re: t.reparto_ezequiel };
   const estado = ESTADOS_TRABAJO.includes(req.body.estado) ? req.body.estado : t.estado;
   db.prepare('UPDATE trabajos_unicos SET nombre=?, monto=?, fecha=?, reparto_german=?, reparto_ezequiel=?, estado=? WHERE id=?')
     .run(nombre, monto, fecha, rep.rg, rep.re, estado, t.id);
@@ -527,7 +532,7 @@ router.post('/:id/cobros', (req, res) => {
   const monto = Number(req.body.monto || 0);
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
   const fechaTrabajo = req.body.fecha_trabajo ? String(req.body.fecha_trabajo).slice(0, 10) : fecha;
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel);
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto);
   if (!nombre || !fecha || !rep) { req.session.flash = { tipo: 'error', msg: 'Datos del cobro inválidos.' }; return res.redirect('/clientes/' + cliente.id); }
   db.prepare(`
     INSERT INTO cobros (cliente_id, concepto, monto, reparto_german, reparto_ezequiel, fecha_trabajo, fecha, creado_por)
@@ -555,7 +560,7 @@ router.post('/:id/cobros/:cid', (req, res) => {
   const monto = req.body.monto != null ? Number(req.body.monto) : co.monto;
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : co.fecha;
   const fechaTrabajo = req.body.fecha_trabajo ? String(req.body.fecha_trabajo).slice(0, 10) : co.fecha_trabajo;
-  const rep = repartoValido(req.body.reparto_german, req.body.reparto_ezequiel) || { rg: co.reparto_german, re: co.reparto_ezequiel };
+  const rep = repartoValido(req.body.parte_german, req.body.parte_ezequiel, monto) || { rg: co.reparto_german, re: co.reparto_ezequiel };
   db.prepare('UPDATE cobros SET concepto=?, monto=?, fecha=?, fecha_trabajo=?, reparto_german=?, reparto_ezequiel=? WHERE id=?')
     .run(nombre, monto, fecha, fechaTrabajo, rep.rg, rep.re, co.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el cobro "${nombre}"`);
