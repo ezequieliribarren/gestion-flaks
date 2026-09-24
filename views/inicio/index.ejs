@@ -31,7 +31,7 @@
   // Paleta reducida a propósito: rojo sólo para lo urgente, verde de marca para plata,
   // gris neutro para el resto (menos "arcoíris", más profesional).
   function card(color) {
-    return { red: 'border-red-300', brand: 'border-brand-300' }[color] || 'border-slate-200';
+    return { red: 'border-red-300', brand: 'border-brand-300', amber: 'border-amber-300' }[color] || 'border-slate-200';
   }
 %>
 
@@ -280,6 +280,27 @@
       });
     })();
   </script>
+  <% } %>
+
+  <!-- Gasto en publicidad (Meta/Google Ads, pauta) -->
+  <% if (!ocultas.has('gasto_publicidad')) { %>
+  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('amber') %>">
+    <form method="POST" action="/inicio/tarjetas/gasto_publicidad/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Gasto en publicidad <span class="normal-case text-slate-400">(<%= nombreMes %>)</span></div>
+    <div class="text-2xl font-bold text-slate-800 mt-1 mb-1"><%= fmt.formatARS(gastoPublicidad.total) %></div>
+    <div class="text-[11px] text-slate-400 mb-1.5">
+      <%= gastoPublicidad.cantidad %> gasto<%= gastoPublicidad.cantidad === 1 ? '' : 's' %> este mes
+      <% if (gastoPublicidad.anterior != null) {
+        var gpDelta = gastoPublicidad.total - gastoPublicidad.anterior;
+        var gpSube = gpDelta >= 0;
+      %>
+        · <span class="<%= gpSube ? 'text-red-600' : 'text-green-600' %>"><%= gpSube ? '▲' : '▼' %> <%= fmt.formatARS(Math.abs(gpDelta)) %></span> vs mes ant.
+      <% } %>
+    </div>
+    <a href="/gastos" class="text-sm text-brand-600 hover:underline">Ver Gastos →</a>
+  </div>
   <% } %>
 
 </div>

@@ -3,7 +3,7 @@
 const express = require('express');
 const db = require('../db');
 const fmt = require('../lib/format');
-const { facturacionDelMes } = require('../lib/billing');
+const { facturacionDelMes, gastosDelMes } = require('../lib/billing');
 const { cuentaCorrienteGlobal } = require('../lib/billing');
 const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
@@ -19,6 +19,13 @@ const router = express.Router();
 function desglosePorTipo(filas) {
   const suma = (tipos) => filas.filter((f) => tipos.includes(f.tipo)).reduce((a, f) => a + f.monto, 0);
   return { recurrentes: suma(['recurrente']), unicos: suma(['unico', 'cobro']) };
+}
+
+// Gasto del mes en publicidad (Meta Ads, Google Ads, pauta en general): gastos
+// recurrentes o únicos cargados con categoría "Publicidad".
+function gastoPublicidad(anio, mes) {
+  const pub = gastosDelMes(anio, mes).filas.filter((g) => g.categoria === 'Publicidad');
+  return { total: pub.reduce((a, g) => a + Number(g.monto || 0), 0), cantidad: pub.length };
 }
 
 // Total facturado a un cliente "raíz" + sus hijos de grupo (ej. SISTEMA CONTINUO,
@@ -139,6 +146,7 @@ router.get('/', async (req, res) => {
     },
     mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total, ...desglosePorTipo(factAnterior.filas) },
     mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total, ...desglosePorTipo(factPosterior.filas) },
+    gastoPublicidad: { ...gastoPublicidad(anio, mes), anterior: gastoPublicidad(anterior.anio, anterior.mes).total },
     objetivos: objetivosVigentes(),
     nombreMes: fmt.nombreMes(mes),
     dolar,
