@@ -9,6 +9,7 @@ const audit = require('../lib/audit');
 const { STORAGE_DIR, UPLOADS_DIR } = require('../lib/paths');
 const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
+const { registrarCambioMonto } = require('../lib/billing');
 
 const router = express.Router();
 
@@ -374,6 +375,9 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
     UPDATE trabajos_recurrentes SET nombre=?, monto_mensual=?, reparto_german=?, reparto_ezequiel=?, activo=?, dia_de_cobro=?, desde=?
     WHERE id=?
   `).run(nombre, monto, rep.rg, rep.re, activo, dia, desde, t.id);
+  // El monto nuevo rige desde este mes: los meses ya facturados quedan con el monto
+  // que regía en ese momento (ver lib/billing.js#montoVigente).
+  registrarCambioMonto(t.id, t.monto_mensual, monto, new Date().toISOString().slice(0, 7), req.session.user.nombre);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó trabajo recurrente "${nombre}"`);
   req.session.flash = { tipo: 'ok', msg: 'Trabajo recurrente actualizado.' };
   res.redirect('/clientes/' + cliente.id + '#recurrentes');

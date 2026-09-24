@@ -113,13 +113,27 @@ CREATE TABLE IF NOT EXISTS trabajos_recurrentes (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   cliente_id       INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
   nombre           TEXT NOT NULL,
-  monto_mensual    REAL NOT NULL DEFAULT 0,
+  monto_mensual    REAL NOT NULL DEFAULT 0,          -- monto vigente hoy (ver recurrente_montos para el historial)
   reparto_german   REAL NOT NULL DEFAULT 50,
   reparto_ezequiel REAL NOT NULL DEFAULT 50,
   activo           INTEGER NOT NULL DEFAULT 1,
   dia_de_cobro     INTEGER,
   desde            TEXT,                            -- 'YYYY-MM': primer mes que factura (null = siempre)
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Historial de cambios de precio de un recurrente. Al editar el monto mensual se
+-- agrega una fila nueva vigente desde el mes en curso, sin tocar las anteriores:
+-- así, los meses ya facturados siguen mostrando el monto que regía en ese momento
+-- y no el precio actual. Ver lib/billing.js#montoVigente.
+CREATE TABLE IF NOT EXISTS recurrente_montos (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  recurrente_id  INTEGER NOT NULL REFERENCES trabajos_recurrentes(id) ON DELETE CASCADE,
+  monto          REAL NOT NULL,
+  vigente_desde  TEXT NOT NULL,                     -- 'YYYY-MM' ('0000-01' = "desde siempre", ver lib/billing.js)
+  creado_en      TEXT NOT NULL DEFAULT (datetime('now')),
+  creado_por     TEXT,
+  UNIQUE (recurrente_id, vigente_desde)
 );
 
 -- Pago(s) de un trabajo recurrente en un mes puntual. Puede haber varias filas por
