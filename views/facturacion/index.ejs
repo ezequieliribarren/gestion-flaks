@@ -52,6 +52,8 @@
               <span class="text-xs text-slate-300">—</span>
             <% } else if (f.tipo === 'recurrente' && f.cobrado) { %>
               <span class="text-xs text-green-700">Cobrado <%= f.fecha_pago ? 'el ' + fmt.formatFecha(f.fecha_pago) : '' %></span>
+            <% } else if (f.tipo === 'recurrente' && f.pago_parcial) { %>
+              <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs font-medium <%= f.vencido ? 'text-red-600' : 'text-amber-600' %> hover:underline"><% if (f.vencido) { %>⚠ <% } %>Parcial: <%= fmt.formatARS(f.pagado) %>/<%= fmt.formatARS(f.monto) %> (falta <%= fmt.formatARS(f.restante) %>)</a>
             <% } else if (f.tipo === 'recurrente' && f.vencido) { %>
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs font-medium text-red-600 hover:underline">⚠ Vencido<% if (f.vence_dia) { %> (día <%= f.vence_dia %>)<% } %></a>
             <% } else if (f.tipo === 'recurrente' && f.pendiente) { %>

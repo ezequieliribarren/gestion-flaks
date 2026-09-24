@@ -167,12 +167,18 @@ router.get('/:id', async (req, res) => {
   }
 
   const recurrentes = db.prepare(`
-    SELECT tr.*, pr.fecha_pago AS pago_fecha
-    FROM trabajos_recurrentes tr
-    LEFT JOIN pagos_recurrentes pr ON pr.recurrente_id = tr.id AND pr.periodo = ?
-    WHERE tr.cliente_id = ?
-    ORDER BY tr.activo DESC, tr.nombre
-  `).all(mesPrefijo, cliente.id);
+    SELECT tr.* FROM trabajos_recurrentes tr WHERE tr.cliente_id = ? ORDER BY tr.activo DESC, tr.nombre
+  `).all(cliente.id).map((r) => {
+    const pagos = db.prepare('SELECT * FROM pagos_recurrentes WHERE recurrente_id = ? AND periodo = ? ORDER BY fecha_pago').all(r.id, mesPrefijo);
+    const pagado = pagos.reduce((a, p) => a + Number(p.monto || 0), 0);
+    return {
+      ...r,
+      pagos,
+      pagado,
+      restante: Math.max(0, r.monto_mensual - pagado),
+      pago_fecha: pagos.length ? pagos[pagos.length - 1].fecha_pago : null,
+    };
+  });
   const unicos = db.prepare('SELECT * FROM trabajos_unicos WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
   const cobros = db.prepare('SELECT * FROM cobros WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
   const mensualTotal = recurrentes.filter((r) => r.activo).reduce((a, r) => a + r.monto_mensual, 0);
@@ -373,7 +379,8 @@ router.post('/:id/recurrentes/:tid', (req, res) => {
   res.redirect('/clientes/' + cliente.id + '#recurrentes');
 });
 
-// Registrar / borrar el pago de un trabajo recurrente para un mes (periodo 'YYYY-MM').
+// Atajo rápido: marcar el resto del mes como pagado (o volver a dejarlo todo pendiente).
+// Si ya había pagos parciales cargados, esto sólo agrega uno por el saldo que faltaba.
 router.post('/:id/recurrentes/:tid/pago', (req, res) => {
   const t = db.prepare('SELECT * FROM trabajos_recurrentes WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
   if (!t) return res.redirect('/clientes');
@@ -381,18 +388,53 @@ router.post('/:id/recurrentes/:tid/pago', (req, res) => {
   const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
 
   if (fecha) {
-    db.prepare(`
-      INSERT INTO pagos_recurrentes (recurrente_id, periodo, fecha_pago, registrado_por)
-      VALUES (@rid, @periodo, @fecha, @usuario)
-      ON CONFLICT(recurrente_id, periodo) DO UPDATE SET fecha_pago = @fecha, registrado_por = @usuario, registrado_en = datetime('now')
-    `).run({ rid: t.id, periodo, fecha, usuario: req.session.user.nombre });
-    audit.registrar(req, 'clientes', req.params.id, 'editar', `Registró pago de "${t.nombre}" (${periodo}) el ${fecha}`);
+    const yaPagado = db.prepare('SELECT COALESCE(SUM(monto),0) AS m FROM pagos_recurrentes WHERE recurrente_id = ? AND periodo = ?').get(t.id, periodo).m;
+    const restante = Math.max(0, t.monto_mensual - yaPagado);
+    if (restante > 0.005) {
+      db.prepare(`
+        INSERT INTO pagos_recurrentes (recurrente_id, periodo, monto, fecha_pago, registrado_por)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(t.id, periodo, restante, fecha, req.session.user.nombre);
+      audit.registrar(req, 'clientes', req.params.id, 'editar', `Registró pago de "${t.nombre}" (${periodo}) el ${fecha}`);
+    }
     req.session.flash = { tipo: 'ok', msg: 'Pago registrado.' };
   } else {
     db.prepare('DELETE FROM pagos_recurrentes WHERE recurrente_id = ? AND periodo = ?').run(t.id, periodo);
     audit.registrar(req, 'clientes', req.params.id, 'editar', `Marcó como pendiente el pago de "${t.nombre}" (${periodo})`);
     req.session.flash = { tipo: 'ok', msg: 'Marcado como pendiente.' };
   }
+  res.redirect('/clientes/' + req.params.id + '#recurrentes');
+});
+
+// Cargar un pago parcial puntual (monto + fecha) de un trabajo recurrente.
+router.post('/:id/recurrentes/:tid/pago-parcial', (req, res) => {
+  const t = db.prepare('SELECT * FROM trabajos_recurrentes WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!t) return res.redirect('/clientes');
+  const periodo = /^\d{4}-\d{2}$/.test(req.body.periodo) ? req.body.periodo : new Date().toISOString().slice(0, 7);
+  const monto = Number(req.body.monto);
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
+
+  if (!monto || monto <= 0 || !fecha) {
+    req.session.flash = { tipo: 'error', msg: 'Poné un monto y una fecha para el pago parcial.' };
+    return res.redirect('/clientes/' + req.params.id + '#recurrentes');
+  }
+
+  db.prepare(`
+    INSERT INTO pagos_recurrentes (recurrente_id, periodo, monto, fecha_pago, registrado_por)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(t.id, periodo, monto, fecha, req.session.user.nombre);
+  audit.registrar(req, 'clientes', req.params.id, 'editar', `Registró pago parcial de "${t.nombre}" (${periodo}): ${monto} el ${fecha}`);
+  req.session.flash = { tipo: 'ok', msg: 'Pago parcial registrado.' };
+  res.redirect('/clientes/' + req.params.id + '#recurrentes');
+});
+
+// Borrar un pago parcial puntual ya cargado.
+router.post('/:id/recurrentes/:tid/pago-parcial/:pid/eliminar', (req, res) => {
+  const t = db.prepare('SELECT * FROM trabajos_recurrentes WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!t) return res.redirect('/clientes');
+  db.prepare('DELETE FROM pagos_recurrentes WHERE id = ? AND recurrente_id = ?').run(req.params.pid, t.id);
+  audit.registrar(req, 'clientes', req.params.id, 'editar', `Eliminó un pago parcial de "${t.nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Pago eliminado.' };
   res.redirect('/clientes/' + req.params.id + '#recurrentes');
 });
 

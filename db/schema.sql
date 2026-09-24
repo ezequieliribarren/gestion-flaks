@@ -122,16 +122,17 @@ CREATE TABLE IF NOT EXISTS trabajos_recurrentes (
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Pago de un trabajo recurrente en un mes puntual. Si no hay fila para el mes,
--- ese trabajo figura "pendiente" ese mes (se "reinicia" solo el 1° de cada mes).
+-- Pago(s) de un trabajo recurrente en un mes puntual. Puede haber varias filas por
+-- mes (pagos parciales en distintas fechas); si no hay ninguna, ese trabajo figura
+-- "pendiente" ese mes (se "reinicia" solo el 1° de cada mes).
 CREATE TABLE IF NOT EXISTS pagos_recurrentes (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   recurrente_id  INTEGER NOT NULL REFERENCES trabajos_recurrentes(id) ON DELETE CASCADE,
   periodo        TEXT NOT NULL,                  -- 'YYYY-MM'
+  monto          REAL,                            -- monto de este pago puntual (permite pagos parciales)
   fecha_pago     TEXT NOT NULL,                  -- 'YYYY-MM-DD' (fecha en que realmente pagó)
   registrado_por TEXT,
-  registrado_en  TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE (recurrente_id, periodo)
+  registrado_en  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- "Trabajos": un trabajo de una sola vez que todavía no se cobró. 'fecha' = mes al

@@ -184,8 +184,44 @@
           <input type="date" name="fecha" value="<%= r.pago_fecha ? String(r.pago_fecha).slice(0,10) : '' %>" onchange="this.form.submit()"
                  class="rounded border <%= r.pago_fecha ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs w-32" />
         </form>
+        <button type="button" onclick="document.getElementById('parcial-<%= r.id %>').hidden=!document.getElementById('parcial-<%= r.id %>').hidden" class="text-xs text-brand-600 hover:underline shrink-0">Pago parcial</button>
         <button type="button" onclick="document.getElementById('m-rec-<%= r.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
       </div>
+
+      <% if (r.pagado > 0 && r.restante > 0.005) { %>
+        <div class="pb-2 -mt-1 text-xs">
+          <span class="text-amber-700 font-medium">Pago parcial:</span>
+          <span class="text-slate-600">pagado <%= fmt.formatARS(r.pagado) %> de <%= fmt.formatARS(r.monto_mensual) %> · falta <%= fmt.formatARS(r.restante) %></span>
+        </div>
+      <% } %>
+
+      <div id="parcial-<%= r.id %>" hidden class="pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
+        <% if (r.pagos.length) { %>
+          <div class="space-y-1">
+            <% r.pagos.forEach(function(p){ %>
+              <div class="flex items-center justify-between text-xs text-slate-600">
+                <span><%= fmt.formatARS(p.monto) %> · <%= fmt.formatFecha(p.fecha_pago) %><% if (p.registrado_por) { %> · <span class="text-slate-400"><%= p.registrado_por %></span><% } %></span>
+                <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago-parcial/<%= p.id %>/eliminar" onsubmit="return confirm('¿Eliminar este pago?')">
+                  <button class="text-slate-300 hover:text-red-500">✕</button>
+                </form>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+        <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago-parcial" class="flex flex-wrap items-end gap-2">
+          <input type="hidden" name="periodo" value="<%= periodoActual %>" />
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-0.5">Monto</label>
+            <input name="monto" type="number" step="0.01" min="0" required placeholder="<%= r.restante.toFixed(0) %>" class="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-0.5">Fecha</label>
+            <input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1 text-xs" />
+          </div>
+          <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded px-3 py-1.5">Agregar pago</button>
+        </form>
+      </div>
+
       <%- modal('m-rec-' + r.id, 'Editar trabajo recurrente',
         '<form method="POST" action="/clientes/' + cliente.id + '/recurrentes/' + r.id + '" class="space-y-3">'
         + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="' + r.nombre.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'

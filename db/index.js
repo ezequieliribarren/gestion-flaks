@@ -99,6 +99,40 @@ raw.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
   const colsRecurrentes = raw.all('PRAGMA table_info(trabajos_recurrentes)').map((c) => c.name);
   if (!colsRecurrentes.includes('desde')) raw.exec('ALTER TABLE trabajos_recurrentes ADD COLUMN desde TEXT');
 
+  // pagos_recurrentes tenía UNIQUE(recurrente_id, periodo): no dejaba cargar pagos
+  // parciales (varios montos/fechas en el mismo mes). Se reconstruye sin esa
+  // restricción y se agrega la columna "monto"; los pagos viejos (que no guardaban
+  // monto, representaban "pagado completo") se completan con el monto mensual de ese
+  // trabajo recurrente en ese momento.
+  const pagosTabla = raw.all("SELECT sql FROM sqlite_master WHERE type='table' AND name='pagos_recurrentes'")[0];
+  if (pagosTabla && /UNIQUE/i.test(pagosTabla.sql)) {
+    try {
+      raw.exec('PRAGMA foreign_keys = OFF');
+      raw.exec(`CREATE TABLE pagos_recurrentes_new (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        recurrente_id  INTEGER NOT NULL REFERENCES trabajos_recurrentes(id) ON DELETE CASCADE,
+        periodo        TEXT NOT NULL,
+        monto          REAL,
+        fecha_pago     TEXT NOT NULL,
+        registrado_por TEXT,
+        registrado_en  TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      raw.exec(`
+        INSERT INTO pagos_recurrentes_new (id, recurrente_id, periodo, monto, fecha_pago, registrado_por, registrado_en)
+        SELECT pr.id, pr.recurrente_id, pr.periodo, tr.monto_mensual, pr.fecha_pago, pr.registrado_por, pr.registrado_en
+        FROM pagos_recurrentes pr JOIN trabajos_recurrentes tr ON tr.id = pr.recurrente_id
+      `);
+      raw.exec('DROP TABLE pagos_recurrentes');
+      raw.exec('ALTER TABLE pagos_recurrentes_new RENAME TO pagos_recurrentes');
+      raw.exec('PRAGMA foreign_keys = ON');
+      console.log('Migración: pagos_recurrentes admite pagos parciales (sin UNIQUE recurrente/periodo).');
+    } catch (err) {
+      console.error('Fallo la migración de pagos_recurrentes:', err.message);
+      try { raw.exec('DROP TABLE IF EXISTS pagos_recurrentes_new'); } catch (e) { /* noop */ }
+      try { raw.exec('PRAGMA foreign_keys = ON'); } catch (e) { /* noop */ }
+    }
+  }
+
   // Una sola vez: los recurrentes ya cargados antes de esto arrancan a contar desde
   // septiembre 2026 (antes se facturaba por un Sheet aparte, ya importado como cobros
   // históricos — sin este corte, Facturación los duplicaría en los meses anteriores).
