@@ -21,10 +21,16 @@ function desglosePorTipo(filas) {
   return { recurrentes: suma(['recurrente']), unicos: suma(['unico', 'cobro']) };
 }
 
-// Gasto del mes en publicidad (Meta Ads, Google Ads, pauta en general): gastos
-// recurrentes o únicos cargados con categoría "Publicidad".
+// Gasto del mes en publicidad (Meta Ads, Google Ads, pauta en general). La categoría
+// es un campo de texto libre (no un menú fijo), así que no alcanza con buscar
+// "Publicidad" exacto: matchea por categoría O por palabras clave en la descripción,
+// sin importar mayúsculas/minúsculas.
+const RE_PUBLICIDAD = /public|\bpauta\b|meta\s*ads|google\s*ads|facebook\s*ads|instagram\s*ads|tiktok\s*ads/i;
+function esGastoPublicidad(g) {
+  return RE_PUBLICIDAD.test(g.categoria || '') || RE_PUBLICIDAD.test(g.descripcion || '');
+}
 function gastoPublicidad(anio, mes) {
-  const pub = gastosDelMes(anio, mes).filas.filter((g) => g.categoria === 'Publicidad');
+  const pub = gastosDelMes(anio, mes).filas.filter(esGastoPublicidad);
   return { total: pub.reduce((a, g) => a + Number(g.monto || 0), 0), cantidad: pub.length };
 }
 
