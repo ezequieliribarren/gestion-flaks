@@ -63,6 +63,11 @@ function retornoClientesNuevos(anio, mes) {
   return { clientesNuevos: idsNuevos.length, presupuestosConfirmados: confirmados.length, retorno };
 }
 
+// Slide de la tarjeta de publicidad para un mes puntual (gasto + retorno de clientes nuevos).
+function tarjetaPublicidadDe(anio, mes) {
+  return { nombre: fmt.nombreMes(mes), ...gastoPublicidad(anio, mes), ...retornoClientesNuevos(anio, mes) };
+}
+
 // Total facturado a un cliente "raíz" + sus hijos de grupo (ej. SISTEMA CONTINUO,
 // que agrupa a SENKO/ARTANIUM/SISTEMA CONTINUO GF y se les cobra distinto cada mes).
 function totalGrupo(filas, nombreRaiz) {
@@ -152,6 +157,7 @@ router.get('/', async (req, res) => {
   // único que ya se sabe hoy (recurrentes activos + trabajos/presupuestos potenciales).
   const anterior = mesAdyacente(anio, mes, -1);
   const posterior = mesAdyacente(anio, mes, 1);
+  const dosAtras = mesAdyacente(anio, mes, -2);
   const factAnterior = facturacionDelMes(anterior.anio, anterior.mes);
   const factPosterior = facturacionDelMes(posterior.anio, posterior.mes, { incluirPotenciales: true });
 
@@ -181,7 +187,11 @@ router.get('/', async (req, res) => {
     },
     mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total, ...desglosePorTipo(factAnterior.filas) },
     mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total, ...desglosePorTipo(factPosterior.filas) },
-    gastoPublicidad: { ...gastoPublicidad(anio, mes), anterior: gastoPublicidad(anterior.anio, anterior.mes).total, ...retornoClientesNuevos(anio, mes) },
+    gastoPublicidadSlides: [
+      tarjetaPublicidadDe(dosAtras.anio, dosAtras.mes),
+      tarjetaPublicidadDe(anterior.anio, anterior.mes),
+      tarjetaPublicidadDe(anio, mes),
+    ],
     objetivos: objetivosVigentes(),
     nombreMes: fmt.nombreMes(mes),
     dolar,

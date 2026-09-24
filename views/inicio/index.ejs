@@ -202,7 +202,7 @@
 
   <!-- Facturado del mes: una sola tarjeta, deslizable entre mes anterior / actual / siguiente -->
   <% if (!ocultas.has('facturado_mes')) { %>
-  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('brand') %> overflow-hidden" id="card-mes-fact">
+  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('brand') %> overflow-hidden mes-slider" data-inicial="1">
     <form method="POST" action="/inicio/tarjetas/facturado_mes/ocultar" class="absolute top-2 right-2 z-10">
       <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
     </form>
@@ -255,13 +255,65 @@
       <span class="mes-dot w-1.5 h-1.5 rounded-full bg-slate-300" data-i="2"></span>
     </div>
   </div>
-  <script>
-    (function () {
-      var card = document.getElementById('card-mes-fact');
-      if (!card) return;
+  <% } %>
+
+  <!-- Gasto en publicidad (Meta/Google Ads, pauta) vs. retorno de clientes nuevos: deslizable, últimos 2 meses + actual -->
+  <% if (!ocultas.has('gasto_publicidad')) { %>
+  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('amber') %> overflow-hidden mes-slider" data-inicial="2">
+    <form method="POST" action="/inicio/tarjetas/gasto_publicidad/ocultar" class="absolute top-2 right-2 z-10">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+
+    <div class="flex items-stretch gap-1">
+      <button type="button" class="mes-nav shrink-0 w-6 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center" data-dir="-1" aria-label="Ver mes anterior">‹</button>
+
+      <div class="flex-1 overflow-hidden">
+        <div class="mes-track flex transition-transform duration-200 ease-out" style="width: 300%; transform: translateX(-66.6666%);">
+          <% gastoPublicidadSlides.forEach(function(gp, i){ var gpAnt = gastoPublicidadSlides[i-1]; %>
+          <div class="mes-slide w-1/3 px-1 text-center">
+            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Gasto en publicidad <span class="normal-case text-slate-400">(<%= gp.nombre %>)</span></div>
+            <div class="text-2xl font-bold text-slate-800 mt-1 mb-1"><%= fmt.formatARS(gp.total) %></div>
+            <div class="text-[11px] text-slate-400 mb-1.5">
+              <%= gp.cantidad %> gasto<%= gp.cantidad === 1 ? '' : 's' %> este mes
+              <% if (gpAnt) { var gpDelta = gp.total - gpAnt.total; var gpSube = gpDelta >= 0; %>
+                · <span class="<%= gpSube ? 'text-red-600' : 'text-green-600' %>"><%= gpSube ? '▲' : '▼' %> <%= fmt.formatARS(Math.abs(gpDelta)) %></span> vs mes ant.
+              <% } %>
+            </div>
+            <div class="border-t border-slate-100 pt-1.5 mt-1.5 text-[11px] text-slate-500">
+              <%= gp.clientesNuevos %> cliente<%= gp.clientesNuevos === 1 ? '' : 's' %> nuevo<%= gp.clientesNuevos === 1 ? '' : 's' %>
+              · <%= gp.presupuestosConfirmados %> presupuesto<%= gp.presupuestosConfirmados === 1 ? '' : 's' %> confirmado<%= gp.presupuestosConfirmados === 1 ? '' : 's' %>
+              <div class="mt-0.5">
+                Retorno: <span class="font-medium text-slate-700"><%= fmt.formatARS(gp.retorno) %></span>
+                <% if (gp.total > 0) { %>
+                  · ROAS: <span class="font-medium <%= gp.retorno >= gp.total ? 'text-green-600' : 'text-amber-600' %>"><%= (gp.retorno / gp.total).toFixed(2) %>x</span>
+                <% } %>
+              </div>
+            </div>
+            <a href="/gastos" class="text-sm text-brand-600 hover:underline">Ver Gastos →</a>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <button type="button" class="mes-nav shrink-0 w-6 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center" data-dir="1" aria-label="Ver mes siguiente">›</button>
+    </div>
+
+    <div class="flex justify-center gap-1.5 mt-2">
+      <span class="mes-dot w-1.5 h-1.5 rounded-full bg-slate-300" data-i="0"></span>
+      <span class="mes-dot w-1.5 h-1.5 rounded-full bg-slate-300" data-i="1"></span>
+      <span class="mes-dot w-1.5 h-1.5 rounded-full bg-brand-600" data-i="2"></span>
+    </div>
+  </div>
+  <% } %>
+
+</div>
+
+<script>
+  (function () {
+    document.querySelectorAll('.mes-slider').forEach(function (card) {
       var track = card.querySelector('.mes-track');
       var dots = Array.prototype.slice.call(card.querySelectorAll('.mes-dot'));
-      var idx = 1;
+      var idx = Number(card.dataset.inicial) || 0;
       function render() {
         track.style.transform = 'translateX(-' + (idx * 33.3333) + '%)';
         dots.forEach(function (d, i) {
@@ -278,42 +330,10 @@
       dots.forEach(function (d) {
         d.addEventListener('click', function () { idx = Number(d.dataset.i); render(); });
       });
-    })();
-  </script>
-  <% } %>
-
-  <!-- Gasto en publicidad (Meta/Google Ads, pauta) -->
-  <% if (!ocultas.has('gasto_publicidad')) { %>
-  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('amber') %>">
-    <form method="POST" action="/inicio/tarjetas/gasto_publicidad/ocultar" class="absolute top-2 right-2">
-      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
-    </form>
-    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Gasto en publicidad <span class="normal-case text-slate-400">(<%= nombreMes %>)</span></div>
-    <div class="text-2xl font-bold text-slate-800 mt-1 mb-1"><%= fmt.formatARS(gastoPublicidad.total) %></div>
-    <div class="text-[11px] text-slate-400 mb-1.5">
-      <%= gastoPublicidad.cantidad %> gasto<%= gastoPublicidad.cantidad === 1 ? '' : 's' %> este mes
-      <% if (gastoPublicidad.anterior != null) {
-        var gpDelta = gastoPublicidad.total - gastoPublicidad.anterior;
-        var gpSube = gpDelta >= 0;
-      %>
-        · <span class="<%= gpSube ? 'text-red-600' : 'text-green-600' %>"><%= gpSube ? '▲' : '▼' %> <%= fmt.formatARS(Math.abs(gpDelta)) %></span> vs mes ant.
-      <% } %>
-    </div>
-    <div class="border-t border-slate-100 pt-1.5 mt-1.5 text-[11px] text-slate-500">
-      <%= gastoPublicidad.clientesNuevos %> cliente<%= gastoPublicidad.clientesNuevos === 1 ? '' : 's' %> nuevo<%= gastoPublicidad.clientesNuevos === 1 ? '' : 's' %>
-      · <%= gastoPublicidad.presupuestosConfirmados %> presupuesto<%= gastoPublicidad.presupuestosConfirmados === 1 ? '' : 's' %> confirmado<%= gastoPublicidad.presupuestosConfirmados === 1 ? '' : 's' %>
-      <div class="mt-0.5">
-        Retorno: <span class="font-medium text-slate-700"><%= fmt.formatARS(gastoPublicidad.retorno) %></span>
-        <% if (gastoPublicidad.total > 0) { %>
-          · ROAS: <span class="font-medium <%= gastoPublicidad.retorno >= gastoPublicidad.total ? 'text-green-600' : 'text-amber-600' %>"><%= (gastoPublicidad.retorno / gastoPublicidad.total).toFixed(2) %>x</span>
-        <% } %>
-      </div>
-    </div>
-    <a href="/gastos" class="text-sm text-brand-600 hover:underline">Ver Gastos →</a>
-  </div>
-  <% } %>
-
-</div>
+      render();
+    });
+  })();
+</script>
 
 <% var ocultasArr = TARJETAS.filter(function(t){ return ocultas.has(t.id); }); %>
 <% if (ocultasArr.length) { %>
