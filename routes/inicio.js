@@ -34,6 +34,35 @@ function gastoPublicidad(anio, mes) {
   return { total: pub.reduce((a, g) => a + Number(g.monto || 0), 0), cantidad: pub.length };
 }
 
+// Retorno de los clientes nuevos del mes, para comparar contra el gasto en publicidad:
+// cuántos presupuestos ya confirmaron (trabajos_unicos no potenciales) y cuánto
+// generaron en total (confirmado + ya cobrado).
+// "Nuevo" se define por su primera actividad real (primer trabajo/cobro/recurrente),
+// no por clientes.creado_en: los clientes importados de la planilla histórica quedaron
+// con esa fecha en el momento de la importación, no la fecha real en que se sumaron.
+function retornoClientesNuevos(anio, mes) {
+  const prefijo = `${anio}-${String(mes).padStart(2, '0')}`;
+  const primeraActividad = db.prepare(`
+    SELECT cliente_id, MIN(fecha) AS primera FROM (
+      SELECT cliente_id, fecha FROM trabajos_unicos
+      UNION ALL
+      SELECT cliente_id, fecha_trabajo AS fecha FROM cobros
+      UNION ALL
+      SELECT cliente_id, substr(creado_en, 1, 10) AS fecha FROM trabajos_recurrentes
+    )
+    GROUP BY cliente_id
+  `).all();
+  const idsNuevos = primeraActividad.filter((r) => String(r.primera).slice(0, 7) === prefijo).map((r) => r.cliente_id);
+  if (!idsNuevos.length) return { clientesNuevos: 0, presupuestosConfirmados: 0, retorno: 0 };
+
+  const placeholders = idsNuevos.map(() => '?').join(',');
+  const confirmados = db.prepare(`SELECT monto FROM trabajos_unicos WHERE estado = 'pendiente' AND cliente_id IN (${placeholders})`).all(...idsNuevos);
+  const cobrados = db.prepare(`SELECT monto FROM cobros WHERE cliente_id IN (${placeholders})`).all(...idsNuevos);
+
+  const retorno = confirmados.reduce((a, t) => a + Number(t.monto || 0), 0) + cobrados.reduce((a, c) => a + Number(c.monto || 0), 0);
+  return { clientesNuevos: idsNuevos.length, presupuestosConfirmados: confirmados.length, retorno };
+}
+
 // Total facturado a un cliente "raíz" + sus hijos de grupo (ej. SISTEMA CONTINUO,
 // que agrupa a SENKO/ARTANIUM/SISTEMA CONTINUO GF y se les cobra distinto cada mes).
 function totalGrupo(filas, nombreRaiz) {
@@ -152,7 +181,7 @@ router.get('/', async (req, res) => {
     },
     mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total, ...desglosePorTipo(factAnterior.filas) },
     mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total, ...desglosePorTipo(factPosterior.filas) },
-    gastoPublicidad: { ...gastoPublicidad(anio, mes), anterior: gastoPublicidad(anterior.anio, anterior.mes).total },
+    gastoPublicidad: { ...gastoPublicidad(anio, mes), anterior: gastoPublicidad(anterior.anio, anterior.mes).total, ...retornoClientesNuevos(anio, mes) },
     objetivos: objetivosVigentes(),
     nombreMes: fmt.nombreMes(mes),
     dolar,

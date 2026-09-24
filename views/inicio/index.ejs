@@ -299,6 +299,16 @@
         · <span class="<%= gpSube ? 'text-red-600' : 'text-green-600' %>"><%= gpSube ? '▲' : '▼' %> <%= fmt.formatARS(Math.abs(gpDelta)) %></span> vs mes ant.
       <% } %>
     </div>
+    <div class="border-t border-slate-100 pt-1.5 mt-1.5 text-[11px] text-slate-500">
+      <%= gastoPublicidad.clientesNuevos %> cliente<%= gastoPublicidad.clientesNuevos === 1 ? '' : 's' %> nuevo<%= gastoPublicidad.clientesNuevos === 1 ? '' : 's' %>
+      · <%= gastoPublicidad.presupuestosConfirmados %> presupuesto<%= gastoPublicidad.presupuestosConfirmados === 1 ? '' : 's' %> confirmado<%= gastoPublicidad.presupuestosConfirmados === 1 ? '' : 's' %>
+      <div class="mt-0.5">
+        Retorno: <span class="font-medium text-slate-700"><%= fmt.formatARS(gastoPublicidad.retorno) %></span>
+        <% if (gastoPublicidad.total > 0) { %>
+          · ROAS: <span class="font-medium <%= gastoPublicidad.retorno >= gastoPublicidad.total ? 'text-green-600' : 'text-amber-600' %>"><%= (gastoPublicidad.retorno / gastoPublicidad.total).toFixed(2) %>x</span>
+        <% } %>
+      </div>
+    </div>
     <a href="/gastos" class="text-sm text-brand-600 hover:underline">Ver Gastos →</a>
   </div>
   <% } %>
