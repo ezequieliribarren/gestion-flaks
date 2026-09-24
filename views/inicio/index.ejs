@@ -215,6 +215,7 @@
           <div class="mes-slide w-1/3 px-1 text-center">
             <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Mes anterior <span class="normal-case text-slate-400">(<%= mesAnterior.nombre %>)</span></div>
             <div class="text-lg font-bold text-slate-800 mt-1">Facturado: <%= fmt.formatARS(mesAnterior.total) %></div>
+            <div class="text-[11px] text-slate-400 mt-1">Recurrentes <%= fmt.formatARS(mesAnterior.recurrentes) %> · Únicos <%= fmt.formatARS(mesAnterior.unicos) %></div>
           </div>
           <div class="mes-slide w-1/3 px-1 text-center">
             <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Facturado del mes <span class="normal-case text-slate-400">(<%= nombreMes %>)</span></div>
@@ -223,11 +224,24 @@
               <div><div class="text-[11px] text-slate-400">Cobrado</div><div class="font-semibold text-green-600"><%= fmt.formatARS(facturadoMes.cobrado) %></div></div>
               <div><div class="text-[11px] text-slate-400">Pendiente</div><div class="font-semibold text-slate-600"><%= fmt.formatARS(facturadoMes.pendiente) %></div></div>
             </div>
+            <div class="text-[11px] text-slate-400 mb-1">Recurrentes <%= fmt.formatARS(facturadoMes.recurrentes) %> · Únicos <%= fmt.formatARS(facturadoMes.unicos) %></div>
+            <% if (facturadoMes.sistemaContinuo != null) {
+              var scDelta = facturadoMes.sistemaContinuo - (facturadoMes.sistemaContinuoAnterior || 0);
+              var scSube = scDelta >= 0;
+            %>
+              <div class="text-[11px] text-slate-500 mb-1.5">
+                Sistema Continuo: <span class="font-medium text-slate-700"><%= fmt.formatARS(facturadoMes.sistemaContinuo) %></span>
+                <% if (facturadoMes.sistemaContinuoAnterior != null) { %>
+                  <span class="<%= scSube ? 'text-green-600' : 'text-red-600' %>"><%= scSube ? '▲' : '▼' %> <%= fmt.formatARS(Math.abs(scDelta)) %></span> vs mes ant.
+                <% } %>
+              </div>
+            <% } %>
             <a href="/facturacion" class="text-sm text-brand-600 hover:underline">Ver Facturación →</a>
           </div>
           <div class="mes-slide w-1/3 px-1 text-center">
             <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Mes que viene <span class="normal-case text-slate-400">(<%= mesPosterior.nombre %>)</span></div>
             <div class="text-lg font-bold text-slate-800 mt-1">Proyectado: <%= fmt.formatARS(mesPosterior.total) %></div>
+            <div class="text-[11px] text-slate-400 mt-1">Recurrentes <%= fmt.formatARS(mesPosterior.recurrentes) %> · Únicos <%= fmt.formatARS(mesPosterior.unicos) %></div>
           </div>
         </div>
       </div>

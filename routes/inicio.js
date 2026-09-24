@@ -13,6 +13,25 @@ const { objetivosVigentes } = require('../lib/objetivos');
 
 const router = express.Router();
 
+// Cuánto de la facturación del mes es de trabajos recurrentes (mensuales, monto fijo)
+// vs. trabajos únicos (puntuales de ese mes, ya cobrados o no) — para ver de un
+// vistazo qué parte del total es "base estable" y qué parte es nuevo ese mes.
+function desglosePorTipo(filas) {
+  const suma = (tipos) => filas.filter((f) => tipos.includes(f.tipo)).reduce((a, f) => a + f.monto, 0);
+  return { recurrentes: suma(['recurrente']), unicos: suma(['unico', 'cobro']) };
+}
+
+// Total facturado a un cliente "raíz" + sus hijos de grupo (ej. SISTEMA CONTINUO,
+// que agrupa a SENKO/ARTANIUM/SISTEMA CONTINUO GF y se les cobra distinto cada mes).
+function totalGrupo(filas, nombreRaiz) {
+  const raiz = db.prepare('SELECT id FROM clientes WHERE nombre = ?').get(nombreRaiz);
+  if (!raiz) return null;
+  const miembros = new Set(
+    db.prepare('SELECT id FROM clientes WHERE id = ? OR grupo_id = ?').all(raiz.id, raiz.id).map((r) => r.id)
+  );
+  return filas.filter((f) => miembros.has(f.cliente_id)).reduce((a, f) => a + f.monto, 0);
+}
+
 function tareasVencidas() {
   const filas = db.prepare(`
     SELECT id, nombre, fecha_cierre, estado
@@ -110,9 +129,16 @@ router.get('/', async (req, res) => {
     saldoSocios: cuentaCorrienteGlobal(),
     pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 3) },
     deudaAntigua: deudaAntigua(prefijo),
-    facturadoMes: { total: fact.totales.total, pendiente: fact.totales.pendiente, cobrado: fact.totales.total - fact.totales.pendiente },
-    mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total },
-    mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total },
+    facturadoMes: {
+      total: fact.totales.total,
+      pendiente: fact.totales.pendiente,
+      cobrado: fact.totales.total - fact.totales.pendiente,
+      ...desglosePorTipo(fact.filas),
+      sistemaContinuo: totalGrupo(fact.filas, 'SISTEMA CONTINUO'),
+      sistemaContinuoAnterior: totalGrupo(factAnterior.filas, 'SISTEMA CONTINUO'),
+    },
+    mesAnterior: { nombre: fmt.nombreMes(anterior.mes), total: factAnterior.totales.total, ...desglosePorTipo(factAnterior.filas) },
+    mesPosterior: { nombre: fmt.nombreMes(posterior.mes), total: factPosterior.totales.total, ...desglosePorTipo(factPosterior.filas) },
     objetivos: objetivosVigentes(),
     nombreMes: fmt.nombreMes(mes),
     dolar,
