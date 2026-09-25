@@ -195,6 +195,8 @@ router.get('/:id', async (req, res) => {
     ORDER BY estado, fecha_cierre
   `).all(cliente.id, mesPrefijo);
 
+  const vencimientos = db.prepare('SELECT * FROM vencimientos WHERE cliente_id = ? ORDER BY fecha').all(cliente.id);
+
   const clientesLista = db.prepare('SELECT id, nombre FROM clientes ORDER BY nombre COLLATE NOCASE').all();
 
   const subclientes = db.prepare('SELECT id, nombre FROM clientes WHERE grupo_id = ? ORDER BY nombre COLLATE NOCASE').all(cliente.id);
@@ -215,6 +217,7 @@ router.get('/:id', async (req, res) => {
     tareasMes,
     tareasActivas,
     avanceContenido,
+    vencimientos,
     periodoActual: mesPrefijo,
     clientesLista,
     subclientes,
@@ -329,6 +332,47 @@ router.post('/:id/notas', (req, res) => {
   audit.registrar(req, 'clientes', cliente.id, 'editar', 'Actualizó las anotaciones');
   req.session.flash = { tipo: 'ok', msg: 'Anotaciones guardadas.' };
   res.redirect('/clientes/' + cliente.id);
+});
+
+// --- Vencimientos del cliente (dominio, hosting, etc.): avisan 3 días antes solos. ---
+router.post('/:id/vencimientos', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  if (!cliente) return res.redirect('/clientes');
+  const nombre = String(req.body.nombre || '').trim();
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(req.body.fecha) ? req.body.fecha : null;
+  if (!nombre || !fecha) {
+    req.session.flash = { tipo: 'error', msg: 'Poné un nombre y una fecha para el vencimiento.' };
+    return res.redirect('/clientes/' + cliente.id + '#datos');
+  }
+  db.prepare('INSERT INTO vencimientos (cliente_id, nombre, fecha, notas, creado_por) VALUES (?, ?, ?, ?, ?)')
+    .run(cliente.id, nombre, fecha, String(req.body.notas || '').trim(), req.session.user.nombre);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó el vencimiento "${nombre}" (${fecha})`);
+  req.session.flash = { tipo: 'ok', msg: 'Vencimiento agregado.' };
+  res.redirect('/clientes/' + cliente.id + '#datos');
+});
+
+router.post('/:id/vencimientos/:vid', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  const v = db.prepare('SELECT * FROM vencimientos WHERE id = ? AND cliente_id = ?').get(req.params.vid, req.params.id);
+  if (!cliente || !v) return res.redirect('/clientes');
+
+  if (req.body._accion === 'eliminar') {
+    db.prepare('DELETE FROM vencimientos WHERE id = ?').run(v.id);
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Eliminó el vencimiento "${v.nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Vencimiento eliminado.' };
+    return res.redirect('/clientes/' + cliente.id + '#datos');
+  }
+
+  const nombre = String(req.body.nombre || '').trim() || v.nombre;
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(req.body.fecha) ? req.body.fecha : v.fecha;
+  const activo = req.body.activo === '1' || req.body.activo === 'on' ? 1 : 0;
+  // Si cambia la fecha, se limpia notificado_en para que el aviso de 3 días pueda volver a dispararse.
+  const notificadoEn = fecha === v.fecha ? v.notificado_en : null;
+  db.prepare('UPDATE vencimientos SET nombre=?, fecha=?, notas=?, activo=?, notificado_en=? WHERE id=?')
+    .run(nombre, fecha, String(req.body.notas || '').trim(), activo, notificadoEn, v.id);
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el vencimiento "${nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Vencimiento actualizado.' };
+  res.redirect('/clientes/' + cliente.id + '#datos');
 });
 
 router.post('/:id/eliminar', (req, res) => {

@@ -117,6 +117,11 @@ setInterval(() => { revisarRedes().catch(() => {}); }, 60 * 60 * 1000).unref();
 revisarPublicacionesSemana().catch((e) => console.error('publicaciones-semana inicial:', e.message));
 setInterval(() => { revisarPublicacionesSemana().catch(() => {}); }, 60 * 60 * 1000).unref();
 
+// Vencimientos (de clientes o internos de Flaks): 3 días antes crean tarea + notificación.
+const { revisar: revisarVencimientos, revisarThrottled: revisarVencimientosThrottled } = require('./lib/vencimientos');
+try { revisarVencimientos(); } catch (e) { console.error('vencimientos inicial:', e.message); }
+setInterval(() => { try { revisarVencimientos(); } catch (e) { /* noop */ } }, 60 * 60 * 1000).unref();
+
 // Helpers disponibles en todas las vistas.
 const { esAdmin } = require('./middleware/auth');
 const { contarNoLeidas } = require('./lib/participacion');
@@ -124,6 +129,7 @@ app.use((req, res, next) => {
   revisarThrottled();
   revisarRedesThrottled();
   revisarPublicacionesSemanaThrottled();
+  revisarVencimientosThrottled();
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
   res.locals.currentPath = req.path;

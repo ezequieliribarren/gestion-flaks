@@ -84,18 +84,21 @@ function listarTareas(req, res, flaks) {
     return res.render('tareas/index', { titulo: 'Tareas', ...datosComunes });
   }
 
-  // Flaks: una sola vista con solapas (Tareas internas / Objetivos / Documentos).
+  // Flaks: una sola vista con solapas (Tareas internas / Objetivos / Documentos / Vencimientos).
   const docs = db.prepare(`
     SELECT d.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
     FROM documentos d LEFT JOIN clientes c ON c.id = d.cliente_id
     ORDER BY d.subido_en DESC
   `).all();
+  const vencimientos = db.prepare('SELECT * FROM vencimientos WHERE cliente_id IS NULL ORDER BY fecha').all();
   res.render('tareas/flaks', {
     titulo: 'Flaks',
     flaks: true,
     ...datosComunes,
     objetivos: objetivosDelPeriodo(periodoActual()),
     docs,
+    vencimientos,
+    hoyISO: new Date().toISOString().slice(0, 10),
     CATEGORIAS: ['presupuesto', 'tutorial', 'otro'],
   });
 }
@@ -129,6 +132,43 @@ router.post('/objetivos/:oid', (req, res) => {
     req.session.flash = { tipo: 'ok', msg: nuevo ? '¡Objetivo cumplido! 🎉' : 'Objetivo reabierto.' };
   }
   res.redirect(volver);
+});
+
+// --- Vencimientos internos de Flaks (herramientas: CapCut, Canva, etc.), viven como solapa ---
+router.post('/vencimientos', (req, res) => {
+  const nombre = String(req.body.nombre || '').trim();
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(req.body.fecha) ? req.body.fecha : null;
+  if (!nombre || !fecha) {
+    req.session.flash = { tipo: 'error', msg: 'Poné un nombre y una fecha para el vencimiento.' };
+    return res.redirect('/tareas/flaks#vencimientos');
+  }
+  const info = db.prepare('INSERT INTO vencimientos (cliente_id, nombre, fecha, notas, creado_por) VALUES (NULL, ?, ?, ?, ?)')
+    .run(nombre, fecha, String(req.body.notas || '').trim(), req.session.user.nombre);
+  audit.registrar(req, 'vencimientos', info.lastInsertRowid, 'crear', `Agregó el vencimiento interno "${nombre}" (${fecha})`);
+  req.session.flash = { tipo: 'ok', msg: 'Vencimiento agregado.' };
+  res.redirect('/tareas/flaks#vencimientos');
+});
+
+router.post('/vencimientos/:vid', (req, res) => {
+  const v = db.prepare('SELECT * FROM vencimientos WHERE id = ? AND cliente_id IS NULL').get(req.params.vid);
+  if (!v) return res.redirect('/tareas/flaks#vencimientos');
+
+  if (req.body._accion === 'eliminar') {
+    db.prepare('DELETE FROM vencimientos WHERE id = ?').run(v.id);
+    audit.registrar(req, 'vencimientos', v.id, 'eliminar', `Eliminó el vencimiento interno "${v.nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Vencimiento eliminado.' };
+    return res.redirect('/tareas/flaks#vencimientos');
+  }
+
+  const nombre = String(req.body.nombre || '').trim() || v.nombre;
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(req.body.fecha) ? req.body.fecha : v.fecha;
+  const activo = req.body.activo === '1' || req.body.activo === 'on' ? 1 : 0;
+  const notificadoEn = fecha === v.fecha ? v.notificado_en : null;
+  db.prepare('UPDATE vencimientos SET nombre=?, fecha=?, notas=?, activo=?, notificado_en=? WHERE id=?')
+    .run(nombre, fecha, String(req.body.notas || '').trim(), activo, notificadoEn, v.id);
+  audit.registrar(req, 'vencimientos', v.id, 'editar', `Editó el vencimiento interno "${nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Vencimiento actualizado.' };
+  res.redirect('/tareas/flaks#vencimientos');
 });
 
 function formData(req) {

@@ -305,6 +305,23 @@ CREATE TABLE IF NOT EXISTS redes_alertas (
   UNIQUE(cliente_id, periodo, tipo)
 );
 
+-- Vencimientos con recordatorio automático: 3 días antes de "fecha" se crea sola una
+-- tarea "Renovar <nombre>[ - <cliente>]" + notificación. cliente_id NULL = interno de
+-- Flaks (herramientas como CapCut, Canva, etc). notificado_en se limpia si se edita la
+-- fecha, para que el recordatorio pueda volver a dispararse en la nueva fecha.
+CREATE TABLE IF NOT EXISTS vencimientos (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id    INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+  nombre        TEXT NOT NULL,
+  fecha         TEXT NOT NULL,                      -- 'YYYY-MM-DD'
+  notas         TEXT NOT NULL DEFAULT '',
+  activo        INTEGER NOT NULL DEFAULT 1,
+  notificado_en TEXT,
+  creado_por    TEXT,
+  creado_en     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_vencimientos_cliente ON vencimientos(cliente_id);
+
 CREATE INDEX IF NOT EXISTS idx_tareas_cliente ON tareas(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_tareas_estado ON tareas(estado);
 CREATE INDEX IF NOT EXISTS idx_tarea_partes ON tarea_partes(tarea_id);

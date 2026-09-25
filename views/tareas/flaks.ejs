@@ -1,9 +1,23 @@
+<%
+  // Modal genérico: id + título + contenido HTML del <form>.
+  function modal(id, titulo, formHtml){
+    return '<div id="' + id + '" hidden class="fixed inset-0 z-50 flex items-center justify-center p-4">'
+      + '<div class="absolute inset-0 bg-slate-900/40" onclick="document.getElementById(\'' + id + '\').hidden=true"></div>'
+      + '<div class="relative bg-white rounded-xl shadow-card-hover w-full max-w-md p-5 max-h-[85vh] overflow-y-auto">'
+      + '<button type="button" onclick="document.getElementById(\'' + id + '\').hidden=true" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>'
+      + '<h3 class="font-semibold text-slate-800 mb-3">' + titulo + '</h3>'
+      + formHtml
+      + '</div></div>';
+  }
+%>
+
 <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
   <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Flaks</h1>
   <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card">
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="tareas">Tareas</button>
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="objetivos">🎯 Objetivos</button>
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="documentos">📁 Documentos</button>
+    <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="vencimientos">⏰ Vencimientos</button>
   </div>
 </div>
 
@@ -85,6 +99,59 @@
   <%- include('../partials/documentos-contenido', { docs, clientes, CATEGORIAS, mostrarFiltro: false }) %>
 </div>
 
+<!-- Panel: Vencimientos -->
+<div data-panel="vencimientos" hidden>
+  <div class="bg-white rounded-xl shadow-card p-4 sm:p-5">
+    <div class="flex items-center justify-between mb-1">
+      <h2 class="font-semibold text-slate-800">Vencimientos internos</h2>
+      <button type="button" onclick="document.getElementById('add-venc-flaks').hidden=!document.getElementById('add-venc-flaks').hidden" class="text-xs text-brand-600 hover:underline">+ Agregar</button>
+    </div>
+    <p class="text-xs text-slate-400 mb-3">Herramientas y licencias del equipo (CapCut, Canva, etc). Avisa solo 3 días antes con una tarea "Renovar" con tag Importante.</p>
+
+    <% if (!vencimientos.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay vencimientos cargados.</p><% } %>
+    <div class="divide-y divide-slate-100">
+      <% vencimientos.forEach(function(v){
+        var vDias = Math.round((Date.parse(hoyISO) - Date.parse(v.fecha)) / 86400000);
+        var vVencido = vDias > 0;
+        var vProximo = !vVencido && vDias >= -3;
+      %>
+        <div class="flex flex-wrap items-center gap-3 py-3">
+          <div class="flex-1 min-w-[140px]">
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-slate-800 truncate"><%= v.nombre %></span>
+              <% if (!v.activo) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">Inactivo</span>
+              <% } else if (vVencido) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">Vencido</span>
+              <% } else if (vProximo) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">⚠ Importante</span>
+              <% } %>
+            </div>
+            <div class="text-xs text-slate-400"><%= fmt.formatFecha(v.fecha) %><% if (v.notas) { %> · <%= v.notas %><% } %></div>
+          </div>
+          <button type="button" onclick="document.getElementById('m-venc-flaks-<%= v.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar">✎</button>
+        </div>
+        <%- modal('m-venc-flaks-' + v.id, 'Editar vencimiento',
+          '<form method="POST" action="/tareas/vencimientos/' + v.id + '" class="space-y-3">'
+          + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="' + v.nombre.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+          + '<div class="grid grid-cols-2 gap-3">'
+          + '<div><label class="block text-xs text-slate-500 mb-1">Fecha</label><input name="fecha" type="date" value="' + v.fecha + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+          + '<div class="flex items-center gap-2 mt-5"><input type="checkbox" name="activo" value="1" id="act-venc-flaks-' + v.id + '" ' + (v.activo ? 'checked' : '') + ' /><label for="act-venc-flaks-' + v.id + '" class="text-sm text-slate-600">Activo</label></div>'
+          + '</div>'
+          + '<div><label class="block text-xs text-slate-500 mb-1">Notas</label><input name="notas" value="' + (v.notas || '').replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+          + '<div class="flex items-center justify-between pt-2">'
+          + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>'
+          + '<button name="_accion" value="eliminar" onclick="return confirm(\'¿Eliminar este vencimiento?\')" class="text-sm text-red-600 hover:underline">Eliminar</button>'
+          + '</div></form>') %>
+      <% }); %>
+    </div>
+
+    <form id="add-venc-flaks" hidden method="POST" action="/tareas/vencimientos" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+      <input name="nombre" required placeholder="Ej: CapCut, Canva…" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+      <input name="fecha" type="date" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+      <input name="notas" placeholder="Notas (opcional)" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
+      <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5 sm:col-span-3">Agregar</button>
+    </form>
+  </div>
+</div>
+
 <script>
   (function () {
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
@@ -106,6 +173,6 @@
       });
     });
     var hash = location.hash.slice(1);
-    activar(['objetivos', 'documentos'].indexOf(hash) >= 0 ? hash : 'tareas');
+    activar(['objetivos', 'documentos', 'vencimientos'].indexOf(hash) >= 0 ? hash : 'tareas');
   })();
 </script>
