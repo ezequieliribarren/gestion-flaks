@@ -292,5 +292,40 @@
       })();
     </script>
   <% } %>
+
+  <!-- Popup de vencimientos importantes sin leer -->
+  <% if (typeof vencimientosPopup !== 'undefined' && vencimientosPopup.length) { %>
+    <div id="venc-popup" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40" onclick="document.getElementById('venc-popup').hidden=true"></div>
+      <div class="relative bg-white rounded-xl shadow-card-hover w-full max-w-md p-5 max-h-[85vh] overflow-y-auto border-t-4 border-amber-400">
+        <button type="button" onclick="document.getElementById('venc-popup').hidden=true" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+        <h3 class="font-semibold text-slate-800 mb-1">⚠ Vencimientos importantes</h3>
+        <p class="text-xs text-slate-500 mb-3">Se generaron tareas de renovación que todavía no viste.</p>
+        <ul class="space-y-2 mb-4">
+          <% vencimientosPopup.forEach(function(n){ %>
+            <li>
+              <a href="/notificaciones/<%= n.id %>/ir" class="block text-sm text-slate-700 hover:text-brand-600 bg-amber-50 rounded-lg px-3 py-2"><%= n.texto %></a>
+            </li>
+          <% }); %>
+        </ul>
+        <form method="POST" action="/notificaciones/marcar-todas" class="flex items-center justify-between">
+          <button class="text-sm text-brand-600 hover:underline">Marcar todas como vistas</button>
+          <button type="button" onclick="document.getElementById('venc-popup').hidden=true" class="text-sm text-slate-500 hover:underline">Cerrar</button>
+        </form>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var pop = document.getElementById('venc-popup');
+        if (!pop) return;
+        var ids = <%- JSON.stringify(vencimientosPopup.map(function(n){ return n.id; })) %>.join(',');
+        var key = 'vencPopupVisto';
+        try {
+          if (sessionStorage.getItem(key) === ids) { pop.hidden = true; return; }
+          sessionStorage.setItem(key, ids);
+        } catch (e) { /* noop: sin sessionStorage igual se muestra */ }
+      })();
+    </script>
+  <% } %>
 </body>
 </html>

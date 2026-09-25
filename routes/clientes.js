@@ -10,6 +10,7 @@ const { STORAGE_DIR, UPLOADS_DIR } = require('../lib/paths');
 const { resumenCliente, periodoActual } = require('../lib/redes-sheet');
 const { metasSemanaDe } = require('../lib/redes-metas');
 const { registrarCambioMonto } = require('../lib/billing');
+const { revisar: revisarVencimientos } = require('../lib/vencimientos');
 
 const router = express.Router();
 
@@ -347,6 +348,8 @@ router.post('/:id/vencimientos', (req, res) => {
   db.prepare('INSERT INTO vencimientos (cliente_id, nombre, fecha, notas, creado_por) VALUES (?, ?, ?, ?, ?)')
     .run(cliente.id, nombre, fecha, String(req.body.notas || '').trim(), req.session.user.nombre);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Agregó el vencimiento "${nombre}" (${fecha})`);
+  // Si ya está a 3 días o menos, no hace falta esperar al chequeo horario: se crea la tarea ya mismo.
+  try { revisarVencimientos(); } catch (e) { /* noop */ }
   req.session.flash = { tipo: 'ok', msg: 'Vencimiento agregado.' };
   res.redirect('/clientes/' + cliente.id + '#datos');
 });
@@ -371,6 +374,7 @@ router.post('/:id/vencimientos/:vid', (req, res) => {
   db.prepare('UPDATE vencimientos SET nombre=?, fecha=?, notas=?, activo=?, notificado_en=? WHERE id=?')
     .run(nombre, fecha, String(req.body.notas || '').trim(), activo, notificadoEn, v.id);
   audit.registrar(req, 'clientes', cliente.id, 'editar', `Editó el vencimiento "${nombre}"`);
+  try { revisarVencimientos(); } catch (e) { /* noop */ }
   req.session.flash = { tipo: 'ok', msg: 'Vencimiento actualizado.' };
   res.redirect('/clientes/' + cliente.id + '#datos');
 });

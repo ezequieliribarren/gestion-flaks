@@ -6,6 +6,7 @@ const audit = require('../lib/audit');
 const fmt = require('../lib/format');
 const { usuarios, asignadosDe, asignadosIds, setAsignados, notificarParticipantes } = require('../lib/participacion');
 const { periodoActual, objetivosDelPeriodo } = require('../lib/objetivos');
+const { revisar: revisarVencimientos } = require('../lib/vencimientos');
 
 const router = express.Router();
 
@@ -145,6 +146,7 @@ router.post('/vencimientos', (req, res) => {
   const info = db.prepare('INSERT INTO vencimientos (cliente_id, nombre, fecha, notas, creado_por) VALUES (NULL, ?, ?, ?, ?)')
     .run(nombre, fecha, String(req.body.notas || '').trim(), req.session.user.nombre);
   audit.registrar(req, 'vencimientos', info.lastInsertRowid, 'crear', `Agregó el vencimiento interno "${nombre}" (${fecha})`);
+  try { revisarVencimientos(); } catch (e) { /* noop */ }
   req.session.flash = { tipo: 'ok', msg: 'Vencimiento agregado.' };
   res.redirect('/tareas/flaks#vencimientos');
 });
@@ -167,6 +169,7 @@ router.post('/vencimientos/:vid', (req, res) => {
   db.prepare('UPDATE vencimientos SET nombre=?, fecha=?, notas=?, activo=?, notificado_en=? WHERE id=?')
     .run(nombre, fecha, String(req.body.notas || '').trim(), activo, notificadoEn, v.id);
   audit.registrar(req, 'vencimientos', v.id, 'editar', `Editó el vencimiento interno "${nombre}"`);
+  try { revisarVencimientos(); } catch (e) { /* noop */ }
   req.session.flash = { tipo: 'ok', msg: 'Vencimiento actualizado.' };
   res.redirect('/tareas/flaks#vencimientos');
 });

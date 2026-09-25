@@ -79,6 +79,18 @@ function totalGrupo(filas, nombreRaiz) {
   return filas.filter((f) => miembros.has(f.cliente_id)).reduce((a, f) => a + f.monto, 0);
 }
 
+// Tareas "Renovar…" generadas por vencimientos (clientes o internos de Flaks) que
+// todavía están abiertas, para mostrarlas juntas en Inicio sin importar de dónde salieron.
+function vencimientosImportantes() {
+  const filas = db.prepare(`
+    SELECT t.id, t.nombre, t.fecha_cierre, t.cliente_id, c.nombre AS cliente_nombre
+    FROM tareas t LEFT JOIN clientes c ON c.id = t.cliente_id
+    WHERE t.origen = 'vencimiento' AND t.estado <> 'completada'
+    ORDER BY t.fecha_cierre
+  `).all();
+  return { total: filas.length, filas: filas.slice(0, 3) };
+}
+
 function tareasVencidas() {
   const filas = db.prepare(`
     SELECT id, nombre, fecha_cierre, estado
@@ -173,6 +185,7 @@ router.get('/', async (req, res) => {
     ocultas,
     TARJETAS,
     tareasVencidas: tareasVencidas(),
+    vencimientosImportantes: vencimientosImportantes(),
     contenido,
     saldoSocios: cuentaCorrienteGlobal(),
     pagosPendientes: { total: pendientesMes.length, monto: pendientesMes.reduce((a, f) => a + f.monto, 0), filas: pendientesMes.slice(0, 3) },

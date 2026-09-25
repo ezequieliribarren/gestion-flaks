@@ -64,6 +64,33 @@
   </div>
   <% } %>
 
+  <!-- Vencimientos importantes (renovaciones: dominios, hosting, herramientas…) -->
+  <% if (!ocultas.has('vencimientos_importantes')) { %>
+  <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card('amber') %>">
+    <form method="POST" action="/inicio/tarjetas/vencimientos_importantes/ocultar" class="absolute top-2 right-2">
+      <button class="w-6 h-6 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 text-sm" title="Ocultar tarjeta">✕</button>
+    </form>
+    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">⚠ Vencimientos importantes</div>
+    <% if (!vencimientosImportantes.total) { %>
+      <p class="text-sm text-green-600 mt-2">🎉 No hay renovaciones pendientes.</p>
+    <% } else { %>
+      <div class="flex items-end gap-2 mt-1 mb-1.5">
+        <span class="text-3xl font-bold text-amber-600"><%= vencimientosImportantes.total %></span>
+        <span class="text-sm text-slate-400 mb-0.5">por renovar</span>
+      </div>
+      <ul class="text-sm text-slate-600 space-y-0.5 mb-1.5">
+        <% vencimientosImportantes.filas.forEach(function(v){ %>
+          <li class="truncate">· <a href="<%= v.cliente_id ? '/clientes/' + v.cliente_id : '/tareas/flaks#vencimientos' %>" class="hover:text-brand-600"><%= v.nombre %></a> <span class="text-slate-400">(<%= fmt.formatFecha(v.fecha_cierre) %>)</span></li>
+        <% }); %>
+      </ul>
+      <% if (vencimientosImportantes.total > vencimientosImportantes.filas.length) { %>
+        <p class="text-xs text-slate-400 mb-1.5">+<%= vencimientosImportantes.total - vencimientosImportantes.filas.length %> más</p>
+      <% } %>
+    <% } %>
+    <a href="/tareas" class="text-sm text-brand-600 hover:underline">Ver tareas →</a>
+  </div>
+  <% } %>
+
   <!-- Pagos pendientes de este mes -->
   <% if (!ocultas.has('pagos_pendientes')) { %>
     <div class="relative bg-white rounded-xl shadow-card p-3.5 border-l-4 <%= card() %>">

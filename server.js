@@ -136,6 +136,11 @@ app.use((req, res, next) => {
   res.locals.fmt = fmt;
   res.locals.flash = req.session.flash || null;
   res.locals.notifCount = req.session.user ? contarNoLeidas(req.session.user.id) : 0;
+  // Popup de vencimientos importantes sin leer, para que no dependan de que alguien
+  // entre a la campanita a verlos.
+  res.locals.vencimientosPopup = req.session.user
+    ? db.prepare("SELECT id, texto, url FROM notificaciones WHERE user_id = ? AND tipo = 'vencimiento' AND leida = 0 ORDER BY creada_en DESC LIMIT 5").all(req.session.user.id)
+    : [];
   delete req.session.flash;
   next();
 });
