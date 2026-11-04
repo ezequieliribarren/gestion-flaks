@@ -48,7 +48,7 @@ function tocarTarea(req, id) {
 }
 
 // --- Lista de clientes de contenido ---
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const q = String(req.query.q || '').trim();
   // Los clientes agrupados (grupo_id IS NOT NULL, ej. SENKO/ARTANIUM/SISTEMA CONTINUO GF)
   // no aparecen como tarjeta propia: se acceden como solapas dentro de su cliente raíz.
@@ -58,12 +58,27 @@ router.get('/', (req, res) => {
 
   const clientes = db.prepare(`
     SELECT c.id, c.nombre, c.logo, c.redes_plan, c.redes_sheet_url,
+      c.redes_meta_posteos_sem, c.redes_meta_historias_mes,
       (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id IN (SELECT id FROM clientes WHERE id = c.id OR grupo_id = c.id) AND estado <> 'completada') AS tareas_abiertas,
       (SELECT COUNT(*) FROM tareas_contenido WHERE cliente_id IN (SELECT id FROM clientes WHERE id = c.id OR grupo_id = c.id)) AS tareas_total
     FROM clientes c
     WHERE ${where.join(' AND ')}
     ORDER BY c.nombre COLLATE NOCASE
   `).all(...params);
+
+  // Cuánto le falta postear esta semana a cada cliente, para verlo de un vistazo sin
+  // entrar a cada ficha. Si un Sheet falla, ese cliente simplemente no muestra el dato.
+  const periodo = periodoActual();
+  await Promise.all(clientes.map(async (c) => {
+    if (!c.redes_sheet_url) return;
+    try {
+      const avance = await resumenCliente(c, metasSemanaDe(c.id, periodo.periodo));
+      if (avance && avance.ok) {
+        const semAct = avance.posteos.semanas.find((s) => s.n === avance.posteos.semana_actual);
+        c.falta_posteos = semAct ? Math.max(0, semAct.meta - semAct.cantidad) : 0;
+      }
+    } catch (e) { /* noop */ }
+  }));
 
   let disponibles = [];
   if (esAdmin(req.session.user)) {

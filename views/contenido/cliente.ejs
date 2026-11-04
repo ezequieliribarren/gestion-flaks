@@ -6,12 +6,20 @@
 
 <a href="/contenido" class="text-sm text-brand-600 hover:underline">&larr; Volver a Contenido</a>
 
-<div class="flex items-center gap-3 mt-2 mb-4">
-  <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 44 }) %>
-  <div>
-    <h1 class="text-2xl font-bold text-slate-800"><%= cliente.nombre %></h1>
-    <div class="text-sm text-slate-500"><%= cliente.redes_plan || 'Sin plan cargado' %></div>
+<div class="flex items-center justify-between gap-3 mt-2 mb-4">
+  <div class="flex items-center gap-3">
+    <%- include('../partials/cliente-avatar', { id: cliente.id, nombre: cliente.nombre, logo: cliente.logo, size: 44 }) %>
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800"><%= cliente.nombre %></h1>
+      <div class="text-sm text-slate-500"><%= cliente.redes_plan || 'Sin plan cargado' %></div>
+    </div>
   </div>
+  <% if (esAdmin) { %>
+    <form method="POST" action="/contenido/<%= cliente.id %>/config" onsubmit="return confirm('¿Dar de baja a este cliente de Contenido? Ya no va a aparecer en la lista (sus tareas de contenido no se borran).')">
+      <input type="hidden" name="_accion" value="quitar" />
+      <button class="text-xs text-red-600 hover:underline shrink-0">Dar de baja de Contenido</button>
+    </form>
+  <% } %>
 </div>
 
 <% if (grupoTabs && grupoTabs.length) { %>
@@ -78,11 +86,7 @@
           </div>
           <p class="text-[11px] text-slate-400 mt-1">Se vacían solas cada mes nuevo: son la meta de las semanas de <%= fmt.nombreMes(periodo.mes) %>, no quedan para el mes siguiente.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
-          <button name="_accion" value="quitar" onclick="return confirm('¿Quitar este cliente del módulo de contenido? No borra sus tareas de contenido.')"
-                  class="text-sm text-red-600 hover:underline">Quitar de Contenido</button>
-        </div>
+        <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>
       </form>
     </details>
   <% } %>
@@ -98,6 +102,20 @@
       <p class="text-sm text-red-600"><%= avance.error %></p>
     <% } else { %>
       <% var semAct = avance.posteos.semanas.find(function(s){ return s.n === avance.posteos.semana_actual; }); %>
+      <% var faltanPosteos = semAct ? Math.max(0, semAct.meta - semAct.cantidad) : 0; %>
+      <% var faltanHistorias = Math.max(0, avance.historias.meta_mes - avance.historias.cantidad); %>
+      <% if (faltanPosteos > 0 || faltanHistorias > 0) { %>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <% if (faltanPosteos > 0) { %>
+            <div class="text-sm font-medium text-amber-700 bg-amber-50 rounded-lg px-3 py-2">⚠ Faltan <%= faltanPosteos %> posteo<%= faltanPosteos === 1 ? '' : 's' %> esta semana</div>
+          <% } %>
+          <% if (faltanHistorias > 0) { %>
+            <div class="text-sm font-medium text-amber-700 bg-amber-50 rounded-lg px-3 py-2">⚠ Faltan <%= faltanHistorias %> historia<%= faltanHistorias === 1 ? '' : 's' %> este mes</div>
+          <% } %>
+        </div>
+      <% } else { %>
+        <div class="text-sm font-medium text-green-700 bg-green-50 rounded-lg px-3 py-2 mb-4 w-fit">✓ Al día con posteos e historias</div>
+      <% } %>
       <div class="flex flex-wrap gap-6 items-start">
         <%- include('../partials/anillo-progreso', {
           pct: semAct ? Math.min(100, Math.round(semAct.cantidad / semAct.meta * 100)) : 0,
