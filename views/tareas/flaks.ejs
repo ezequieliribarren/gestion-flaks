@@ -16,7 +16,6 @@
   <div class="flex gap-1 bg-white rounded-xl p-1 shadow-card">
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="tareas">Tareas</button>
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="objetivos">🎯 Objetivos</button>
-    <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="documentos">📁 Documentos</button>
     <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="vencimientos">⏰ Vencimientos</button>
   </div>
 </div>
@@ -94,11 +93,6 @@
   </div>
 </div>
 
-<!-- Panel: Documentos -->
-<div data-panel="documentos" hidden>
-  <%- include('../partials/documentos-contenido', { docs, clientes, CATEGORIAS, mostrarFiltro: false }) %>
-</div>
-
 <!-- Panel: Vencimientos -->
 <div data-panel="vencimientos" hidden>
   <div class="bg-white rounded-xl shadow-card p-4 sm:p-5">
@@ -173,6 +167,6 @@
       });
     });
     var hash = location.hash.slice(1);
-    activar(['objetivos', 'documentos', 'vencimientos'].indexOf(hash) >= 0 ? hash : 'tareas');
+    activar(['objetivos', 'vencimientos'].indexOf(hash) >= 0 ? hash : 'tareas');
   })();
 </script>

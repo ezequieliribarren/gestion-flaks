@@ -85,22 +85,15 @@ function listarTareas(req, res, flaks) {
     return res.render('tareas/index', { titulo: 'Tareas', ...datosComunes });
   }
 
-  // Flaks: una sola vista con solapas (Tareas internas / Objetivos / Documentos / Vencimientos).
-  const docs = db.prepare(`
-    SELECT d.*, c.nombre AS cliente_nombre, c.logo AS cliente_logo
-    FROM documentos d LEFT JOIN clientes c ON c.id = d.cliente_id
-    ORDER BY d.subido_en DESC
-  `).all();
+  // Flaks: una sola vista con solapas (Tareas internas / Objetivos / Vencimientos).
   const vencimientos = db.prepare('SELECT * FROM vencimientos WHERE cliente_id IS NULL ORDER BY fecha').all();
   res.render('tareas/flaks', {
     titulo: 'Flaks',
     flaks: true,
     ...datosComunes,
     objetivos: objetivosDelPeriodo(periodoActual()),
-    docs,
     vencimientos,
     hoyISO: new Date().toISOString().slice(0, 10),
-    CATEGORIAS: ['presupuesto', 'tutorial', 'otro'],
   });
 }
 

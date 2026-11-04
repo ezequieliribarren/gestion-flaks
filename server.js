@@ -100,22 +100,10 @@ app.use(
   })
 );
 
-// Revisión de recordatorios de re-marketing: al arrancar y cada 15 min.
-const { revisar: revisarRemarketing, revisarThrottled } = require('./lib/remarketing');
-try { revisarRemarketing(); } catch (e) { console.error('remarketing inicial:', e.message); }
-setInterval(() => { try { revisarRemarketing(); } catch (e) { /* noop */ } }, 15 * 60 * 1000).unref();
-
 // Revisión de avance de contenido (Sheets) en la última semana del mes: al arrancar y cada 1 hora.
-const {
-  revisar: revisarRedes, revisarThrottled: revisarRedesThrottled,
-  revisarPublicacionesSemana, revisarPublicacionesSemanaThrottled,
-} = require('./lib/redes-alertas');
+const { revisar: revisarRedes, revisarThrottled: revisarRedesThrottled } = require('./lib/redes-alertas');
 revisarRedes().catch((e) => console.error('redes-alertas inicial:', e.message));
 setInterval(() => { revisarRedes().catch(() => {}); }, 60 * 60 * 1000).unref();
-
-// Los lunes: tarea automática "Publicación - cliente" si la semana anterior quedó corta de posteos.
-revisarPublicacionesSemana().catch((e) => console.error('publicaciones-semana inicial:', e.message));
-setInterval(() => { revisarPublicacionesSemana().catch(() => {}); }, 60 * 60 * 1000).unref();
 
 // Vencimientos (de clientes o internos de Flaks): 3 días antes crean tarea + notificación.
 const { revisar: revisarVencimientos, revisarThrottled: revisarVencimientosThrottled } = require('./lib/vencimientos');
@@ -126,9 +114,7 @@ setInterval(() => { try { revisarVencimientos(); } catch (e) { /* noop */ } }, 6
 const { esAdmin } = require('./middleware/auth');
 const { contarNoLeidas } = require('./lib/participacion');
 app.use((req, res, next) => {
-  revisarThrottled();
   revisarRedesThrottled();
-  revisarPublicacionesSemanaThrottled();
   revisarVencimientosThrottled();
   res.locals.currentUser = req.session.user || null;
   res.locals.esAdmin = esAdmin(req.session.user);
@@ -152,7 +138,6 @@ app.use('/notificaciones', requireAuth, require('./routes/notificaciones'));
 app.use('/contenido', requireAuth, require('./routes/contenido'));
 app.use('/tareas', requireAuth, soloAdmin, require('./routes/tareas'));
 app.use('/clientes', requireAuth, soloAdmin, require('./routes/clientes'));
-app.use('/marketing', requireAuth, soloAdmin, require('./routes/marketing'));
 app.use('/facturacion', requireAuth, soloAdmin, require('./routes/facturacion'));
 app.use('/gastos', requireAuth, soloAdmin, require('./routes/gastos'));
 app.use('/caja', requireAuth, soloAdmin, require('./routes/caja'));
