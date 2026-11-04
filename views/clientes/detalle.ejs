@@ -19,12 +19,6 @@
       inactivo:  ['Inactivo', 'bg-slate-200 text-slate-500'],
     }[e] || ['—', 'bg-slate-100 text-slate-600'];
   }
-  function estadoTrabajoClase(e){
-    return {
-      pendiente: 'bg-red-100 text-red-700',
-      potencial: 'bg-amber-100 text-amber-700',
-    }[e] || 'bg-slate-100 text-slate-600';
-  }
   // Íconos minimalistas de trazo (en vez de emoji) para esta ficha.
   function ic(name, size){
     var attrs = 'width="' + (size||15) + '" height="' + (size||15) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -262,28 +256,72 @@
     <h2 class="font-semibold text-slate-800">Trabajos</h2>
     <button type="button" onclick="document.getElementById('m-add-trabajo').hidden=false" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
-  <p class="text-xs text-slate-400 mb-3">Al cobrar, pasa a Cobros realizados.</p>
+  <p class="text-xs text-slate-400 mb-3">Se puede cobrar en una vez o en varias cuotas: "Pago parcial" descuenta del total y muestra lo que falta.</p>
 
   <% if (!unicos.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay trabajos cargados.</p><% } %>
   <div class="divide-y divide-slate-100">
-    <% unicos.forEach(function(u){ var pot = u.estado === 'potencial'; %>
+    <% unicos.forEach(function(u){
+      var pot = u.estado === 'potencial';
+      var uCobrado = !pot && u.pagado > 0 && u.restante <= 0.005;
+      var uParcial = !pot && u.pagado > 0 && u.restante > 0.005;
+    %>
       <div class="flex flex-wrap items-center gap-3 py-3">
         <div class="flex-1 min-w-[140px]">
           <div class="flex items-center gap-2">
             <span class="font-medium text-slate-800 truncate"><%= u.nombre %></span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded-full <%= estadoTrabajoClase(u.estado) %>"><%= pot ? 'Potencial' : 'Pendiente' %></span>
+            <% if (pot) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Potencial</span>
+            <% } else if (uCobrado) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Cobrado</span>
+            <% } else if (uParcial) { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Pago parcial</span>
+            <% } else { %><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">Pendiente</span><% } %>
           </div>
           <div class="text-xs text-slate-400"><%= fmt.formatFecha(u.fecha) %></div>
         </div>
         <div class="font-semibold text-slate-800 text-right shrink-0"><%= fmt.formatARS(u.monto) %></div>
         <% if (!pot) { %>
-          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/cobrar" class="flex items-center gap-1 shrink-0">
-            <input type="date" name="fecha" value="<%= hoyISO %>" class="rounded border border-slate-200 px-1.5 py-1 text-xs w-32" />
-            <button class="text-xs btn bg-green-600 hover:bg-green-700 text-white rounded-lg px-2 py-1.5 whitespace-nowrap">Cobrar</button>
+          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago" class="shrink-0">
+            <input type="date" name="fecha" value="<%= u.fecha_cobro || '' %>" onchange="this.form.submit()" title="Marcar como cobrado en esta fecha (paga el saldo pendiente)"
+                   class="rounded border <%= uCobrado ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs w-32" />
           </form>
+          <button type="button" onclick="document.getElementById('parcial-uni-<%= u.id %>').hidden=!document.getElementById('parcial-uni-<%= u.id %>').hidden" class="text-xs text-brand-600 hover:underline shrink-0">Pago parcial</button>
         <% } %>
         <button type="button" onclick="document.getElementById('m-uni-<%= u.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
       </div>
+
+      <% if (uParcial) { %>
+        <div class="pb-2 -mt-1 text-xs">
+          <span class="text-amber-700 font-medium">Pago parcial:</span>
+          <span class="text-slate-600">pagado <%= fmt.formatARS(u.pagado) %> de <%= fmt.formatARS(u.monto) %> · falta <%= fmt.formatARS(u.restante) %></span>
+        </div>
+      <% } %>
+
+      <% if (!pot) { %>
+        <div id="parcial-uni-<%= u.id %>" hidden class="pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
+          <% if (u.pagos.length) { %>
+            <div class="space-y-1">
+              <% u.pagos.forEach(function(p){ %>
+                <div class="flex items-center justify-between text-xs text-slate-600">
+                  <span><%= fmt.formatARS(p.monto) %> · <%= fmt.formatFecha(p.fecha) %><% if (p.registrado_por) { %> · <span class="text-slate-400"><%= p.registrado_por %></span><% } %></span>
+                  <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago-parcial/<%= p.id %>/eliminar" onsubmit="return confirm('¿Eliminar este pago?')">
+                    <button class="text-slate-300 hover:text-red-500">✕</button>
+                  </form>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago-parcial" class="flex flex-wrap items-end gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Monto</label>
+              <input name="monto" type="number" step="0.01" min="0" required placeholder="<%= u.restante.toFixed(0) %>" class="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Fecha</label>
+              <input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1 text-xs" />
+            </div>
+            <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded px-3 py-1.5">Agregar pago</button>
+          </form>
+        </div>
+      <% } %>
+
       <%- modal('m-uni-' + u.id, 'Editar trabajo',
         '<form method="POST" action="/clientes/' + cliente.id + '/unicos/' + u.id + '" class="space-y-3" data-reparto>'
         + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" value="' + u.nombre.replace(/"/g,'&quot;') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'

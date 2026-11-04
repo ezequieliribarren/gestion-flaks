@@ -186,7 +186,15 @@ router.get('/:id', async (req, res) => {
       pago_fecha: pagos.length ? pagos[pagos.length - 1].fecha_pago : null,
     };
   });
-  const unicos = db.prepare('SELECT * FROM trabajos_unicos WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
+  const unicos = db.prepare('SELECT * FROM trabajos_unicos WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id).map((u) => {
+    const pagos = db.prepare('SELECT * FROM pagos_unicos WHERE trabajo_id = ? ORDER BY fecha').all(u.id);
+    const pagado = pagos.reduce((a, p) => a + Number(p.monto || 0), 0);
+    return {
+      ...u, pagos, pagado,
+      restante: Math.max(0, u.monto - pagado),
+      fecha_cobro: pagos.length ? pagos[pagos.length - 1].fecha : null,
+    };
+  });
   const cobros = db.prepare('SELECT * FROM cobros WHERE cliente_id = ? ORDER BY fecha DESC').all(cliente.id);
   const mensualTotal = recurrentes.filter((r) => r.activo).reduce((a, r) => a + r.monto_mensual, 0);
 
@@ -553,23 +561,62 @@ router.post('/:id/unicos/:tid', (req, res) => {
   res.redirect('/clientes/' + cliente.id + '#unicos');
 });
 
-// Convierte un trabajo pendiente en un cobro (con la fecha real en que se cobró) y lo saca de Trabajos.
-router.post('/:id/unicos/:tid/cobrar', (req, res) => {
+// Atajo rápido: marcar el resto de un trabajo como pagado (o volver a dejarlo pendiente).
+// Si ya había pagos parciales cargados, esto sólo agrega uno por el saldo que faltaba.
+router.post('/:id/unicos/:tid/pago', (req, res) => {
   const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
   const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
   if (!cliente || !t) return res.redirect('/clientes');
-  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : hoyISO();
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
 
-  db.prepare(`
-    INSERT INTO cobros (cliente_id, concepto, monto, reparto_german, reparto_ezequiel, fecha_trabajo, fecha, creado_por)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(cliente.id, t.nombre, t.monto, t.reparto_german, t.reparto_ezequiel, t.fecha, fecha, req.session.user.nombre);
-  db.prepare('DELETE FROM trabajos_unicos WHERE id = ?').run(t.id);
+  if (fecha) {
+    const yaPagado = db.prepare('SELECT COALESCE(SUM(monto),0) AS m FROM pagos_unicos WHERE trabajo_id = ?').get(t.id).m;
+    const restante = Math.max(0, t.monto - yaPagado);
+    let extra = '';
+    if (restante > 0.005) {
+      db.prepare('INSERT INTO pagos_unicos (trabajo_id, monto, fecha, registrado_por) VALUES (?, ?, ?, ?)')
+        .run(t.id, restante, fecha, req.session.user.nombre);
+      extra = activarSiHaciaFalta(req, cliente);
+      audit.registrar(req, 'clientes', cliente.id, 'editar', `Cobró "${t.nombre}" (${restante}) el ${fecha}.${extra}`);
+    }
+    req.session.flash = { tipo: 'ok', msg: 'Pago registrado.' + extra };
+  } else {
+    db.prepare('DELETE FROM pagos_unicos WHERE trabajo_id = ?').run(t.id);
+    audit.registrar(req, 'clientes', cliente.id, 'editar', `Marcó como pendiente de cobro el trabajo "${t.nombre}"`);
+    req.session.flash = { tipo: 'ok', msg: 'Marcado como pendiente de cobro.' };
+  }
+  res.redirect('/clientes/' + cliente.id + '#unicos');
+});
 
+// Cargar un pago parcial puntual (monto + fecha) de un trabajo único.
+router.post('/:id/unicos/:tid/pago-parcial', (req, res) => {
+  const cliente = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+  const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!cliente || !t) return res.redirect('/clientes');
+  const monto = Number(req.body.monto);
+  const fecha = req.body.fecha ? String(req.body.fecha).slice(0, 10) : null;
+
+  if (!monto || monto <= 0 || !fecha) {
+    req.session.flash = { tipo: 'error', msg: 'Poné un monto y una fecha para el pago.' };
+    return res.redirect('/clientes/' + cliente.id + '#unicos');
+  }
+
+  db.prepare('INSERT INTO pagos_unicos (trabajo_id, monto, fecha, registrado_por) VALUES (?, ?, ?, ?)')
+    .run(t.id, monto, fecha, req.session.user.nombre);
   const extra = activarSiHaciaFalta(req, cliente);
-  audit.registrar(req, 'clientes', cliente.id, 'editar', `Cobró "${t.nombre}" (${t.monto}) el ${fecha}.${extra}`);
-  req.session.flash = { tipo: 'ok', msg: 'Cobro registrado.' + extra };
-  res.redirect('/clientes/' + cliente.id + '#cobros');
+  audit.registrar(req, 'clientes', cliente.id, 'editar', `Registró pago parcial de "${t.nombre}": ${monto} el ${fecha}.${extra}`);
+  req.session.flash = { tipo: 'ok', msg: 'Pago registrado.' + extra };
+  res.redirect('/clientes/' + cliente.id + '#unicos');
+});
+
+// Borrar un pago puntual ya cargado.
+router.post('/:id/unicos/:tid/pago-parcial/:pid/eliminar', (req, res) => {
+  const t = db.prepare('SELECT * FROM trabajos_unicos WHERE id = ? AND cliente_id = ?').get(req.params.tid, req.params.id);
+  if (!t) return res.redirect('/clientes');
+  db.prepare('DELETE FROM pagos_unicos WHERE id = ? AND trabajo_id = ?').run(req.params.pid, t.id);
+  audit.registrar(req, 'clientes', req.params.id, 'editar', `Eliminó un pago de "${t.nombre}"`);
+  req.session.flash = { tipo: 'ok', msg: 'Pago eliminado.' };
+  res.redirect('/clientes/' + req.params.id + '#unicos');
 });
 
 // --- Cobros realizados ---

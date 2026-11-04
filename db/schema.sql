@@ -164,6 +164,19 @@ CREATE TABLE IF NOT EXISTS trabajos_unicos (
   creado_en        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Pago(s) de un trabajo único (puede cobrarse en varias cuotas). El trabajo sigue
+-- existiendo en trabajos_unicos aunque ya esté totalmente pagado: "pagado" y "falta"
+-- se calculan sumando estas filas, igual que con los trabajos recurrentes.
+CREATE TABLE IF NOT EXISTS pagos_unicos (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  trabajo_id     INTEGER NOT NULL REFERENCES trabajos_unicos(id) ON DELETE CASCADE,
+  monto          REAL NOT NULL,
+  fecha          TEXT NOT NULL,                  -- 'YYYY-MM-DD' fecha real del pago
+  registrado_por TEXT,
+  registrado_en  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_pagos_unicos_trabajo ON pagos_unicos(trabajo_id);
+
 -- "Cobros realizados": plata que ya entró. fecha_trabajo = mes al que pertenece el
 -- trabajo (factura, arrastrado desde trabajos_unicos.fecha al convertirlo, o igual a
 -- 'fecha' si el cobro se cargó directo acá). fecha = fecha real en la que se cobró.

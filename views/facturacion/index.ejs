@@ -60,6 +60,10 @@
               <a href="/clientes/<%= f.cliente_id %>#recurrentes" class="text-xs text-amber-600 hover:underline">Pendiente<% if (f.vence_dia) { %> (hasta el <%= f.vence_dia %>)<% } %></a>
             <% } else if (f.tipo === 'cobro') { %>
               <span class="text-xs text-green-700">Cobrado el <%= fmt.formatFecha(f.fecha_cobro) %></span>
+            <% } else if (f.tipo === 'unico' && f.cobrado) { %>
+              <span class="text-xs text-green-700">Cobrado<%= f.fecha_cobro ? ' el ' + fmt.formatFecha(f.fecha_cobro) : '' %></span>
+            <% } else if (f.tipo === 'unico' && f.pago_parcial) { %>
+              <a href="/clientes/<%= f.cliente_id %>#unicos" class="text-xs font-medium text-amber-600 hover:underline">Parcial: <%= fmt.formatARS(f.pagado) %>/<%= fmt.formatARS(f.monto) %> (falta <%= fmt.formatARS(f.restante) %>)</a>
             <% } else if (f.pendiente) { %>
               <a href="/clientes/<%= f.cliente_id %>#unicos" class="text-xs font-medium text-red-600 hover:underline">⚠ Sin cobrar</a>
             <% } else { %>
