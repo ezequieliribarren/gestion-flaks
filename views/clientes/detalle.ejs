@@ -163,7 +163,7 @@
 <div id="recurrentes" class="bg-white rounded-xl shadow-card p-5">
   <div class="flex items-center justify-between mb-1">
     <h2 class="font-semibold text-slate-800">Trabajos recurrentes (mensuales)</h2>
-    <button type="button" onclick="document.getElementById('add-recurrente').hidden=!document.getElementById('add-recurrente').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+    <button type="button" onclick="document.getElementById('m-add-recurrente').hidden=false" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
   <p class="text-xs text-slate-400 mb-3">El pago se reinicia solo cada 1° de mes.</p>
 
@@ -228,8 +228,9 @@
         + '<div class="grid grid-cols-2 gap-3">'
         + '<div><label class="block text-xs text-slate-500 mb-1">Monto/mes</label><input name="monto_mensual" type="number" step="0.01" value="' + r.monto_mensual + '" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /><p class="text-[10px] text-slate-400 mt-1">Rige desde este mes; los meses ya facturados no cambian.</p></div>'
         + '<div><label class="block text-xs text-slate-500 mb-1">Día de cobro</label><input name="dia_de_cobro" type="number" min="1" max="28" value="' + (r.dia_de_cobro || '') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">German $</label><input name="parte_german" type="number" step="0.01" value="' + (r.monto_mensual * r.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel $</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (r.monto_mensual * r.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de ese monto mensual?</p></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="' + (r.monto_mensual * r.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (r.monto_mensual * r.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '<div><label class="block text-xs text-slate-500 mb-1">Desde</label><input name="desde" type="month" value="' + (r.desde || '') + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '<div class="flex items-center gap-2 mt-5"><input type="checkbox" name="activo" value="1" id="act-' + r.id + '" ' + (r.activo ? 'checked' : '') + ' /><label for="act-' + r.id + '" class="text-sm text-slate-600">Activo</label></div>'
         + '</div>'
@@ -240,22 +241,26 @@
     <% }); %>
   </div>
 
-  <form id="add-recurrente" hidden method="POST" action="/clientes/<%= cliente.id %>/recurrentes" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3" data-reparto>
-    <input name="nombre" required placeholder="Nombre" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
-    <input name="monto_mensual" type="number" step="0.01" value="0" placeholder="Monto/mes" data-monto-campo class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="parte_german" type="number" step="0.01" value="0" placeholder="German $" data-parte-german class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="parte_ezequiel" type="number" step="0.01" value="0" placeholder="Ezequiel $" data-parte-ezequiel class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="dia_de_cobro" type="number" min="1" max="28" placeholder="Día de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="desde" type="month" value="<%= periodoActual %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
-  </form>
+  <%- modal('m-add-recurrente', 'Nuevo trabajo recurrente',
+    '<form method="POST" action="/clientes/' + cliente.id + '/recurrentes" class="space-y-3" data-reparto>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required placeholder="Ej: Mantenimiento web" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="grid grid-cols-2 gap-3">'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Monto/mes</label><input name="monto_mensual" type="number" step="0.01" value="0" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Día de cobro</label><input name="dia_de_cobro" type="number" min="1" max="28" placeholder="Ej: 10" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de ese monto mensual?</p></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="0" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="0" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="col-span-2"><label class="block text-xs text-slate-500 mb-1">Desde qué mes factura</label><input name="desde" type="month" value="' + periodoActual + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '</div>'
+    + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar</button>'
+    + '</form>') %>
 </div>
 
 <!-- Trabajos (sin cobrar) -->
 <div id="unicos" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <div class="flex items-center justify-between mb-1">
     <h2 class="font-semibold text-slate-800">Trabajos</h2>
-    <button type="button" onclick="document.getElementById('add-trabajo').hidden=!document.getElementById('add-trabajo').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+    <button type="button" onclick="document.getElementById('m-add-trabajo').hidden=false" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
   <p class="text-xs text-slate-400 mb-3">Al cobrar, pasa a Cobros realizados.</p>
 
@@ -285,8 +290,9 @@
         + '<div class="grid grid-cols-2 gap-3">'
         + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="' + u.monto + '" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '<div><label class="block text-xs text-slate-500 mb-1">Mes (fecha)</label><input name="fecha" type="date" value="' + String(u.fecha).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">German $</label><input name="parte_german" type="number" step="0.01" value="' + (u.monto * u.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel $</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (u.monto * u.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de este trabajo?</p></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="' + (u.monto * u.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (u.monto * u.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '</div>'
         + '<div><label class="block text-xs text-slate-500 mb-1">Estado</label><select name="estado" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm">'
         + '<option value="pendiente"' + (!pot ? ' selected' : '') + '>Pendiente de cobro</option>'
@@ -300,25 +306,27 @@
     <% }); %>
   </div>
 
-  <form id="add-trabajo" hidden method="POST" action="/clientes/<%= cliente.id %>/unicos" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3" data-reparto>
-    <input name="nombre" required placeholder="Nombre" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
-    <input name="monto" type="number" step="0.01" value="0" placeholder="Monto" data-monto-campo class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="fecha" type="date" required value="<%= hoyISO %>" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <select name="estado" class="rounded border border-slate-300 px-2 py-1.5 text-sm">
-      <option value="pendiente">Pendiente de cobro</option>
-      <option value="potencial">Potencial (presupuesto)</option>
-    </select>
-    <input name="parte_german" type="number" step="0.01" value="0" placeholder="German $" data-parte-german class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="parte_ezequiel" type="number" step="0.01" value="0" placeholder="Ezequiel $" data-parte-ezequiel class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
-  </form>
+  <%- modal('m-add-trabajo', 'Nuevo trabajo',
+    '<form method="POST" action="/clientes/' + cliente.id + '/unicos" class="space-y-3" data-reparto>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required placeholder="Ej: Rediseño de logo" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="grid grid-cols-2 gap-3">'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Fecha</label><input name="fecha" type="date" required value="' + hoyISO + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="col-span-2"><label class="block text-xs text-slate-500 mb-1">Estado</label><select name="estado" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm">'
+    + '<option value="pendiente">Pendiente de cobro</option><option value="potencial">Potencial (presupuesto)</option></select></div>'
+    + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de este trabajo?</p></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="0" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="0" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '</div>'
+    + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar</button>'
+    + '</form>') %>
 </div>
 
 <!-- Cobros realizados -->
 <div id="cobros" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <div class="flex items-center justify-between mb-1">
     <h2 class="font-semibold text-slate-800">Cobros realizados</h2>
-    <button type="button" onclick="document.getElementById('add-cobro').hidden=!document.getElementById('add-cobro').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+    <button type="button" onclick="document.getElementById('m-add-cobro').hidden=false" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
   <p class="text-xs text-slate-400 mb-3">El mes de facturación puede ser distinto al mes en que se cobró.</p>
 
@@ -339,10 +347,11 @@
         + '<div class="grid grid-cols-2 gap-3">'
         + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="' + co.monto + '" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '<div></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">Mes de facturación</label><input name="fecha_trabajo" type="date" value="' + String(co.fecha_trabajo).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" value="' + String(co.fecha).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">German $</label><input name="parte_german" type="number" step="0.01" value="' + (co.monto * co.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
-        + '<div><label class="block text-xs text-slate-500 mb-1">Ezequiel $</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (co.monto * co.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Mes de facturación</label><input name="fecha_trabajo" type="date" value="' + String(co.fecha_trabajo).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /><p class="text-[10px] text-slate-400 mt-1">A qué mes de trabajo corresponde (para los reportes)</p></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" value="' + String(co.fecha).slice(0,10) + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /><p class="text-[10px] text-slate-400 mt-1">Cuándo entró la plata realmente</p></div>'
+        + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de este cobro?</p></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="' + (co.monto * co.reparto_german / 100) + '" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+        + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="' + (co.monto * co.reparto_ezequiel / 100) + '" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
         + '</div>'
         + '<div class="flex items-center justify-between pt-2">'
         + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Guardar</button>'
@@ -351,15 +360,20 @@
     <% }); %>
   </div>
 
-  <form id="add-cobro" hidden method="POST" action="/clientes/<%= cliente.id %>/cobros" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3" data-reparto>
-    <input name="nombre" required placeholder="Concepto" class="rounded border border-slate-300 px-2 py-1.5 text-sm sm:col-span-3" />
-    <input name="monto" type="number" step="0.01" value="0" placeholder="Monto" data-monto-campo class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="fecha" type="date" required value="<%= hoyISO %>" placeholder="Fecha de cobro" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="fecha_trabajo" type="date" placeholder="Mes de facturación (opcional)" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="parte_german" type="number" step="0.01" value="0" placeholder="German $" data-parte-german class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="parte_ezequiel" type="number" step="0.01" value="0" placeholder="Ezequiel $" data-parte-ezequiel class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5">Agregar</button>
-  </form>
+  <%- modal('m-add-cobro', 'Nuevo cobro',
+    '<form method="POST" action="/clientes/' + cliente.id + '/cobros" class="space-y-3" data-reparto>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Concepto</label><input name="nombre" required placeholder="Ej: Diseño de redes" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div class="grid grid-cols-2 gap-3">'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Monto</label><input name="monto" type="number" step="0.01" value="0" data-monto-campo class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Mes de facturación</label><input name="fecha_trabajo" type="date" value="' + hoyISO + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /><p class="text-[10px] text-slate-400 mt-1">A qué mes de trabajo corresponde (para los reportes)</p></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Fecha de cobro</label><input name="fecha" type="date" required value="' + hoyISO + '" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /><p class="text-[10px] text-slate-400 mt-1">Cuándo entró la plata realmente</p></div>'
+    + '<div class="col-span-2 -mb-1"><p class="text-xs text-slate-500">¿Cuánto se lleva cada socio de este cobro?</p></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para German ($)</label><input name="parte_german" type="number" step="0.01" value="0" data-parte-german class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Para Ezequiel ($)</label><input name="parte_ezequiel" type="number" step="0.01" value="0" data-parte-ezequiel class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '</div>'
+    + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar</button>'
+    + '</form>') %>
 </div>
 
 <script>
@@ -443,7 +457,7 @@
 <div id="vencimientos" class="bg-white rounded-xl shadow-card p-5 mt-4">
   <div class="flex items-center justify-between mb-1">
     <h2 class="font-semibold text-slate-800">Vencimientos</h2>
-    <button type="button" onclick="document.getElementById('add-vencimiento').hidden=!document.getElementById('add-vencimiento').hidden" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
+    <button type="button" onclick="document.getElementById('m-add-vencimiento').hidden=false" class="text-xs text-brand-600 hover:underline flex items-center gap-1"><%- ic('plus', 13) %> Agregar</button>
   </div>
   <p class="text-xs text-slate-400 mb-3">Dominio, hosting, licencias… Avisa solo 3 días antes con una tarea "Renovar".</p>
 
@@ -482,12 +496,13 @@
     <% }); %>
   </div>
 
-  <form id="add-vencimiento" hidden method="POST" action="/clientes/<%= cliente.id %>/vencimientos" class="mt-3 grid sm:grid-cols-3 gap-2 border-t border-slate-100 pt-3">
-    <input name="nombre" required placeholder="Ej: Dominio, Hosting…" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="fecha" type="date" required class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <input name="notas" placeholder="Notas (opcional)" class="rounded border border-slate-300 px-2 py-1.5 text-sm" />
-    <button class="btn bg-slate-800 hover:bg-slate-900 text-white text-sm rounded-lg px-3 py-1.5 sm:col-span-3">Agregar</button>
-  </form>
+  <%- modal('m-add-vencimiento', 'Nuevo vencimiento',
+    '<form method="POST" action="/clientes/' + cliente.id + '/vencimientos" class="space-y-3">'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Nombre</label><input name="nombre" required placeholder="Ej: Dominio, Hosting…" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Fecha de vencimiento</label><input name="fecha" type="date" required class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<div><label class="block text-xs text-slate-500 mb-1">Notas (opcional)</label><input name="notas" class="w-full rounded border border-slate-300 px-2 py-1.5 text-sm" /></div>'
+    + '<button class="btn bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2">Agregar</button>'
+    + '</form>') %>
 </div>
 
 </div>
@@ -526,7 +541,7 @@
     // Cerrar modales con Escape.
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        document.querySelectorAll('[id^="m-rec-"], [id^="m-uni-"], [id^="m-cob-"]').forEach(function (m) { m.hidden = true; });
+        document.querySelectorAll('[id^="m-"]').forEach(function (m) { m.hidden = true; });
       }
     });
   })();
