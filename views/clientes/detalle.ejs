@@ -30,8 +30,23 @@
       pencil: '<path d="M15.5 5.5 19 9 9 19H5.5v-3.5Z"/><path d="M13.5 7.5 17 11"/>',
       upload: '<path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
       plus: '<path d="M12 5v14M5 12h14"/>',
+      check: '<path d="M5 12.5 9.5 17 19 7"/>',
+      calendar: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
+      grid: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.3"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.3"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.3"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.3"/>',
+      briefcase: '<rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M8.5 7.5V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.5"/><path d="M3 12.5h18"/>',
+      file: '<path d="M7 3.5h7l3 3v14h-10a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V7h3"/>',
     };
     return '<svg ' + attrs + ' class="inline-block align-[-2px] shrink-0">' + (paths[name] || '') + '</svg>';
+  }
+  // Color de acento (borde izquierdo + badge) según el estado de la fila: visualmente
+  // igual al lenguaje ya usado en Inicio (verde=ok, ámbar=atención, rojo=urgente, gris=neutro).
+  function filaColor(estado){
+    return {
+      ok:     'border-green-400',
+      warn:   'border-amber-400',
+      bad:    'border-red-300',
+      muted:  'border-slate-200',
+    }[estado] || 'border-slate-200';
   }
   // Modal genérico: id + título + contenido HTML del <form>.
   function modal(id, titulo, formHtml){
@@ -83,11 +98,11 @@
   </div>
 <% } %>
 
-<!-- Solapas -->
-<div class="flex gap-1 bg-white rounded-xl p-1 shadow-card w-fit mt-4 mb-4">
-  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="resumen">Resumen</button>
-  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="servicios">Servicios</button>
-  <button type="button" class="tab-btn btn px-3 py-1.5 text-sm rounded-lg" data-tab="datos">Datos</button>
+<!-- Secciones de la ficha (distintas de las solapas de arriba: acá subrayadas, sin fondo) -->
+<div class="flex items-center gap-5 border-b border-slate-200 mt-5 mb-5 overflow-x-auto">
+  <button type="button" class="tab-btn flex items-center gap-1.5 pb-2.5 -mb-px text-sm font-medium border-b-2 whitespace-nowrap transition-colors" data-tab="resumen"><%- ic('grid', 15) %> Resumen</button>
+  <button type="button" class="tab-btn flex items-center gap-1.5 pb-2.5 -mb-px text-sm font-medium border-b-2 whitespace-nowrap transition-colors" data-tab="servicios"><%- ic('briefcase', 15) %> Servicios</button>
+  <button type="button" class="tab-btn flex items-center gap-1.5 pb-2.5 -mb-px text-sm font-medium border-b-2 whitespace-nowrap transition-colors" data-tab="datos"><%- ic('file', 15) %> Datos</button>
 </div>
 
 <!-- Panel: Resumen -->
@@ -162,9 +177,14 @@
   <p class="text-xs text-slate-400 mb-3">El pago se reinicia solo cada 1° de mes.</p>
 
   <% if (!recurrentes.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay trabajos recurrentes.</p><% } %>
-  <div class="divide-y divide-slate-100">
-    <% recurrentes.forEach(function(r){ %>
-      <div class="flex flex-wrap items-center gap-3 py-3">
+  <div class="space-y-2">
+    <% recurrentes.forEach(function(r){
+      var rPagado = !!r.pago_fecha;
+      var rParcial = !rPagado && r.pagado > 0 && r.restante > 0.005;
+      var rEstado = !r.activo ? 'muted' : (rPagado ? 'ok' : (rParcial ? 'warn' : 'muted'));
+    %>
+      <div class="rounded-lg border-l-4 <%= filaColor(rEstado) %> bg-slate-50/60">
+      <div class="flex flex-wrap items-center gap-3 px-3 py-3">
         <div class="flex-1 min-w-[140px]">
           <div class="flex items-center gap-2">
             <span class="font-medium text-slate-800 truncate"><%= r.nombre %></span>
@@ -173,23 +193,52 @@
           <div class="text-xs text-slate-400">Día <%= r.dia_de_cobro || '—' %> · Desde <%= r.desde || '—' %></div>
         </div>
         <div class="font-semibold text-slate-800 text-right shrink-0"><%= fmt.formatARS(r.monto_mensual) %></div>
-        <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago" class="shrink-0">
-          <input type="hidden" name="periodo" value="<%= periodoActual %>" />
-          <input type="date" name="fecha" value="<%= r.pago_fecha ? String(r.pago_fecha).slice(0,10) : '' %>" onchange="this.form.submit()"
-                 class="rounded border <%= r.pago_fecha ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs w-32" />
-        </form>
-        <button type="button" onclick="document.getElementById('parcial-<%= r.id %>').hidden=!document.getElementById('parcial-<%= r.id %>').hidden" class="text-xs text-brand-600 hover:underline shrink-0">Pago parcial</button>
-        <button type="button" onclick="document.getElementById('m-rec-<%= r.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <% if (rPagado) { %>
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-1"><%- ic('check', 12) %> Pagado <%= fmt.formatFecha(r.pago_fecha) %></span>
+          <% } else { %>
+            <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago">
+              <input type="hidden" name="periodo" value="<%= periodoActual %>" />
+              <input type="hidden" name="fecha" value="<%= hoyISO %>" />
+              <button class="btn inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-white border border-green-300 hover:bg-green-50 rounded-full px-2.5 py-1"><%- ic('check', 12) %> Marcar pagado</button>
+            </form>
+          <% } %>
+          <button type="button" onclick="document.getElementById('fecha-rec-<%= r.id %>').hidden=!document.getElementById('fecha-rec-<%= r.id %>').hidden" class="text-slate-400 hover:text-brand-600 p-1" title="Elegir otra fecha de pago"><%- ic('calendar', 14) %></button>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="document.getElementById('parcial-<%= r.id %>').hidden=!document.getElementById('parcial-<%= r.id %>').hidden" class="btn text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1">Pago parcial</button>
+          <button type="button" onclick="document.getElementById('m-rec-<%= r.id %>').hidden=false" class="btn flex items-center gap-1 text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1"><%- ic('pencil', 12) %> Editar</button>
+        </div>
       </div>
 
-      <% if (r.pagado > 0 && r.restante > 0.005) { %>
-        <div class="pb-2 -mt-1 text-xs">
+      <div id="fecha-rec-<%= r.id %>" hidden class="px-3 pb-3 -mt-1">
+        <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago" class="flex flex-wrap items-end gap-2">
+          <input type="hidden" name="periodo" value="<%= periodoActual %>" />
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-0.5">Fecha de pago</label>
+            <input type="date" name="fecha" value="<%= r.pago_fecha ? String(r.pago_fecha).slice(0,10) : hoyISO %>" class="rounded border border-slate-300 px-2 py-1 text-xs" />
+          </div>
+          <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded px-3 py-1.5">Guardar fecha</button>
+        </form>
+        <% if (rPagado) { %>
+          <form method="POST" action="/clientes/<%= cliente.id %>/recurrentes/<%= r.id %>/pago" class="inline">
+            <input type="hidden" name="periodo" value="<%= periodoActual %>" />
+            <input type="hidden" name="fecha" value="" />
+            <button class="text-xs text-red-600 hover:underline mt-1">Deshacer pago</button>
+          </form>
+        <% } %>
+      </div>
+
+      <% if (rParcial) { %>
+        <div class="px-3 pb-2 -mt-1 text-xs">
           <span class="text-amber-700 font-medium">Pago parcial:</span>
           <span class="text-slate-600">pagado <%= fmt.formatARS(r.pagado) %> de <%= fmt.formatARS(r.monto_mensual) %> · falta <%= fmt.formatARS(r.restante) %></span>
         </div>
       <% } %>
 
-      <div id="parcial-<%= r.id %>" hidden class="pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
+      <div id="parcial-<%= r.id %>" hidden class="px-3 pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
         <% if (r.pagos.length) { %>
           <div class="space-y-1">
             <% r.pagos.forEach(function(p){ %>
@@ -214,6 +263,7 @@
           </div>
           <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded px-3 py-1.5">Agregar pago</button>
         </form>
+      </div>
       </div>
 
       <%- modal('m-rec-' + r.id, 'Editar trabajo recurrente',
@@ -259,13 +309,15 @@
   <p class="text-xs text-slate-400 mb-3">Se puede cobrar en una vez o en varias cuotas: "Pago parcial" descuenta del total y muestra lo que falta.</p>
 
   <% if (!unicos.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay trabajos cargados.</p><% } %>
-  <div class="divide-y divide-slate-100">
+  <div class="space-y-2">
     <% unicos.forEach(function(u){
       var pot = u.estado === 'potencial';
       var uCobrado = !pot && u.pagado > 0 && u.restante <= 0.005;
       var uParcial = !pot && u.pagado > 0 && u.restante > 0.005;
+      var uEstado = pot ? 'warn' : (uCobrado ? 'ok' : (uParcial ? 'warn' : 'bad'));
     %>
-      <div class="flex flex-wrap items-center gap-3 py-3">
+      <div class="rounded-lg border-l-4 <%= filaColor(uEstado) %> bg-slate-50/60">
+      <div class="flex flex-wrap items-center gap-3 px-3 py-3">
         <div class="flex-1 min-w-[140px]">
           <div class="flex items-center gap-2">
             <span class="font-medium text-slate-800 truncate"><%= u.nombre %></span>
@@ -277,25 +329,56 @@
           <div class="text-xs text-slate-400"><%= fmt.formatFecha(u.fecha) %></div>
         </div>
         <div class="font-semibold text-slate-800 text-right shrink-0"><%= fmt.formatARS(u.monto) %></div>
+
         <% if (!pot) { %>
-          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago" class="shrink-0">
-            <input type="date" name="fecha" value="<%= u.fecha_cobro || '' %>" onchange="this.form.submit()" title="Marcar como cobrado en esta fecha (paga el saldo pendiente)"
-                   class="rounded border <%= uCobrado ? 'border-green-400 bg-green-50 text-green-800' : 'border-amber-300 bg-amber-50' %> px-2 py-1 text-xs w-32" />
-          </form>
-          <button type="button" onclick="document.getElementById('parcial-uni-<%= u.id %>').hidden=!document.getElementById('parcial-uni-<%= u.id %>').hidden" class="text-xs text-brand-600 hover:underline shrink-0">Pago parcial</button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <% if (uCobrado) { %>
+              <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-1"><%- ic('check', 12) %> Cobrado <%= fmt.formatFecha(u.fecha_cobro) %></span>
+            <% } else { %>
+              <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago">
+                <input type="hidden" name="fecha" value="<%= hoyISO %>" />
+                <button class="btn inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-white border border-green-300 hover:bg-green-50 rounded-full px-2.5 py-1"><%- ic('check', 12) %> Marcar cobrado</button>
+              </form>
+            <% } %>
+            <button type="button" onclick="document.getElementById('fecha-uni-<%= u.id %>').hidden=!document.getElementById('fecha-uni-<%= u.id %>').hidden" class="text-slate-400 hover:text-brand-600 p-1" title="Elegir otra fecha de cobro"><%- ic('calendar', 14) %></button>
+          </div>
         <% } %>
-        <button type="button" onclick="document.getElementById('m-uni-<%= u.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <% if (!pot) { %>
+            <button type="button" onclick="document.getElementById('parcial-uni-<%= u.id %>').hidden=!document.getElementById('parcial-uni-<%= u.id %>').hidden" class="btn text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1">Pago parcial</button>
+          <% } %>
+          <button type="button" onclick="document.getElementById('m-uni-<%= u.id %>').hidden=false" class="btn flex items-center gap-1 text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1"><%- ic('pencil', 12) %> Editar</button>
+        </div>
       </div>
 
+      <% if (!pot) { %>
+        <div id="fecha-uni-<%= u.id %>" hidden class="px-3 pb-3 -mt-1">
+          <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago" class="flex flex-wrap items-end gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Fecha de cobro</label>
+              <input type="date" name="fecha" value="<%= u.fecha_cobro || hoyISO %>" class="rounded border border-slate-300 px-2 py-1 text-xs" />
+            </div>
+            <button class="btn bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded px-3 py-1.5">Guardar fecha</button>
+          </form>
+          <% if (uCobrado) { %>
+            <form method="POST" action="/clientes/<%= cliente.id %>/unicos/<%= u.id %>/pago" class="inline">
+              <input type="hidden" name="fecha" value="" />
+              <button class="text-xs text-red-600 hover:underline mt-1">Deshacer cobro</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
+
       <% if (uParcial) { %>
-        <div class="pb-2 -mt-1 text-xs">
+        <div class="px-3 pb-2 -mt-1 text-xs">
           <span class="text-amber-700 font-medium">Pago parcial:</span>
           <span class="text-slate-600">pagado <%= fmt.formatARS(u.pagado) %> de <%= fmt.formatARS(u.monto) %> · falta <%= fmt.formatARS(u.restante) %></span>
         </div>
       <% } %>
 
       <% if (!pot) { %>
-        <div id="parcial-uni-<%= u.id %>" hidden class="pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
+        <div id="parcial-uni-<%= u.id %>" hidden class="px-3 pb-3 -mt-1 bg-slate-50 rounded-lg p-3 space-y-2">
           <% if (u.pagos.length) { %>
             <div class="space-y-1">
               <% u.pagos.forEach(function(p){ %>
@@ -321,6 +404,7 @@
           </form>
         </div>
       <% } %>
+      </div>
 
       <%- modal('m-uni-' + u.id, 'Editar trabajo',
         '<form method="POST" action="/clientes/' + cliente.id + '/unicos/' + u.id + '" class="space-y-3" data-reparto>'
@@ -369,15 +453,15 @@
   <p class="text-xs text-slate-400 mb-3">El mes de facturación puede ser distinto al mes en que se cobró.</p>
 
   <% if (!cobros.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay cobros cargados.</p><% } %>
-  <div class="divide-y divide-slate-100">
+  <div class="space-y-2">
     <% cobros.forEach(function(co){ %>
-      <div class="flex flex-wrap items-center gap-3 py-3">
+      <div class="rounded-lg border-l-4 <%= filaColor('ok') %> bg-slate-50/60 flex flex-wrap items-center gap-3 px-3 py-3">
         <div class="flex-1 min-w-[140px]">
           <div class="font-medium text-slate-800 truncate"><%= co.concepto %></div>
           <div class="text-xs text-slate-400">Facturado <%= fmt.formatFecha(co.fecha_trabajo) %> · Cobrado <%= fmt.formatFecha(co.fecha) %></div>
         </div>
         <div class="font-semibold text-green-700 text-right shrink-0"><%= fmt.formatARS(co.monto) %></div>
-        <button type="button" onclick="document.getElementById('m-cob-<%= co.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+        <button type="button" onclick="document.getElementById('m-cob-<%= co.id %>').hidden=false" class="btn flex items-center gap-1 text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1 shrink-0"><%- ic('pencil', 12) %> Editar</button>
       </div>
       <%- modal('m-cob-' + co.id, 'Editar cobro',
         '<form method="POST" action="/clientes/' + cliente.id + '/cobros/' + co.id + '" class="space-y-3" data-reparto>'
@@ -500,13 +584,14 @@
   <p class="text-xs text-slate-400 mb-3">Dominio, hosting, licencias… Avisa solo 3 días antes con una tarea "Renovar".</p>
 
   <% if (!vencimientos.length) { %><p class="text-sm text-slate-400 py-2">Todavía no hay vencimientos cargados.</p><% } %>
-  <div class="divide-y divide-slate-100">
+  <div class="space-y-2">
     <% vencimientos.forEach(function(v){
       var vDias = Math.round((Date.parse(hoyISO) - Date.parse(v.fecha)) / 86400000);
       var vVencido = vDias > 0;
       var vProximo = !vVencido && vDias >= -3;
+      var vEstado = !v.activo ? 'muted' : (vVencido ? 'bad' : (vProximo ? 'warn' : 'muted'));
     %>
-      <div class="flex flex-wrap items-center gap-3 py-3">
+      <div class="rounded-lg border-l-4 <%= filaColor(vEstado) %> bg-slate-50/60 flex flex-wrap items-center gap-3 px-3 py-3">
         <div class="flex-1 min-w-[140px]">
           <div class="flex items-center gap-2">
             <span class="font-medium text-slate-800 truncate"><%= v.nombre %></span>
@@ -517,7 +602,7 @@
           </div>
           <div class="text-xs text-slate-400"><%= fmt.formatFecha(v.fecha) %><% if (v.notas) { %> · <%= v.notas %><% } %></div>
         </div>
-        <button type="button" onclick="document.getElementById('m-venc-<%= v.id %>').hidden=false" class="text-slate-400 hover:text-brand-600 p-1 shrink-0" title="Editar"><%- ic('pencil') %></button>
+        <button type="button" onclick="document.getElementById('m-venc-<%= v.id %>').hidden=false" class="btn flex items-center gap-1 text-xs text-slate-600 hover:text-brand-600 border border-slate-200 hover:border-brand-300 rounded-full px-2.5 py-1 shrink-0"><%- ic('pencil', 12) %> Editar</button>
       </div>
       <%- modal('m-venc-' + v.id, 'Editar vencimiento',
         '<form method="POST" action="/clientes/' + cliente.id + '/vencimientos/' + v.id + '" class="space-y-3">'
@@ -553,10 +638,11 @@
     function activar(nombre, scrollId) {
       tabs.forEach(function (b) {
         var on = b.dataset.tab === nombre;
-        b.classList.toggle('bg-brand-600', on);
-        b.classList.toggle('text-white', on);
-        b.classList.toggle('text-slate-600', !on);
-        b.classList.toggle('hover:bg-slate-100', !on);
+        b.classList.toggle('text-brand-700', on);
+        b.classList.toggle('border-brand-600', on);
+        b.classList.toggle('text-slate-500', !on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('hover:text-slate-700', !on);
       });
       panels.forEach(function (p) { p.hidden = p.dataset.panel !== nombre; });
       if (scrollId) {
